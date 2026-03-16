@@ -1,4 +1,4 @@
-# flashattn-cuda-metal
+# FlashAttention-CUDA-Metal
 
 FlashAttention forward and backward kernels implemented from scratch in CUDA, with Apple Metal port planned.
 
