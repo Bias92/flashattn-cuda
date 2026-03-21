@@ -2,8 +2,9 @@ from setuptools import setup
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 
 setup(
-    name="flash_attn_cuda",
+    name="flash-attn-cuda",
     ext_modules=[
+        # Baseline FP32 kernel
         CUDAExtension(
             name="flash_attn_cuda",
             sources=["cuda/flash_attn_kernel.cu"],
@@ -11,7 +12,19 @@ setup(
                 "nvcc": [
                     "-O3",
                     "--use_fast_math",
-                    "-gencode=arch=compute_89,code=sm_89",  # RTX 4060 Ti (Ada Lovelace)
+                    "-gencode=arch=compute_89,code=sm_89",
+                ],
+            },
+        ),
+        # WMMA Tensor Core optimized kernel
+        CUDAExtension(
+            name="flash_attn_wmma",
+            sources=["cuda/flash_attn_wmma.cu"],
+            extra_compile_args={
+                "nvcc": [
+                    "-O3",
+                    "--use_fast_math",
+                    "-gencode=arch=compute_89,code=sm_89",
                 ],
             },
         ),
