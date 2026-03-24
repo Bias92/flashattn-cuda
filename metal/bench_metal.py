@@ -32,7 +32,7 @@ if __name__ == "__main__":
     print(f"FlashAttention Benchmark — Metal ({fa.device_name})")
     print(f"Config: B={B}, H={H}, D={D}, FP32")
     print("=" * 75)
-    print(f"{'N':>6} | {'Metal':>10} | {'CUDA BL':>10} | {'Ratio':>8}")
+    print(f"{'N':>6} | {'Wall':>10} | {'GPU':>10} | {'CUDA BL':>10} | {'Ratio(GPU)':>12}")
     print("-" * 75)
 
     for N in seq_lengths:
@@ -41,11 +41,11 @@ if __name__ == "__main__":
         K = np.random.randn(B, H, N, D).astype(np.float32)
         V = np.random.randn(B, H, N, D).astype(np.float32)
 
-        ms = fa.bench_forward(Q, K, V, warmup=10, repeats=100)
+        wall_ms, gpu_ms = fa.bench_forward(Q, K, V, warmup=10, repeats=100)
         cuda_ms = CUDA_BASELINE_MS[N]
-        ratio = cuda_ms / ms
+        ratio = cuda_ms / gpu_ms
 
-        print(f"{N:>6} | {ms:>8.2f}ms | {cuda_ms:>8.2f}ms | {ratio:>6.2f}x")
+        print(f"{N:>6} | {wall_ms:>8.2f}ms | {gpu_ms:>8.2f}ms | {cuda_ms:>8.2f}ms | {ratio:>10.2f}x")
 
     print("=" * 75)
     print("Ratio > 1.0 = Metal faster, < 1.0 = CUDA faster")

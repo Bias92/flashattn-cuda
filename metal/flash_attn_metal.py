@@ -46,14 +46,14 @@ def _load_lib():
     _LIB.metal_flash_attn_forward.argtypes = [
         fp, fp, fp, fp, fp,
         ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int
-    ]
+    ]   
 
     # metal_flash_attn_forward_bench(..., warmup, repeats) -> double
     _LIB.metal_flash_attn_forward_bench.restype = ctypes.c_double
     _LIB.metal_flash_attn_forward_bench.argtypes = [
         fp, fp, fp, fp, fp,
         ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int,
-        ctypes.c_int, ctypes.c_int
+        ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_double)
     ]
 
     ret = _LIB.metal_init()
@@ -108,7 +108,7 @@ class MetalFlashAttention:
     def bench_forward(self, Q, K, V, warmup=10, repeats=100):
         """
         Benchmark forward pass.
-        Returns average time in ms.
+        Returns (wall_ms, gpu_ms) tuple.
         """
         assert Q.dtype == np.float32
         B, H, N, D = Q.shape
@@ -120,11 +120,14 @@ class MetalFlashAttention:
         O = np.zeros_like(Q)
         L = np.zeros((B, H, N), dtype=np.float32)
 
+        gpu_ms = ctypes.c_double(0.0)
+
         ms = self.lib.metal_flash_attn_forward_bench(
             _ptr(Q), _ptr(K), _ptr(V), _ptr(O), _ptr(L),
-            B, H, N, D, warmup, repeats
+            B, H, N, D, warmup, repeats,
+            ctypes.byref(gpu_ms)
         )
         if ms < 0:
             raise RuntimeError("Metal benchmark failed")
 
-        return ms
+        return ms, gpu_ms.value

@@ -213,7 +213,7 @@ double metal_flash_attn_forward_bench(
     float* O_host,
     float* L_host,
     int B, int H, int N, int D,
-    int warmup, int repeats)
+    int warmup, int repeats, double* gpu_avg_ms_out)
 {
     if (!ensure_initialized()) return -1.0;
     if (D != 64) return -1.0;
@@ -261,6 +261,7 @@ double metal_flash_attn_forward_bench(
     }
 
     // Timed runs
+    double gpu_total = 0.0;
     CFAbsoluteTime t0 = CFAbsoluteTimeGetCurrent();
     for (int i = 0; i < repeats; i++) {
         id<MTLCommandBuffer> cmd = [g_queue commandBuffer];
@@ -276,10 +277,14 @@ double metal_flash_attn_forward_bench(
         [enc endEncoding];
         [cmd commit];
         [cmd waitUntilCompleted];
+        gpu_total += ([cmd GPUEndTime] - [cmd GPUStartTime]);
     }
     CFAbsoluteTime t1 = CFAbsoluteTimeGetCurrent();
 
     double avg_ms = (t1 - t0) / repeats * 1000.0;
+    if (gpu_avg_ms_out) {
+        *gpu_avg_ms_out = gpu_total / repeats * 1000.0;
+    }
 
     // Copy final output
     memcpy(O_host, [buf_O contents], qkv_bytes);
