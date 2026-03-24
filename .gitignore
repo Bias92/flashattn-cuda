@@ -209,3 +209,4 @@ __marimo__/
 *.dylib
 metal/bench_instrument
 metal/query_counters
+metal/bw_test
