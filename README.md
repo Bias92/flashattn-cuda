@@ -1,71 +1,42 @@
-# FlashAttention-CUDA-Metal
+# flashattn-cuda-metal
 
-FlashAttention forward and backward kernels implemented from scratch in CUDA, with Apple Metal port planned.
+This is project FlashAttention forward/backward kernels implemented from scratch in CUDA(profiling it and optimizing with WMMA)
+finally, ported to Apple Metal, profiled across discrete(Discrete/Separate Memory Architecture) and unified memory GPUs(Unified Memory Architecture, AKA "UMA").
 
-Built on RTX 4060 Ti (Ada Lovelace, sm_89). No external FlashAttention libraries — pure CUDA C++ with PyTorch C++ extension binding.
+## Goal
 
-## What This Is
-
-A ground-up implementation of the FlashAttention algorithm (Dao et al., NeurIPS 2022) at the GPU kernel level. The kernel uses **tiling** and **online softmax** to reduce attention memory from O(N²) to O(N), without ever materializing the full N×N attention matrix.
-
-This is not a wrapper or API call — it's the actual CUDA kernel that computes scaled dot-product attention using shared memory tiling and running statistics.
+Scratch-implement FlashAttention → profile with ncu → optimize (5 attempts) 
+-> port to Metal -> compare kernel-level performance across 
+RTX 4060 Ti (discrete GDDR6) vs M4 Pro (unified LPDDR5) vs Jetson AGX Orin (unified LPDDR5).
 
 ## Algorithm
 
 ### Forward (Algorithm 1)
 
-1. **Tile Q into row blocks (B_r=32), K/V into column blocks (B_c=32)**
+1. **Tile Q into row blocks ($B_r=32$), K/V into column blocks ($B_c=32$)**
 2. **Load Q row into registers** (stays fixed across all K/V blocks)
 3. **For each K/V block:**
    - Collaboratively load K, V tiles into shared memory (16KB total)
-   - Compute `S = Q · K^T × scale`
-   - Online softmax update: `m_new = max(m_old, block_max)`, rescale previous accumulator by `exp(m_old - m_new)`, accumulate new block
-4. **Normalize:** `O = acc / l_i`
-5. **Store logsumexp** `L = m + log(l)` for backward pass
+   - Compute $S = Q \cdot K^T \times \text{scale}$
+   - Online softmax update: $m_{new} = \max(m_{old}, m_{block})$, rescale previous accumulator by $e^{m_{old} - m_{new}}$, accumulate new block
+4. **Normalize:** $O = \text{acc} / l_i$
+5. **Store logsumexp** $L = m + \log(l)$ for backward pass
 
-Thread model: one thread per Q row, grid = `(ceil(N/B_r), B×H)`, block = `(B_r,)`.
+Thread model: one thread per Q row, grid = $(⌈N/B_r⌉,\; B \times H)$, block = $(B_r,)$.
 
 ### Backward (Algorithm 2)
 
-The backward pass computes dQ, dK, dV without ever materializing the full N×N attention matrix by **recomputing** S and P from the stored logsumexp L.
+The backward pass computes $dQ$, $dK$, $dV$ without ever materializing the full $N \times N$ attention matrix by **recomputing** $S$ and $P$ from the stored logsumexp $L$.
 
 Three kernels:
 
-1. **Precompute D:** `D_i = rowsum(dO ⊙ O)` — simple per-row dot product
-2. **dQ kernel:** One thread per Q row, iterates over all K/V blocks. Recomputes `P = exp(QK^T × scale - L)`, then accumulates `dQ += P(dO·V^T - D) × K × scale`
-3. **dK/dV kernel:** One thread per K/V row, iterates over all Q blocks. Recomputes P, then accumulates `dV += P^T × dO` and `dK += (P(dO·V^T - D))^T × Q × scale`
+1. **Precompute D:** $D_i = \text{rowsum}(dO \odot O)$ — simple per-row dot product
+2. **dQ kernel:** One thread per Q row, iterates over all K/V blocks. Recomputes $P = e^{QK^T \times \text{scale} - L}$, then accumulates $dQ \mathrel{+}= P(dO \cdot V^T - D) \times K \times \text{scale}$
+3. **dK/dV kernel:** One thread per K/V row, iterates over all Q blocks. Recomputes $P$, then accumulates $dV \mathrel{+}= P^T \times dO$ and $dK \mathrel{+}= (P(dO \cdot V^T - D))^T \times Q \times \text{scale}$
 
-Same tiling strategy (B_r=32, B_c=32) and shared memory collaborative loading as forward.
+Same tiling strategy ($B_r=32$, $B_c=32$) and shared memory collaborative loading as forward.
 
-## Benchmark Results
 
-### Forward
-
-**GPU:** NVIDIA GeForce RTX 4060 Ti | **Precision:** FP32 | **Config:** B=1, H=8, D=64
-
-| Seq Len | Naive (ms) | Flash (ms) | Speedup | Naive Mem | Flash Mem | Mem Save |
-|---------|-----------|-----------|---------|-----------|-----------|----------|
-| 128     | 0.62      | 0.12      | 5.26×   | 10.6 MB   | 9.1 MB    | 1.16×    |
-| 256     | 0.18      | 0.12      | 1.56×   | 16.1 MB   | 10.1 MB   | 1.59×    |
-| 512     | 0.19      | 0.25      | 0.75×   | 36.2 MB   | 12.1 MB   | 2.98×    |
-| 1024    | 1.59      | 0.94      | 1.69×   | 112.2 MB  | 16.2 MB   | 6.94×    |
-| 2048    | 6.94      | 3.06      | 2.27×   | 408.2 MB  | 24.2 MB   | 16.88×   |
-| 4096    | 27.87     | 11.18     | 2.49×   | 1576.4 MB | 40.2 MB   | **39.16×** |
-
-### Backward
-
-**GPU:** NVIDIA GeForce RTX 4060 Ti | **Precision:** FP32 | **Config:** B=1, H=8, D=64
-
-| Seq Len | Naive (ms) | Flash (ms) | Speedup | Naive Mem | Flash Mem | Mem Save |
-|---------|-----------|-----------|---------|-----------|-----------|----------|
-| 128     | 0.24      | 0.26      | 0.94×   | 12.6 MB   | 10.1 MB   | 1.25×    |
-| 256     | 0.43      | 0.52      | 0.82×   | 21.6 MB   | 12.1 MB   | 1.78×    |
-| 512     | 0.84      | 1.75      | 0.48×   | 55.2 MB   | 16.2 MB   | 3.41×    |
-| 1024    | 2.38      | 5.59      | 0.43×   | 182.2 MB  | 24.2 MB   | 7.53×    |
-| 2048    | 8.79      | 17.96     | 0.49×   | 676.2 MB  | 40.2 MB   | 16.80×   |
-| 4096    | 34.62     | 69.50     | 0.50×   | 2624.4 MB | 72.4 MB   | **36.26×** |
-
-Key takeaway: **Memory savings scale consistently** — 36–39× at N=4096 for both forward and backward. Backward speed is currently slower than naive due to low occupancy and register spill (see profiling below), which are the primary optimization targets.
 
 ## Correctness
 
@@ -96,12 +67,52 @@ Key takeaway: **Memory savings scale consistently** — 36–39× at N=4096 for 
 [PASS] B=1, H=1, N= 1024, D=64  |  dQ_diff=4.768372e-07  dK_diff=3.725290e-07  dV_diff=3.725290e-07
 [PASS] B=1, H=1, N= 2048, D=64  |  dQ_diff=4.470348e-07  dK_diff=4.470348e-07  dV_diff=3.278255e-07
 ```
+the reason why Batch is 1. because the kernel processes each (batch, head) pair independently increasing B only launches more identical blocks without changing `per-kernel` behavior. i just fixed B=1 to isolate sequence length scaling. also 
+tests cover single-block, multi-block, non-aligned sequence lengths, and multi-batch/multi-head configurations.
 
-Tests cover single-block, multi-block, non-aligned sequence lengths, and multi-batch/multi-head configurations.
+## Benchmark Results
+
+### Forward
+
+**GPU:** NVIDIA GeForce RTX 4060 Ti | **Precision:** FP32 | **Config:** B=1, H=8, D=64
+
+| Seq Len | Naive (ms) | Flash (ms) | Speedup | Naive Mem | Flash Mem | Mem Save |
+|---------|-----------|-----------|---------|-----------|-----------|----------|
+| 128     | 0.62      | 0.12      | 5.26×   | 10.6 MB   | 9.1 MB    | 1.16×    |
+| 256     | 0.18      | 0.12      | 1.56×   | 16.1 MB   | 10.1 MB   | 1.59×    |
+| 512     | 0.19      | 0.25      | 0.75×   | 36.2 MB   | 12.1 MB   | 2.98×    |
+| 1024    | 1.59      | 0.94      | 1.69×   | 112.2 MB  | 16.2 MB   | 6.94×    |
+| 2048    | 6.94      | 3.06      | 2.27×   | 408.2 MB  | 24.2 MB   | 16.88×   |
+| 4096    | 27.87     | 11.18     | 2.49×   | 1576.4 MB | 40.2 MB   | **39.16×** |
+
+### Backward
+
+**GPU:** NVIDIA GeForce RTX 4060 Ti | **Precision:** FP32 | **Config:** B=1, H=8, D=64
+
+| Seq Len | Naive (ms) | Flash (ms) | Speedup | Naive Mem | Flash Mem | Mem Save |
+|---------|-----------|-----------|---------|-----------|-----------|----------|
+| 128     | 0.24      | 0.26      | 0.94×   | 12.6 MB   | 10.1 MB   | 1.25×    |
+| 256     | 0.43      | 0.52      | 0.82×   | 21.6 MB   | 12.1 MB   | 1.78×    |
+| 512     | 0.84      | 1.75      | 0.48×   | 55.2 MB   | 16.2 MB   | 3.41×    |
+| 1024    | 2.38      | 5.59      | 0.43×   | 182.2 MB  | 24.2 MB   | 7.53×    |
+| 2048    | 8.79      | 17.96     | 0.49×   | 676.2 MB  | 40.2 MB   | 16.80×   |
+| 4096    | 34.62     | 69.50     | 0.50×   | 2624.4 MB | 72.4 MB   | **36.26×** |
+
+both of them (fw/bwd) are saving memory 36-39x at seq_len=4096.
+backward is slower than naive because of occupancy 7.9% and resiget spill ( may you can see profiling section below.)
 
 ## Profiling (Nsight Compute)
 
-All kernels profiled with `ncu --set full --launch-count 1` on N=1024, B=1, H=8, D=64.
+in this section. i focused on 4 metrics per kernel : 
+
+- **GPU Speed of Light (SOL)**: how much of the GPU's peak compute and memory bandwidth is actually used. If both are under 60%, the kernel is stalling because there aren't enough warps to hide memory latency.
+- **Roofline**: plots the kernel's achieved throughput against hardware limits.
+$$\text{Attainable Performance} = \min(\text{Peak FLOP/s},\; \text{Peak Bandwidth} \times \text{Arithmetic Intensity})$$
+$$\text{Arithmetic Intensity} = \frac{\text{FLOPs}}{\text{Bytes Accessed}}$$
+- **Memory Workload**: shows memory access patterns. High local memory % means registers are spilling to L1/global memory, adding extra latency.
+- **Occupancy**: ratio of active warps to the hardware max. Low occupancy means the SM can't switch between enough warps to keep the pipeline busy.
+
+entire kernels are profiled with `ncu --set full --launch-count 1` on N=1024, B=1, H=8, D=64.
 
 ### Kernel Comparison Summary
 
@@ -118,39 +129,33 @@ All kernels profiled with `ncu --set full --launch-count 1` on N=1024, B=1, H=8,
 
 ### Forward Kernel
 
-#### GPU Speed of Light
+| Before (FP32 Baseline) | After (WMMA+half2 v1) |
+|---|---|
+| <img src="docs/profiling/gpu_speed_of_light.png" width="400"> | <img src="docs/profiling/wmma_gpu_sol.png" width="400"> |
+| Compute 25.30%, Memory 25.30% | Compute 27.40%, Memory 42.55% |
+| <img src="docs/profiling/roofline_fp32.png" width="400"> | <img src="docs/profiling/wmma_roofline_fp32.png" width="400"> |
+| 10% of FP32 peak | 0% of FP32 peak, Tensor Core 4.54% |
+| <img src="docs/profiling/memory_workload.png" width="400"> | <img src="docs/profiling/wmma_memory_workload.png" width="400"> |
+| Register spill 28.57% | Register spill 0%, bank conflict 4.6-way |
+| <img src="docs/profiling/occupancy.png" width="400"> | <img src="docs/profiling/wmma_occupancy.png" width="400"> |
+| Occupancy 7.90% | Occupancy 12.49% |
 
-![GPU Speed of Light](docs/profiling/gpu_speed_of_light.png)
+### Forward Optimization Summary
 
-- Compute (SM) Throughput: 25.30%
-- Memory Throughput: 25.30%
-- L1/TEX Cache Throughput: 25.70%
-- DRAM Throughput: 4.46%
-- Diagnosis: Latency-bound — both compute and memory under 60%, indicating stalls
+tried 5 things to make the forward kernel faster:
 
-#### Roofline (Single Precision)
+| # | what i tried | result | why it failed/worked |
+|---|---|---|---|
+| 1 | tile 32→16 + launch_bounds | 11.18→15.44ms, slower | K/V iteration 2x, spill unchanged |
+| 2 | FP16 shared memory | occupancy 2x but 11.18→16.28ms | half2float() conversion kills it |
+| 3 | WMMA 16×16 | 11.18→11.83ms | tile too small, softmax breaks pipeline |
+| 4 | WMMA + half2 load | 11.18→11.63ms, N=128: 0.09ms | kept this one (v1) |
+| 5 | 4 warps/block | 11.18→12.39ms, rolled back | 35KB shmem, only 2 blocks fit per SM |
 
-![Roofline](docs/profiling/roofline_fp32.png)
+scratch WMMA can't beat FP32 baseline at large N. that's why Dao Lab uses CUTLASS with 128×64+ tiles and warp-specialized softmax.
 
-Kernel operates in the compute-bound region (arithmetic intensity ~10-100 FLOP/byte) but achieves only 10% of FP32 peak. The gap between kernel points and the roofline ceiling represents optimization headroom.
+------------
 
-#### Memory Workload
-
-![Memory Workload](docs/profiling/memory_workload.png)
-
-- Local memory usage: 28.57% of L1TEX sectors — register spill detected
-- Global store: 4.1/32 bytes utilized per sector — poor coalescing
-- Local load/store: 1.0/32 bytes — worst-case access pattern from spilled registers
-
-#### Occupancy
-
-![Occupancy](docs/profiling/occupancy.png)
-
-- Theoretical occupancy: 10.42%
-- Achieved occupancy: 7.90%
-- Active warps per SM: 3.79
-- **Bottleneck: shared memory** (Block Limit Shared Mem = 5)
-- Estimated speedup from fixing: 74.70%
 
 ### Backward dQ Kernel
 
