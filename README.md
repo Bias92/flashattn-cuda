@@ -3,11 +3,27 @@
 This is project FlashAttention forward/backward kernels implemented from scratch in CUDA(profiling it and optimizing with WMMA)
 finally, ported to Apple Metal, profiled across discrete(Discrete/Separate Memory Architecture) and unified memory GPUs(Unified Memory Architecture, AKA "UMA").
 
-## Goal
+## Motivation & Goal
 
+![](docs/profiling/flash_picture.png)
+
+### Motivation
+
+Transformer attention computes a full $N \times N$ score matrix, which blows up memory at long sequences.
+at B=32, H=8, seq_len=4096 in FP32, that's ~17GB just for attention scores.
+FlashAttention avoids this by tiling Q/K/V into SRAM-sized blocks and computing softmax on the fly, never materializing the full matrix.
+
+i wanted to understand how this actually works at the kernel level, not just call `F.scaled_dot_product_attention`.
+so i implemented it from scratch in CUDA, profiled it with ncu to find bottlenecks, tried 5 optimizations,
+then ported it to Apple Metal to see how the same algorithm behaves on unified memory.
+
+
+### Goal
 Scratch-implement FlashAttention → profile with ncu → optimize (5 attempts) 
 -> port to Metal -> compare kernel-level performance across 
 RTX 4060 Ti (discrete GDDR6) vs M4 Pro (unified LPDDR5) vs Jetson AGX Orin (unified LPDDR5).
+
+
 
 ## Algorithm
 
@@ -39,6 +55,10 @@ Same tiling strategy ($B_r=32$, $B_c=32$) and shared memory collaborative loadin
 
 
 ## Correctness
+
+validated against PyTorch reference (torch.matmul + F.softmax) using max absolute error.
+all forward/backward tests under 1e-6 max diff (FP32).
+backward checks dQ, dK, dV independently to avoid hiding errors in a single aggregate.
 
 ### Forward — 9/9 passed
 
@@ -72,34 +92,43 @@ tests cover single-block, multi-block, non-aligned sequence lengths, and multi-b
 
 ## Benchmark Results
 
+![](docs/profiling/benchmark_comparison.png)
+
 ### Forward
 
 **GPU:** NVIDIA GeForce RTX 4060 Ti | **Precision:** FP32 | **Config:** B=1, H=8, D=64
 
-| Seq Len | Naive (ms) | Flash (ms) | Speedup | Naive Mem | Flash Mem | Mem Save |
-|---------|-----------|-----------|---------|-----------|-----------|----------|
-| 128     | 0.62      | 0.12      | 5.26×   | 10.6 MB   | 9.1 MB    | 1.16×    |
-| 256     | 0.18      | 0.12      | 1.56×   | 16.1 MB   | 10.1 MB   | 1.59×    |
-| 512     | 0.19      | 0.25      | 0.75×   | 36.2 MB   | 12.1 MB   | 2.98×    |
-| 1024    | 1.59      | 0.94      | 1.69×   | 112.2 MB  | 16.2 MB   | 6.94×    |
-| 2048    | 6.94      | 3.06      | 2.27×   | 408.2 MB  | 24.2 MB   | 16.88×   |
-| 4096    | 27.87     | 11.18     | 2.49×   | 1576.4 MB | 40.2 MB   | **39.16×** |
+| Seq Len | Naive (ms) | Flash (ms) | SDPA (ms) | Speedup (vs Naive) | Naive Mem | Flash Mem | Mem Save |
+|---------|-----------|-----------|-----------|-------------------|-----------|-----------|----------|
+| 128     | 0.62      | 0.12      | 0.06      | 5.26×             | 10.6 MB   | 9.1 MB    | 1.16×    |
+| 256     | 0.18      | 0.12      | 0.06      | 1.56×             | 16.1 MB   | 10.1 MB   | 1.59×    |
+| 512     | 0.19      | 0.25      | 0.14      | 0.75×             | 36.2 MB   | 12.1 MB   | 2.98×    |
+| 1024    | 1.59      | 0.94      | 0.45      | 1.69×             | 112.2 MB  | 16.2 MB   | 6.94×    |
+| 2048    | 6.94      | 3.06      | 1.58      | 2.27×             | 408.2 MB  | 24.2 MB   | 16.88×   |
+| 4096    | 27.87     | 11.18     | 6.20      | 2.49×             | 1576.4 MB | 40.2 MB   | **39.16×** |
+
+torch SDPA (`F.scaled_dot_product_attention`) is included as a production-grade reference.
+our scratch kernel is ~2x slower than SDPA, which is expected since SDPA uses optimized backends (flash/efficient/math).
+this project is not trying to beat production kernels.
 
 ### Backward
 
 **GPU:** NVIDIA GeForce RTX 4060 Ti | **Precision:** FP32 | **Config:** B=1, H=8, D=64
 
-| Seq Len | Naive (ms) | Flash (ms) | Speedup | Naive Mem | Flash Mem | Mem Save |
-|---------|-----------|-----------|---------|-----------|-----------|----------|
-| 128     | 0.24      | 0.26      | 0.94×   | 12.6 MB   | 10.1 MB   | 1.25×    |
-| 256     | 0.43      | 0.52      | 0.82×   | 21.6 MB   | 12.1 MB   | 1.78×    |
-| 512     | 0.84      | 1.75      | 0.48×   | 55.2 MB   | 16.2 MB   | 3.41×    |
-| 1024    | 2.38      | 5.59      | 0.43×   | 182.2 MB  | 24.2 MB   | 7.53×    |
-| 2048    | 8.79      | 17.96     | 0.49×   | 676.2 MB  | 40.2 MB   | 16.80×   |
-| 4096    | 34.62     | 69.50     | 0.50×   | 2624.4 MB | 72.4 MB   | **36.26×** |
+| Seq Len | Naive (ms) | Flash (ms) | SDPA (ms) | Speedup (vs Naive) | Naive Mem | Flash Mem | Mem Save |
+|---------|-----------|-----------|-----------|-------------------|-----------|-----------|----------|
+| 128     | 0.24      | 0.26      | —         | 0.94×             | 12.6 MB   | 10.1 MB   | 1.25×    |
+| 256     | 0.43      | 0.52      | —         | 0.82×             | 21.6 MB   | 12.1 MB   | 1.78×    |
+| 512     | 0.84      | 1.75      | —         | 0.48×             | 55.2 MB   | 16.2 MB   | 3.41×    |
+| 1024    | 2.38      | 5.59      | —         | 0.43×             | 182.2 MB  | 24.2 MB   | 7.53×    |
+| 2048    | 8.79      | 17.96     | —         | 0.49×             | 676.2 MB  | 40.2 MB   | 16.80×   |
+| 4096    | 34.62     | 69.50     | —         | 0.50×             | 2624.4 MB | 72.4 MB   | **36.26×** |
 
-both of them (fw/bwd) are saving memory 36-39x at seq_len=4096.
-backward is slower than naive because of occupancy 7.9% and resiget spill ( may you can see profiling section below.)
+- both of them (fw/bwd) are saving memory 36-39x at seq_len=4096.
+- backward is slower than naive because of occupancy 7.9% and resiget spill (you can see profiling section below.)
+- forward benefits from avoiding full attention materialization and reducing memory traffic.
+backward saves memory (36x) but recomputation + register pressure hurts latency.
+the strongest result is memory scaling: naive grows O(N²) while flash stays nearly flat.
 
 ## Profiling (Nsight Compute)
 
@@ -125,7 +154,6 @@ entire kernels are profiled with `ncu --set full --launch-count 1` on N=1024, B=
 | FP32 Peak Achieved | 10% | 11% | 4% |
 | Block Limit (Shared Mem) | 5 | 5 | 5 |
 | Register Spill (Local Mem) | 28.57% | 26.39% | 71.88% |
-| Diagnosis | Latency | High Memory | Latency |
 
 ### Forward Kernel
 
@@ -155,169 +183,144 @@ tried 5 things to make the forward kernel faster:
 scratch WMMA can't beat FP32 baseline at large N. that's why Dao Lab uses CUTLASS with 128×64+ tiles and warp-specialized softmax.
 
 ------------
+### Why backward is split into dQ and dK/dV
 
+In the forward pass, each thread handles one Q row and iterates over all K/V blocks.
+But in backward, dQ and dK/dV have opposite accumulation directions:
+
+- **dQ**: one thread per Q row, iterating over all K/V blocks to accumulate $dQ_i = \sum_j dS_{ij} K_j$
+- **dK/dV**: one thread per K/V row, iterating over all Q blocks to accumulate $dK_j = \sum_i dS_{ij}^T Q_i$
+
+different grid layouts, different parallelization. can't do both in one kernel with 1-thread-per-row.
+the original paper (Algorithm 4) handles this in a single nested loop with block-level
 
 ### Backward dQ Kernel
 
-#### GPU Speed of Light
-
-![dQ GPU SOL](docs/profiling/bwd_dq_gpu_sol.png)
-
-- Compute (SM) Throughput: 22.82%
-- Memory Throughput: 73.89%
-- L1/TEX Cache Throughput: 77.84%
-- DRAM Throughput: 2.19%
-- Diagnosis: High Memory Throughput — L1 bottleneck from register spill traffic
-
-#### Roofline (Single Precision)
-
-![dQ Roofline](docs/profiling/bwd_dq_roofline.png)
-
-Achieves 11% of FP32 peak. Similar arithmetic intensity range as forward but with higher memory pressure from recomputation.
-
-#### Memory Workload
-
-![dQ Memory Workload](docs/profiling/bwd_dq_memory_workload.png)
-
-- Local memory usage: 26.39% of L1TEX — register spill from q_reg[64] + do_reg[64] + dq_acc[64]
-- L1/TEX Hit Rate: 90.59% — good cache reuse from tiling
-- Local Memory Spilling Requests: 3.1M
-
-#### Occupancy
-
-![dQ Occupancy](docs/profiling/bwd_dq_occupancy.png)
-
-- Theoretical occupancy: 10.42%
-- Achieved occupancy: 8.99%
-- Active warps per SM: 4.32
-- **Bottleneck: shared memory** (Block Limit Shared Mem = 5)
-- Estimated speedup from fixing: 26.11%
+| Before (FP32 Baseline) | After (WMMA) |
+|---|---|
+| <img src="docs/profiling/bwd_dq_gpu_sol.png" width="400"> | <img src="docs/profiling/dq/wmma_gpu_sol.png" width="400"> |
+| <img src="docs/profiling/bwd_dq_roofline.png" width="400"> | <img src="docs/profiling/dq/wmma_roofline_fp32.png" width="400"> |
+| <img src="docs/profiling/bwd_dq_memory_workload.png" width="400"> | <img src="docs/profiling/dq/wmma_memory_workload.png" width="400"> |
+| <img src="docs/profiling/bwd_dq_occupancy.png" width="400"> | <img src="docs/profiling/dq/wmma_occupancy.png" width="400"> |
 
 ### Backward dK/dV Kernel
 
-#### GPU Speed of Light
-
-![dK/dV GPU SOL](docs/profiling/bwd_dkdv_gpu_sol.png)
-
-- Compute (SM) Throughput: 17.95%
-- Memory Throughput: 32.31%
-- L1/TEX Cache Throughput: 37.15%
-- DRAM Throughput: 3.95%
-- Diagnosis: Latency Issue — FP32 peak only 4%, worst of all three kernels
-
-#### Roofline (Single Precision)
-
-![dK/dV Roofline](docs/profiling/bwd_dkdv_roofline.png)
-
-Achieves only 4% of FP32 peak — the most severe underutilization. Kernel points sit far below the roofline ceiling.
-
-#### Memory Workload
-
-![dK/dV Memory Workload](docs/profiling/bwd_dkdv_memory_workload.png)
-
-- Local memory usage: **71.88%** of L1TEX — severe register spill
-- k_reg[64] + v_reg[64] + dk_acc[64] + dv_acc[64] = 256+ registers per thread
-- Local Memory Spilling Requests: **22.8M** (7× worse than dQ)
-- L1/TEX Hit Rate: 29.51% — poor cache utilization due to massive spill traffic
-
-#### Occupancy
-
-![dK/dV Occupancy](docs/profiling/bwd_dkdv_occupancy.png)
-
-- Theoretical occupancy: 10.42%
-- Achieved occupancy: 9.44%
-- Active warps per SM: 4.53
-- **Bottleneck: shared memory** (Block Limit Shared Mem = 5)
-- Estimated speedup from fixing: 67.69%
+| Before (FP32 Baseline) | After (WMMA) |
+|---|---|
+| <img src="docs/profiling/bwd_dkdv_gpu_sol.png" width="400"> | <img src="docs/profiling/dkdv/wmma_gpu_sol.png" width="400"> |
+| <img src="docs/profiling/bwd_dkdv_roofline.png" width="400"> | <img src="docs/profiling/dkdv/wmma_roofline_fp32.png" width="400"> |
+| <img src="docs/profiling/bwd_dkdv_memory_workload.png" width="400"> | <img src="docs/profiling/dkdv/wmma_memory_workload.png" width="400"> |
+| <img src="docs/profiling/bwd_dkdv_occupancy.png" width="400"> | <img src="docs/profiling/dkdv/wmma_occupancy.png" width="400"> |
 
 ### Profiling Summary
 
-1. All three kernels share the same bottleneck: **occupancy ~10%** due to shared memory (16KB per block) and register pressure
-2. The dK/dV kernel is the worst performer — 71.88% local memory usage from 256+ registers per thread causes 22.8M spill requests
-3. Optimization targets: **FP16 Tensor Core** (halves register/shared memory usage, raises throughput ceiling) → **tile size tuning** → **`__launch_bounds__`** for register control
+1. All three kernels share the same bottleneck: occupancy ~10% due to shared memory (16KB per block) and register pressure
+2. dK/dV is the worst performer: 71.88% local memory usage from 256+ registers per thread, 22.8M spill requests
+3. Tried 5 optimizations targeting these bottlenecks (see optimization section above)
 
 ## Project Structure
 
 ```
 flashattn-cuda-metal/
 ├── cuda/
-│   └── flash_attn_kernel.cu    # Forward + backward CUDA kernels
+│   ├── flash_attn_kernel.cu       # FP32 baseline forward+backward
+│   └── flash_attn_wmma.cu         # WMMA Tensor Core + half2 (v1)
+├── metal/
+│   ├── flash_attn.metal           # Metal shader (CUDA baseline 1:1 port)
+│   ├── flash_attn_metal.mm        # Obj-C++ host (GPU timestamp)
+│   ├── flash_attn_metal.py        # Python ctypes wrapper
+│   ├── test_metal.py              # correctness 9/9
+│   ├── bench_metal.py             # benchmark (Wall/GPU/CUDA)
+│   ├── bench_instrument.mm        # Instruments Metal System Trace
+│   ├── query_counters.mm          # Counter Sampling API probe
+│   ├── bw_test.mm                 # BW microbenchmark
+│   └── Makefile
 ├── ref/
-│   └── naive_attn.py           # O(N²) reference implementation
+│   └── naive_attn.py              # O(N²) reference
 ├── tests/
-│   ├── test_forward.py         # Forward correctness tests (9 configs)
-│   └── test_backward.py        # Backward correctness tests (9 configs)
+│   ├── test_forward.py            # forward 9/9
+│   ├── test_backward.py           # backward 9/9
+│   └── test_wmma.py               # WMMA 9/9
 ├── bench/
-│   ├── bench_forward.py        # Forward benchmark with CSV output
-│   └── bench_backward.py       # Backward benchmark with CSV output
+│   ├── bench_forward.py           # forward benchmark (CSV)
+│   ├── bench_backward.py          # backward benchmark (CSV)
+│   ├── roofline_analysis.py       # effective BW analysis
+│   └── results/                   # CSV + .ncu-rep files
 ├── docs/
-│   └── profiling/              # NCU screenshots (forward + backward)
-├── setup.py                    # PyTorch CUDA extension build
-├── LICENSE                     # MIT
+│   └── profiling/                 # ncu screenshots (before + after)
+├── setup.py                       # flash_attn_cuda + flash_attn_wmma
+├── LICENSE                        # MIT
 └── README.md
 ```
 
+----
+
 ## Build & Run
 
-Requires: CUDA toolkit matching your PyTorch CUDA version, PyTorch with CUDA support.
+### CUDA (WSL2, RTX 4060 Ti)
 
 ```bash
-# Build
-pip install -e .
+# sm_89. CUDA_HOME is required.
+CUDA_HOME=/usr/local/cuda-12.8 pip install -e . --break-system-packages
 
-# Test correctness
-python tests/test_forward.py
-python tests/test_backward.py
+# correctness
+python3 tests/test_forward.py
+python3 tests/test_backward.py
+python3 tests/test_wmma.py
 
-# Benchmark (outputs CSV to bench/results/)
-python bench/bench_forward.py
-python bench/bench_backward.py
-
-# Profile with Nsight Compute
-ncu --set full --launch-count 1 --kernel-name flash_attn_fwd_kernel \
-    --export bench/results/flash_fwd \
-    python -c "
-import torch, flash_attn_cuda
-Q=torch.randn(1,8,1024,64,device='cuda')
-K=torch.randn(1,8,1024,64,device='cuda')
-V=torch.randn(1,8,1024,64,device='cuda')
-flash_attn_cuda.forward(Q,K,V)
-"
+# benchmark
+python3 bench/bench_forward.py
+python3 bench/bench_backward.py
 ```
 
-## Current Specs
+### Metal (MacBook M4 Pro)
 
-- Precision: FP32
-- Head dimension: D=64 (compile-time constant)
-- Tile sizes: B_r=32, B_c=32
-- Shared memory: 16KB (sK[32][64] + sV[32][64])
-- Target GPU: RTX 4060 Ti (sm_89, Ada Lovelace)
+```bash
+cd metal && make    # -> libflash_attn_metal.dylib
+cd ..
+python3 metal/test_metal.py    # correctness 9/9
+python3 metal/bench_metal.py   # Wall / GPU / CUDA comparison
+```
+
+no PyTorch needed. numpy only.
+
+### Jetson AGX Orin 64GB
+
+```bash
+# change gencode in setup.py: sm_89 -> sm_87
+CUDA_HOME=/usr/local/cuda pip install -e . --break-system-packages
+```
+
+not yet profiled. Phase 5.
+
+## Hardware
+
+| Platform | GPU | Memory | Profiler |
+|---|---|---|---|
+| RTX 4060 Ti | Ada Lovelace sm_89 | GDDR6 288 GB/s | Nsight Compute |
+| M4 Pro | Apple GPU 20-core | Unified LPDDR5 273 GB/s | GPU Timestamp only (1 HW counter) |
+| Jetson AGX Orin 64GB | Ampere sm_87 | Unified LPDDR5 204.8 GB/s | Nsight Compute |
 
 ## Roadmap
 
 - [x] Forward kernel (online softmax tiling)
 - [x] Backward kernel (dQ, dK, dV with recomputation)
 - [x] Nsight Compute profiling (forward + backward)
-- [ ] FP16 support with Tensor Core (WMMA/MMA)
-- [ ] Occupancy optimization (tile size tuning, register pressure reduction)
-- [ ] Warp-level primitives (`__shfl_sync` for reductions)
-- [ ] Apple Metal port (M4 Pro)
+- [x] FP16 mixed precision experiment
+- [x] WMMA Tensor Core + half2 optimization (v1)
+- [x] Multi-warp attempt (failed, rolled back)
+- [x] Apple Metal port (M4 Pro, forward only)
+- [x] Metal GPU timestamp profiling
+- [x] Metal BW microbenchmark
+- [ ] Jetson AGX Orin profiling
+- [ ] Cross-platform comparison table
 - [ ] Causal masking support
-
-## Environment
-
-- GPU: NVIDIA GeForce RTX 4060 Ti
-- OS: Windows 11 + WSL2 (Ubuntu 24.04)
-- CUDA: 12.8
-- PyTorch: 2.x (CUDA 12.8 build)
-- Profiler: Nsight Compute, Nsight Systems
 
 ## References
 
 - Dao et al., "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness" (NeurIPS 2022)
 - Dao, "FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning" (2023)
 - NVIDIA CUDA C++ Programming Guide
-- MIT 6.5940 TinyML (Song Han)
 
 ## License
 
