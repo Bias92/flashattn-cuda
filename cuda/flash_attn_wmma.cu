@@ -46,9 +46,9 @@ __global__ void flash_attn_fwd_wmma_kernel(
     float* L_bh = L + bh * N;
 
     // Shared memory layout (~12KB total)
-    __shared__ half sQ[Br][D];        // 16×64×2 = 2KB  — Q tile (loaded once)
-    __shared__ half sK[Bc][D];        // 16×64×2 = 2KB  — K tile (per KV block)
-    __shared__ half sV[Bc][D];        // 16×64×2 = 2KB  — V tile (per KV block)
+    __shared__ half sQ[Br][D + 8];    // 16×72×2 = 2.25KB  — Q tile (loaded once)
+    __shared__ half sK[Bc][D + 8];    // 16×72×2 = 2.25KB  — K tile (per KV block)
+    __shared__ half sV[Bc][D + 8];    // 16×72×2 = 2.25KB  — V tile (per KV block)
     __shared__ float sS[Br][Bc];      // 16×16×4 = 1KB  — S scores / temp buffer
     __shared__ half sP[Br][Bc];       // 16×16×2 = 0.5KB — P after softmax
     __shared__ float sO[Br][D];       // 16×64×4 = 4KB  — running output accumulator
@@ -67,7 +67,6 @@ __global__ void flash_attn_fwd_wmma_kernel(
 
     // Load Q tile to shared memory — vectorized half2 (2x bandwidth)
     {
-        half2* sQ_h2 = reinterpret_cast<half2*>(&sQ[0][0]);
         const int total_h2 = Br * D / 2;  // 16*64/2 = 512
         for (int i = lane; i < total_h2; i += 32) {
             int flat = i * 2;
@@ -76,9 +75,9 @@ __global__ void flash_attn_fwd_wmma_kernel(
             int global_r = q_start + r;
             if (global_r < N) {
                 const half2* src = reinterpret_cast<const half2*>(&Q_bh[global_r * D + c]);
-                sQ_h2[i] = *src;
+                *reinterpret_cast<half2*>(&sQ[r][c]) = *src;
             } else {
-                sQ_h2[i] = __float2half2_rn(0.0f);
+                *reinterpret_cast<half2*>(&sQ[r][c]) = __float2half2_rn(0.0f);
             }
         }
     }
@@ -92,8 +91,6 @@ __global__ void flash_attn_fwd_wmma_kernel(
 
         // Load K, V tiles — vectorized half2
         {
-            half2* sK_h2 = reinterpret_cast<half2*>(&sK[0][0]);
-            half2* sV_h2 = reinterpret_cast<half2*>(&sV[0][0]);
             const int total_h2 = Bc * D / 2;
             for (int i = lane; i < total_h2; i += 32) {
                 int flat = i * 2;
@@ -101,11 +98,11 @@ __global__ void flash_attn_fwd_wmma_kernel(
                 int c = flat % D;
                 int global_r = kv_start + r;
                 if (global_r < N) {
-                    sK_h2[i] = *reinterpret_cast<const half2*>(&K_bh[global_r * D + c]);
-                    sV_h2[i] = *reinterpret_cast<const half2*>(&V_bh[global_r * D + c]);
+                    *reinterpret_cast<half2*>(&sK[r][c]) = *reinterpret_cast<const half2*>(&K_bh[global_r * D + c]);
+                    *reinterpret_cast<half2*>(&sV[r][c]) = *reinterpret_cast<const half2*>(&V_bh[global_r * D + c]);
                 } else {
-                    sK_h2[i] = __float2half2_rn(0.0f);
-                    sV_h2[i] = __float2half2_rn(0.0f);
+                    *reinterpret_cast<half2*>(&sK[r][c]) = __float2half2_rn(0.0f);
+                    *reinterpret_cast<half2*>(&sV[r][c]) = __float2half2_rn(0.0f);
                 }
             }
         }
@@ -119,8 +116,8 @@ __global__ void flash_attn_fwd_wmma_kernel(
         wmma::fill_fragment(s_frag, 0.0f);
 
         for (int dk = 0; dk < D; dk += 16) {
-            wmma::load_matrix_sync(q_frag, &sQ[0][dk], D);
-            wmma::load_matrix_sync(k_frag, &sK[0][dk], D);
+            wmma::load_matrix_sync(q_frag, &sQ[0][dk], D + 8);
+            wmma::load_matrix_sync(k_frag, &sK[0][dk], D + 8);
             wmma::mma_sync(s_frag, q_frag, k_frag, s_frag);
         }
 
@@ -185,7 +182,7 @@ __global__ void flash_attn_fwd_wmma_kernel(
             wmma::fragment<wmma::accumulator, 16, 16, 16, float> o_frag;
             wmma::fill_fragment(o_frag, 0.0f);
 
-            wmma::load_matrix_sync(v_frag, &sV[0][dk], D);
+            wmma::load_matrix_sync(v_frag, &sV[0][dk], D + 8);
             wmma::mma_sync(o_frag, p_frag, v_frag, o_frag);
 
             // Store partial result to sS (reused as temp buffer)
