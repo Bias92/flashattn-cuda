@@ -90,6 +90,26 @@ backward checks dQ, dK, dV independently to avoid hiding errors in a single aggr
 the reason why Batch is 1. because the kernel processes each (batch, head) pair independently increasing B only launches more identical blocks without changing `per-kernel` behavior. i just fixed B=1 to isolate sequence length scaling. also 
 tests cover single-block, multi-block, non-aligned sequence lengths, and multi-batch/multi-head configurations.
 
+## Live Demo
+
+### Naive OOM vs Flash @ N=16384
+
+![oom demo](docs/demo/demo_oom.gif)
+
+Naive attention tries to materialize the full N×N score matrix (N=16384, B=1, H=8, FP32 = ~8.6GB), exceeding RTX 4060 Ti 8GB VRAM.
+FlashAttention processes the same workload in 235 MB by tiling Q/K/V and never materializing the score matrix.
+
+### Speed + Memory @ N=8192
+
+![speed demo](docs/demo/demo.gif)
+
+|        | Per iter  | Peak memory |
+|--------|-----------|-------------|
+| Naive  | 327.00 ms | 8665.6 MB   |
+| Flash  | 179.19 ms |  118.0 MB   |
+| Ratio  | **1.82×** | **73×**     |
+
+
 ## Benchmark Results
 
 ![](docs/profiling/benchmark_comparison.png)
