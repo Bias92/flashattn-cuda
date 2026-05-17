@@ -1,31 +1,31 @@
-# flashattn-cuda-metal
+# Flashattn-cuda
 
 This is project FlashAttention forward/backward kernels implemented from scratch in CUDA(profiling it and optimizing with WMMA)
-finally, ported to Apple Metal, profiled across discrete(Discrete/Separate Memory Architecture) and unified memory GPUs(Unified Memory Architecture, AKA "UMA").
+finally,, profiled on RTX 4060 Ti with Nsight Compute.
 
-## Motivation & Goal
+## motivation & goal
 
 ![](docs/profiling/flash_picture.png)
 
-### Motivation
+### motivation
 
 Transformer attention computes a full $N \times N$ score matrix, which blows up memory at long sequences.
 at B=32, H=8, seq_len=4096 in FP32, that's ~17GB just for attention scores.
 FlashAttention avoids this by tiling Q/K/V into SRAM-sized blocks and computing softmax on the fly, never materializing the full matrix.
 
 i wanted to understand how this actually works at the kernel level, not just call `F.scaled_dot_product_attention`.
-so i implemented it from scratch in CUDA, profiled it with ncu to find bottlenecks, tried 5 optimizations,
-then ported it to Apple Metal to see how the same algorithm behaves on unified memory.
+so i implemented it from scratch in CUDA, profiled it with ncu to find bottlenecks, tried 6 optimizations,
 
 
 ### Goal
-Scratch-implement FlashAttention → profile with ncu → optimize (5 attempts) 
--> port to Metal -> compare kernel-level performance across 
-RTX 4060 Ti (discrete GDDR6) vs M4 Pro (unified LPDDR5) vs Jetson AGX Orin (unified LPDDR5).
+Scratch-implement FlashAttention → profile with ncu → optimize (6 attempts) 
+ -> analyze kernel-level performance on
+RTX 4060 Ti (discrete GDDR6).
+Jetson AGX Orin profiling is future work.
 
 
 
-## Algorithm
+## algorithm
 
 ### Forward (Algorithm 1)
 
@@ -157,7 +157,7 @@ entire kernels are profiled with `ncu --set full --launch-count 1` on N=1024, B=
 
 ### Forward Kernel
 
-| Before (FP32 Baseline) | After (WMMA+half2 v1) |
+| Before (FP32 Baseline) | After (WMMA+half2 v1 before padding) |
 |---|---|
 | <img src="docs/profiling/gpu_speed_of_light.png" width="400"> | <img src="docs/profiling/wmma_gpu_sol.png" width="400"> |
 | Compute 25.30%, Memory 25.30% | Compute 27.40%, Memory 42.55% |
@@ -170,7 +170,7 @@ entire kernels are profiled with `ncu --set full --launch-count 1` on N=1024, B=
 
 ### Forward Optimization Summary
 
-tried 5 things to make the forward kernel faster:
+tried 6 things to make the forward kernel faster:
 
 | # | what i tried | result | why it failed/worked |
 |---|---|---|---|
@@ -179,8 +179,9 @@ tried 5 things to make the forward kernel faster:
 | 3 | WMMA 16×16 | 11.18→11.83ms | tile too small, softmax breaks pipeline |
 | 4 | WMMA + half2 load | 11.18→11.63ms, N=128: 0.09ms | kept this one (v1) |
 | 5 | 4 warps/block | 11.18→12.39ms, rolled back | 35KB shmem, only 2 blocks fit per SM |
+| 6 | shared memory padding (+8) | 11.63→10.41ms, bank conflict 4.6-way→2.7-way | row stride no longer maps exactly to 32 banks |
 
-scratch WMMA can't beat FP32 baseline at large N. that's why Dao Lab uses CUTLASS with 128×64+ tiles and warp-specialized softmax.
+scratch WMMA with padding beats the FP32 scratch baseline at N=4096. production SDPA is still faster, which is expected since SDPA uses optimized backends.
 
 ------------
 ### Why backward is split into dQ and dK/dV
@@ -196,7 +197,7 @@ the original paper (Algorithm 4) handles this in a single nested loop with block
 
 ### Backward dQ Kernel
 
-| Before (FP32 Baseline) | After (WMMA) |
+| Before (FP32 Baseline) | After (mixed precision / WMMA module) |
 |---|---|
 | <img src="docs/profiling/bwd_dq_gpu_sol.png" width="400"> | <img src="docs/profiling/dq/wmma_gpu_sol.png" width="400"> |
 | <img src="docs/profiling/bwd_dq_roofline.png" width="400"> | <img src="docs/profiling/dq/wmma_roofline_fp32.png" width="400"> |
@@ -205,7 +206,7 @@ the original paper (Algorithm 4) handles this in a single nested loop with block
 
 ### Backward dK/dV Kernel
 
-| Before (FP32 Baseline) | After (WMMA) |
+| Before (FP32 Baseline) | After (mixed precision / WMMA module) |
 |---|---|
 | <img src="docs/profiling/bwd_dkdv_gpu_sol.png" width="400"> | <img src="docs/profiling/dkdv/wmma_gpu_sol.png" width="400"> |
 | <img src="docs/profiling/bwd_dkdv_roofline.png" width="400"> | <img src="docs/profiling/dkdv/wmma_roofline_fp32.png" width="400"> |
@@ -216,7 +217,7 @@ the original paper (Algorithm 4) handles this in a single nested loop with block
 
 1. All three kernels share the same bottleneck: occupancy ~10% due to shared memory (16KB per block) and register pressure
 2. dK/dV is the worst performer: 71.88% local memory usage from 256+ registers per thread, 22.8M spill requests
-3. Tried 5 optimizations targeting these bottlenecks (see optimization section above)
+3. Tried 6 optimizations targeting these bottlenecks (see optimization section above)
 
 ## Project Structure
 
@@ -224,17 +225,7 @@ the original paper (Algorithm 4) handles this in a single nested loop with block
 flashattn-cuda-metal/
 ├── cuda/
 │   ├── flash_attn_kernel.cu       # FP32 baseline forward+backward
-│   └── flash_attn_wmma.cu         # WMMA Tensor Core + half2 (v1)
-├── metal/
-│   ├── flash_attn.metal           # Metal shader (CUDA baseline 1:1 port)
-│   ├── flash_attn_metal.mm        # Obj-C++ host (GPU timestamp)
-│   ├── flash_attn_metal.py        # Python ctypes wrapper
-│   ├── test_metal.py              # correctness 9/9
-│   ├── bench_metal.py             # benchmark (Wall/GPU/CUDA)
-│   ├── bench_instrument.mm        # Instruments Metal System Trace
-│   ├── query_counters.mm          # Counter Sampling API probe
-│   ├── bw_test.mm                 # BW microbenchmark
-│   └── Makefile
+│   └── flash_attn_wmma.cu         # WMMA Tensor Core forward + mixed precision backward
 ├── ref/
 │   └── naive_attn.py              # O(N²) reference
 ├── tests/
@@ -273,17 +264,6 @@ python3 bench/bench_forward.py
 python3 bench/bench_backward.py
 ```
 
-### Metal (MacBook M4 Pro)
-
-```bash
-cd metal && make    # -> libflash_attn_metal.dylib
-cd ..
-python3 metal/test_metal.py    # correctness 9/9
-python3 metal/bench_metal.py   # Wall / GPU / CUDA comparison
-```
-
-no PyTorch needed. numpy only.
-
 ### Jetson AGX Orin 64GB
 
 ```bash
@@ -291,15 +271,14 @@ no PyTorch needed. numpy only.
 CUDA_HOME=/usr/local/cuda pip install -e . --break-system-packages
 ```
 
-not yet profiled. Phase 5.
+not yet profiled. future work.
 
 ## Hardware
 
 | Platform | GPU | Memory | Profiler |
 |---|---|---|---|
 | RTX 4060 Ti | Ada Lovelace sm_89 | GDDR6 288 GB/s | Nsight Compute |
-| M4 Pro | Apple GPU 20-core | Unified LPDDR5 273 GB/s | GPU Timestamp only (1 HW counter) |
-| Jetson AGX Orin 64GB | Ampere sm_87 | Unified LPDDR5 204.8 GB/s | Nsight Compute |
+| Jetson AGX Orin 64GB | Ampere sm_87 | shared LPDDR5 204.8 GB/s | Nsight Compute (future work) |
 
 ## Roadmap
 
@@ -309,9 +288,7 @@ not yet profiled. Phase 5.
 - [x] FP16 mixed precision experiment
 - [x] WMMA Tensor Core + half2 optimization (v1)
 - [x] Multi-warp attempt (failed, rolled back)
-- [x] Apple Metal port (M4 Pro, forward only)
-- [x] Metal GPU timestamp profiling
-- [x] Metal BW microbenchmark
+- [x] Shared memory bank conflict padding (+8)
 - [ ] Jetson AGX Orin profiling
 - [ ] Cross-platform comparison table
 - [ ] Causal masking support
