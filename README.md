@@ -92,22 +92,23 @@ tests cover single-block, multi-block, non-aligned sequence lengths, and multi-b
 
 ## Live Demo
 
-### Naive OOM vs Flash @ N=16384
+### Naive O(N²) vs FlashAttention @ N=8192
 
-![oom demo](docs/demo/demo_oom.gif)
+![naive vs flash](docs/demo/side_by_side.gif)
 
-Naive attention tries to materialize the full N×N score matrix (N=16384, B=1, H=8, FP32 = ~8.6GB), exceeding RTX 4060 Ti 8GB VRAM.
-FlashAttention processes the same workload in 235 MB by tiling Q/K/V and never materializing the score matrix.
+| | Per iter | Peak memory |
+|---|---|---|
+| Naive  | 287 ms | 8666 MB |
+| Flash  |  41 ms |  118 MB |
+| Ratio  | **7×** | **73×** |
 
-### Speed + Memory @ N=8192
+Config: B=1, H=8, D=64, FP32, 200 iterations, RTX 4060 Ti 8GB.
 
-![speed demo](docs/demo/demo.gif)
+### Naive OOM @ N=16384
 
-|        | Per iter  | Peak memory |
-|--------|-----------|-------------|
-| Naive  | 327.00 ms | 8665.6 MB   |
-| Flash  | 179.19 ms |  118.0 MB   |
-| Ratio  | **1.82×** | **73×**     |
+![naive OOM](docs/demo/oom.gif)
+
+At N=16384, naive attention requires ~8.6GB to materialize the N×N score matrix, exceeding the 8GB capacity of an RTX 4060 Ti. FlashAttention processes the same workload in 235MB.
 
 
 ## Benchmark Results
