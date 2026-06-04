@@ -206,7 +206,3 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 *.deb
-*.dylib
-metal/bench_instrument
-metal/query_counters
-metal/bw_test
