@@ -243,7 +243,7 @@ the original paper (Algorithm 4) handles this in a single nested loop with block
 ## Project Structure
 
 ```
-flashattn-cuda-metal/
+flashattn-cuda/
 ├── cuda/
 │   ├── flash_attn_kernel.cu       # FP32 baseline forward+backward
 │   └── flash_attn_wmma.cu         # WMMA Tensor Core forward + mixed precision backward
