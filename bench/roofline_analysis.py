@@ -23,11 +23,6 @@ platforms = {
         "peak_bw_gbps": 288.0,
         "gpu_times_ms": {128: 0.12, 256: 0.12, 512: 0.25, 1024: 0.94, 2048: 3.06, 4096: 11.18},
     },
-    "M4 Pro": {
-        "mem_type": "Unified LPDDR5",
-        "peak_bw_gbps": 273.0,
-        "gpu_times_ms": {128: 0.35, 256: 0.71, 512: 2.80, 1024: 11.05, 2048: 38.43, 4096: 139.72},
-    },
     # Jetson placeholder — fill in after ncu profiling
     # "Jetson Orin": {
     #     "mem_type": "Unified LPDDR5",
