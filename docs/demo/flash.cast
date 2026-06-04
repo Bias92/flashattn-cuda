@@ -1,5 +1,5 @@
 {"version": 2, "width": 100, "height": 45, "timestamp": 1779026821, "env": {"SHELL": "/bin/bash", "TERM": "xterm-256color"}}
-[0.014889, "o", "\u001b[?2004h\u001b]0;root@DESKTOP-MLNTJLR: /mnt/c/Users/PC/Desktop/flashattn-cuda-metal\u0007root@DESKTOP-MLNTJLR:/mnt/c/Users/PC/Desktop/flashattn-cuda-metal# "]
+[0.014889, "o", "\u001b[?2004h\u001b]0;root@DESKTOP-MLNTJLR: /mnt/c/Users/PC/Desktop/flashattn-cuda\u0007root@DESKTOP-MLNTJLR:/mnt/c/Users/PC/Desktop/flashattn-cuda# "]
 [1.62053, "o", "\u001b[7mpython3 flash_demo.py\u001b[27m"]
 [1.752943, "o", "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bpython3 flash_demo.py\r\n\u001b[?2004l\r"]
 [2.212245, "o", "/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.\r\n  import pynvml  # type: ignore[import]\r\n"]
@@ -206,7 +206,7 @@
 [11.458187, "o", "  [flash] iter 200/200  elapsed  8.26s\r\n"]
 [11.458398, "o", "\r\nTotal: 8.26s  |  Per iter: 41.31ms  |  Peak: 118MB"]
 [11.458618, "o", "\r\n"]
-[11.655406, "o", "\u001b[?2004h\u001b]0;root@DESKTOP-MLNTJLR: /mnt/c/Users/PC/Desktop/flashattn-cuda-metal\u0007root@DESKTOP-MLNTJLR:/mnt/c/Users/PC/Desktop/flashattn-cuda-metal# "]
+[11.655406, "o", "\u001b[?2004h\u001b]0;root@DESKTOP-MLNTJLR: /mnt/c/Users/PC/Desktop/flashattn-cuda\u0007root@DESKTOP-MLNTJLR:/mnt/c/Users/PC/Desktop/flashattn-cuda# "]
 [21.323657, "o", "\u001b[7mexit\u001b[27m"]
 [21.471949, "o", "\b\b\b\bexit\r\n\u001b[?2004l\r"]
 [21.472119, "o", "exit\r\n"]
