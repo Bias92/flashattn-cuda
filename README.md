@@ -21,7 +21,9 @@ Tested on RTX 4060 Ti, CUDA 12.8, PyTorch 2.10.0+cu128, B=1, H=8, D=64,
 FP16 input, FP32 accumulate, non-causal forward. The numbers above are 10-run
 paired medians from `bench/bench_fa3_headline.py`.
 
-![Forward benchmark](docs/profiling/benchmark_comparison.png)
+<p align="center">
+  <img src="docs/profiling/benchmark_comparison.png" width="720" alt="Forward benchmark">
+</p>
 
 ## Why I Built This
 
@@ -41,7 +43,9 @@ So this repo keeps the whole trail:
 
 At `N=4096`, the chain moved from about 3.2 ms to about 0.873 ms.
 
-![Optimization chain](docs/profiling/fa3_optimization_chain.png)
+<p align="center">
+  <img src="docs/profiling/fa3_optimization_chain.png" width="720" alt="Optimization chain">
+</p>
 
 ## Current Kernel
 
