@@ -85,24 +85,22 @@ Raw Nsight Compute artifacts:
 
 | Artifact | fa3 before | db_full after |
 |---|---|---|
-| `.ncu-rep` | [report](docs/profiling/ncu/fa3_before_n4096.ncu-rep) | [report](docs/profiling/ncu/db_full_after_n4096.ncu-rep) |
-| text export | [txt](docs/profiling/ncu/fa3_before_n4096.txt) | [txt](docs/profiling/ncu/db_full_after_n4096.txt) |
-| GUI capture | [png](docs/profiling/ncu/fa3_before_ncu_ui.png) | [png](docs/profiling/ncu/db_full_after_ncu_ui.png) |
+| full `.ncu-rep` | [report](docs/profiling/ncu_sections/fa3_before_n4096_full.ncu-rep) | [report](docs/profiling/ncu_sections/db_full_after_n4096_full.ncu-rep) |
+| text export | [txt](docs/profiling/ncu_sections/fa3_before_n4096_full.txt) | [txt](docs/profiling/ncu_sections/db_full_after_n4096_full.txt) |
 
 <details>
-<summary>Nsight Compute GUI captures</summary>
+<summary>Nsight Compute section captures</summary>
 
-Before:
+| Section | fa3 before | db_full after |
+|---|---|---|
+| Speed of Light | <img src="docs/profiling/ncu_sections/fa3_speed_of_light.png" width="360" alt="fa3 Speed of Light"> | <img src="docs/profiling/ncu_sections/db_full_speed_of_light.png" width="360" alt="db_full Speed of Light"> |
+| Roofline | <img src="docs/profiling/ncu_sections/fa3_roofline.png" width="360" alt="fa3 Roofline"> | <img src="docs/profiling/ncu_sections/db_full_roofline.png" width="360" alt="db_full Roofline"> |
+| Memory Workload | <img src="docs/profiling/ncu_sections/fa3_memory_workload.png" width="360" alt="fa3 Memory Workload"> | <img src="docs/profiling/ncu_sections/db_full_memory_workload.png" width="360" alt="db_full Memory Workload"> |
+| Occupancy | <img src="docs/profiling/ncu_sections/fa3_occupancy.png" width="360" alt="fa3 Occupancy"> | <img src="docs/profiling/ncu_sections/db_full_occupancy.png" width="360" alt="db_full Occupancy"> |
+| Launch Stats | <img src="docs/profiling/ncu_sections/fa3_launch_stats.png" width="360" alt="fa3 Launch Stats"> | <img src="docs/profiling/ncu_sections/db_full_launch_stats.png" width="360" alt="db_full Launch Stats"> |
 
-<p align="center">
-  <img src="docs/profiling/ncu/fa3_before_ncu_ui.png" width="720" alt="Nsight Compute before">
-</p>
-
-After:
-
-<p align="center">
-  <img src="docs/profiling/ncu/db_full_after_ncu_ui.png" width="720" alt="Nsight Compute after">
-</p>
+The images above are rendered from the full Nsight Compute reports. The raw
+`.ncu-rep` files are kept in the same directory.
 
 </details>
 
