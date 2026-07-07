@@ -92,9 +92,17 @@ These are actual captures from Nsight Compute UI. The full `.ncu-rep` files
 above contain the Speed of Light, Roofline, Memory Workload, Occupancy, and
 Launch Statistics sections.
 
-| fa3 before | db_full after |
-|---|---|---|
-| <img src="docs/profiling/ncu/fa3_before_ncu_ui.png" width="420" alt="ncu-ui fa3 before"> | <img src="docs/profiling/ncu/db_full_after_ncu_ui.png" width="420" alt="ncu-ui db_full after"> |
+fa3 before:
+
+<p align="center">
+  <img src="docs/profiling/ncu/fa3_before_ncu_ui.png" width="760" alt="ncu-ui fa3 before">
+</p>
+
+db_full after:
+
+<p align="center">
+  <img src="docs/profiling/ncu/db_full_after_ncu_ui.png" width="760" alt="ncu-ui db_full after">
+</p>
 
 </details>
 
