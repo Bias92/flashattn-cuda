@@ -85,26 +85,20 @@ Raw Nsight Compute artifacts:
 | text export | [txt](docs/profiling/ncu_sections/fa3_before_n4096_full.txt) | [txt](docs/profiling/ncu_sections/db_full_after_n4096_full.txt) |
 | actual ncu-ui capture | [png](docs/profiling/ncu/fa3_before_ncu_ui.png) | [png](docs/profiling/ncu/db_full_after_ncu_ui.png) |
 
-<details open>
-<summary>Nsight Compute GUI captures</summary>
-
-These are actual captures from Nsight Compute UI. The full `.ncu-rep` files
-above contain the Speed of Light, Roofline, Memory Workload, Occupancy, and
-Launch Statistics sections.
-
-fa3 before:
+Actual ncu-ui summary crop, fa3 before:
 
 <p align="center">
-  <img src="docs/profiling/ncu/fa3_before_ncu_ui.png" width="760" alt="ncu-ui fa3 before">
+  <img src="docs/profiling/ncu/fa3_before_ncu_ui_summary.png" width="760" alt="ncu-ui fa3 before summary">
 </p>
 
-db_full after:
+Actual ncu-ui summary crop, db_full after:
 
 <p align="center">
-  <img src="docs/profiling/ncu/db_full_after_ncu_ui.png" width="760" alt="ncu-ui db_full after">
+  <img src="docs/profiling/ncu/db_full_after_ncu_ui_summary.png" width="760" alt="ncu-ui db_full after summary">
 </p>
 
-</details>
+The full `.ncu-rep` files contain the Speed of Light, Roofline, Memory Workload,
+Occupancy, and Launch Statistics sections.
 
 ## Current Kernel
 
