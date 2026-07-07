@@ -1,0 +1,42 @@
+[490] python3.12@127.0.0.1
+  void fa3_fwd_kernel<64>(const __half *, const __half *, const __half *, __half *, float *, int) (64, 8, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+    Section: GPU Speed Of Light Throughput
+    ----------------------- ----------- ------------
+    Metric Name             Metric Unit Metric Value
+    ----------------------- ----------- ------------
+    DRAM Frequency                  Ghz         8.74
+    SM Frequency                    Ghz         2.31
+    Elapsed Cycles                cycle      3179972
+    Memory Throughput                 %        35.18
+    DRAM Throughput                   %         3.27
+    Duration                         ms         1.38
+    L1/TEX Cache Throughput           %        37.46
+    L2 Cache Throughput               %        10.22
+    SM Active Cycles              cycle   3023085.44
+    Compute (SM) Throughput           %        35.18
+    ----------------------- ----------- ------------
+
+    OPT   This workload exhibits low compute throughput and memory bandwidth utilization relative to the peak           
+          performance of this device. Achieved compute throughput and/or memory bandwidth below 60.0% of peak           
+          typically indicate latency issues. Look at Scheduler Statistics and Warp State Statistics for potential       
+          reasons.                                                                                                      
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           24
+    Block Limit Registers                 block            6
+    Block Limit Shared Mem                block            6
+    Block Limit Warps                     block           12
+    Theoretical Active Warps per SM        warp           24
+    Theoretical Occupancy                     %           50
+    Achieved Occupancy                        %        43.22
+    Achieved Active Warps Per SM           warp        20.74
+    ------------------------------- ----------- ------------
+
+    OPT   Est. Local Speedup: 50%                                                                                       
+          The 6.00 theoretical warps per scheduler this kernel can issue according to its occupancy are below the       
+          hardware maximum of 12. This kernel's theoretical occupancy (50.0%) is limited by the number of required      
+          registers, and the required amount of shared memory.                                                          
+
