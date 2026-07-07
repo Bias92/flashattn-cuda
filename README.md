@@ -54,6 +54,10 @@ Nsight Compute on the same `N=4096` shape. This is a single profiled launch, so
 it is not the headline benchmark. The event-timed paired benchmark above is the
 latency number I quote.
 
+The point of this profile is not just "lower time." The final kernel does more
+useful work per cycle after K/V prefetching, address cleanup, and the full-tile
+path.
+
 <p align="center">
   <img src="docs/profiling/ncu_before_after.png" width="720" alt="Nsight Compute before and after">
 </p>
@@ -65,9 +69,17 @@ latency number I quote.
 | Memory throughput | 35.18% | 41.84% |
 | Achieved occupancy | 43.22% | 38.01% |
 
-The final kernel is faster even though achieved occupancy is lower. The win came
-from better instruction scheduling, `cp.async`, less address work, and the
-full-tile path.
+What changed:
+
+| Signal | Read |
+|---|---|
+| Duration went down | the final kernel is doing less wasted work |
+| Compute throughput went up | Tensor Core work is fed better |
+| Memory throughput went up | `cp.async` and the K/V pipeline are actually visible |
+| Occupancy went down | not a regression by itself, because the final kernel uses more registers and shared memory |
+
+The final kernel is faster even with lower achieved occupancy. That is the main
+profiling lesson here: occupancy was not the only score to chase.
 
 Raw Nsight Compute artifacts:
 
@@ -76,6 +88,23 @@ Raw Nsight Compute artifacts:
 | `.ncu-rep` | [report](docs/profiling/ncu/fa3_before_n4096.ncu-rep) | [report](docs/profiling/ncu/db_full_after_n4096.ncu-rep) |
 | text export | [txt](docs/profiling/ncu/fa3_before_n4096.txt) | [txt](docs/profiling/ncu/db_full_after_n4096.txt) |
 | GUI capture | [png](docs/profiling/ncu/fa3_before_ncu_ui.png) | [png](docs/profiling/ncu/db_full_after_ncu_ui.png) |
+
+<details>
+<summary>Nsight Compute GUI captures</summary>
+
+Before:
+
+<p align="center">
+  <img src="docs/profiling/ncu/fa3_before_ncu_ui.png" width="720" alt="Nsight Compute before">
+</p>
+
+After:
+
+<p align="center">
+  <img src="docs/profiling/ncu/db_full_after_ncu_ui.png" width="720" alt="Nsight Compute after">
+</p>
+
+</details>
 
 ## Current Kernel
 
