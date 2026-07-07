@@ -77,13 +77,8 @@ What changed:
 The final kernel is faster even with lower achieved occupancy. That is the main
 profiling lesson here: occupancy was not the only score to chase.
 
-Raw Nsight Compute artifacts:
-
-| Artifact | fa3 before | db_full after |
-|---|---|---|
-| full `.ncu-rep` | [report](docs/profiling/ncu_sections/fa3_before_n4096_full.ncu-rep) | [report](docs/profiling/ncu_sections/db_full_after_n4096_full.ncu-rep) |
-| text export | [txt](docs/profiling/ncu_sections/fa3_before_n4096_full.txt) | [txt](docs/profiling/ncu_sections/db_full_after_n4096_full.txt) |
-| actual ncu-ui capture | [png](docs/profiling/ncu/fa3_before_ncu_ui.png) | [png](docs/profiling/ncu/db_full_after_ncu_ui.png) |
+The full Nsight Compute reports, text exports, and original uncropped UI
+captures are kept under `docs/profiling/ncu/` and `docs/profiling/ncu_sections/`.
 
 Actual ncu-ui summary crop, fa3 before:
 
