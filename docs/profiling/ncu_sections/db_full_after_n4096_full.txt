@@ -1,0 +1,142 @@
+[605] python3.12@127.0.0.1
+  void fa3db_full_fwd_kernel<64, 1, 1>(const __half *, const __half *, const __half *, __half *, float *, int) (64, 8, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+    Section: GPU Speed Of Light Throughput
+    ----------------------- ----------- ------------
+    Metric Name             Metric Unit Metric Value
+    ----------------------- ----------- ------------
+    DRAM Frequency                  Ghz         8.74
+    SM Frequency                    Ghz         2.30
+    Elapsed Cycles                cycle      2279960
+    Memory Throughput                 %        41.78
+    DRAM Throughput                   %         4.56
+    Duration                         us       989.09
+    L1/TEX Cache Throughput           %        34.76
+    L2 Cache Throughput               %        42.31
+    SM Active Cycles              cycle   2147481.53
+    Compute (SM) Throughput           %        43.33
+    ----------------------- ----------- ------------
+
+    OPT   This workload exhibits low compute throughput and memory bandwidth utilization relative to the peak           
+          performance of this device. Achieved compute throughput and/or memory bandwidth below 60.0% of peak           
+          typically indicate latency issues. Look at Scheduler Statistics and Warp State Statistics for potential       
+          reasons.                                                                                                      
+
+    Section: GPU Speed Of Light Roofline Chart (Overview)
+    INF   The ratio of peak float (FP32) to double (FP64) performance on this device is 64:1. The workload achieved 4%  
+          of this device's FP32 peak performance and 0% of its FP64 peak performance. See the Profiling Guide           
+          (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#roofline) for more details on roofline      
+          analysis.                                                                                                     
+
+    Section: Memory Workload Analysis
+    --------------------------------------- ----------- ------------
+    Metric Name                             Metric Unit Metric Value
+    --------------------------------------- ----------- ------------
+    Local Memory Spilling Requests                                 0
+    Local Memory Spilling Request Overhead            %            0
+    L2 Sector Promotion Misses                        %            0
+    Shared Memory Spilling Requests                                0
+    Shared Memory Spilling Request Overhead           %            0
+    Memory Throughput                           Gbyte/s        12.75
+    Mem Busy                                          %        41.78
+    Max Bandwidth                                     %        41.37
+    L1/TEX Hit Rate                                   %         1.10
+    L2 Persisting Size                            Mbyte         6.29
+    L2 Compression Success Rate                       %            0
+    L2 Compression Ratio                                           0
+    L2 Compression Input Sectors                 sector            0
+    L2 Hit Rate                                       %       101.22
+    Mem Pipes Busy                                    %        32.78
+    --------------------------------------- ----------- ------------
+
+    Section: Memory Workload Analysis Tables
+    OPT   Est. Speedup: 16.14%                                                                                          
+          The memory access pattern for global stores to L1TEX might not be optimal. On average, only 16.2 of the 32    
+          bytes transmitted per sector are utilized by each thread. This could possibly be caused by a stride between   
+          threads. Check the Source Counters section for uncoalesced global stores.                                     
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Speedup: 3.793%                                                                                          
+          The memory access pattern for shared stores might not be optimal and causes on average a 1.1 - way bank       
+          conflict across all 32768 shared store requests.This results in 4013 bank conflicts,  which represent 10.91%  
+          of the overall 36781 wavefronts for shared stores. Check the Source Counters section for uncoalesced shared   
+          stores.                                                                                                       
+
+    Section: Launch Statistics
+    -------------------------------- --------------- ---------------
+    Metric Name                          Metric Unit    Metric Value
+    -------------------------------- --------------- ---------------
+    Block Size                                                   128
+    Function Cache Configuration                     CachePreferNone
+    Grid Size                                                    512
+    Registers Per Thread             register/thread              95
+    Shared Memory Configuration Size           Kbyte          102.40
+    Driver Shared Memory Per Block       Kbyte/block            1.02
+    Dynamic Shared Memory Per Block       byte/block               0
+    Static Shared Memory Per Block       Kbyte/block           18.43
+    # SMs                                         SM              34
+    Stack Size                                                  1024
+    Threads                                   thread           65536
+    # TPCs                                                        17
+    Enabled TPC IDs                                              all
+    Uses Green Context                                             0
+    Waves Per SM                                                3.01
+    -------------------------------- --------------- ---------------
+
+    OPT   Est. Speedup: 25%                                                                                             
+          A wave of thread blocks is defined as the maximum number of blocks that can be executed in parallel on the    
+          target GPU. The number of blocks in a wave depends on the number of multiprocessors and the theoretical       
+          occupancy of the kernel. This kernel launch results in 3 full waves and a partial wave of 2 thread blocks.    
+          Under the assumption of a uniform execution duration of all thread blocks, this partial wave may account for  
+          up to 25.0% of the total runtime of this kernel. Try launching a grid with no partial wave. The overall       
+          impact of this tail effect also lessens with the number of full waves executed for a grid. See the Hardware   
+          Model (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-hw-model) description for     
+          more details on launch configurations.                                                                        
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           24
+    Block Limit Registers                 block            5
+    Block Limit Shared Mem                block            5
+    Block Limit Warps                     block           12
+    Theoretical Active Warps per SM        warp           20
+    Theoretical Occupancy                     %        41.67
+    Achieved Occupancy                        %        38.06
+    Achieved Active Warps Per SM           warp        18.27
+    ------------------------------- ----------- ------------
+
+    OPT   Est. Local Speedup: 58.33%                                                                                    
+          The 5.00 theoretical warps per scheduler this kernel can issue according to its occupancy are below the       
+          hardware maximum of 12. This kernel's theoretical occupancy (41.7%) is limited by the number of required      
+          registers, and the required amount of shared memory.                                                          
+
+    Section: GPU and Memory Workload Distribution
+    -------------------------- ----------- ------------
+    Metric Name                Metric Unit Metric Value
+    -------------------------- ----------- ------------
+    Average DRAM Active Cycles       cycle       393940
+    Total DRAM Elapsed Cycles        cycle     34586624
+    Average L1 Active Cycles         cycle   2147481.53
+    Total L1 Elapsed Cycles          cycle     77431190
+    Average L2 Active Cycles         cycle   1698193.44
+    Total L2 Elapsed Cycles          cycle     30588272
+    Average SM Active Cycles         cycle   2147481.53
+    Total SM Elapsed Cycles          cycle     77431190
+    Average SMSP Active Cycles       cycle   2148478.87
+    Total SMSP Elapsed Cycles        cycle    309724760
+    -------------------------- ----------- ------------
+
+    OPT   Est. Speedup: 5.395%                                                                                          
+          One or more SMs have a much higher number of active cycles than the average number of active cycles. Maximum  
+          instance value is 5.72% above the average, while the minimum instance value is 0.61% below the average.       
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Speedup: 5.386%                                                                                          
+          One or more SMSPs have a much higher number of active cycles than the average number of active cycles.        
+          Maximum instance value is 5.71% above the average, while the minimum instance value is 0.63% below the        
+          average.                                                                                                      
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Speedup: 5.395%                                                                                          
+          One or more L1 Slices have a much higher number of active cycles than the average number of active cycles.    
+          Maximum instance value is 5.72% above the average, while the minimum instance value is 0.61% below the        
+          average.                                                                                                      
+
