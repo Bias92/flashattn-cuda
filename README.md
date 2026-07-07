@@ -47,6 +47,36 @@ At `N=4096`, the chain moved from about 3.2 ms to about 0.873 ms.
   <img src="docs/profiling/fa3_optimization_chain.png" width="720" alt="Optimization chain">
 </p>
 
+## Nsight Compute Snapshot
+
+I also profiled the direct `fa3` kernel and the final `db_full` kernel with
+Nsight Compute on the same `N=4096` shape. This is a single profiled launch, so
+it is not the headline benchmark. The event-timed paired benchmark above is the
+latency number I quote.
+
+<p align="center">
+  <img src="docs/profiling/ncu_before_after.png" width="720" alt="Nsight Compute before and after">
+</p>
+
+| Metric | fa3 before | db_full after |
+|---|---:|---:|
+| Duration | 1.38 ms | 0.987 ms |
+| Compute throughput | 35.18% | 43.32% |
+| Memory throughput | 35.18% | 41.84% |
+| Achieved occupancy | 43.22% | 38.01% |
+
+The final kernel is faster even though achieved occupancy is lower. The win came
+from better instruction scheduling, `cp.async`, less address work, and the
+full-tile path.
+
+Raw Nsight Compute artifacts:
+
+| Artifact | fa3 before | db_full after |
+|---|---|---|
+| `.ncu-rep` | [report](docs/profiling/ncu/fa3_before_n4096.ncu-rep) | [report](docs/profiling/ncu/db_full_after_n4096.ncu-rep) |
+| text export | [txt](docs/profiling/ncu/fa3_before_n4096.txt) | [txt](docs/profiling/ncu/db_full_after_n4096.txt) |
+| GUI capture | [png](docs/profiling/ncu/fa3_before_ncu_ui.png) | [png](docs/profiling/ncu/db_full_after_ncu_ui.png) |
+
 ## Current Kernel
 
 The final forward kernel uses:
