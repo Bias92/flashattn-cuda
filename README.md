@@ -88,7 +88,7 @@ Raw Nsight Compute artifacts:
 | full `.ncu-rep` | [report](docs/profiling/ncu_sections/fa3_before_n4096_full.ncu-rep) | [report](docs/profiling/ncu_sections/db_full_after_n4096_full.ncu-rep) |
 | text export | [txt](docs/profiling/ncu_sections/fa3_before_n4096_full.txt) | [txt](docs/profiling/ncu_sections/db_full_after_n4096_full.txt) |
 
-<details>
+<details open>
 <summary>Nsight Compute section captures</summary>
 
 | Section | fa3 before | db_full after |
