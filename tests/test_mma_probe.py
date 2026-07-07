@@ -49,6 +49,13 @@ def main():
     ref_chain = S.half().float() @ V.float()
     ok &= report("CHAIN S=A@Kf^T -> half -> @V", mod.probe_chain(A, Kf, V), ref_chain)
 
+    # Probe 4: f16-accumulate QK layout (looser tol: accumulation itself is fp16)
+    got = mod.probe_qk_f16acc(A, K)
+    diff = (got - ref_qk).abs().max().item()
+    ok4 = diff < 5e-2   # layout errors would be O(1); fp16-acc rounding is ~1e-2
+    print(f"[{'PASS' if ok4 else 'FAIL'}] {'QK f16-accumulate layout':<40s} max_diff={diff:.3e}")
+    ok &= ok4
+
     print("=" * 60)
     print("ALL LAYOUT PROBES PASSED" if ok else "LAYOUT PROBE FAILURE — DO NOT BUILD fa3 ON THIS")
     return 0 if ok else 1
