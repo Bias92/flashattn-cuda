@@ -140,6 +140,50 @@ tail 행은 src-size 0 → 하드웨어 zero-fill. Q 스테이징은 stage-1 버
 
 클린업 (2026-07-07 밤): ① `WRITE_L=false`에서 L 포인터 산술 제거 (`if constexpr` 안으로) — db_addr/db_full 적용, 비트일치 재확인 ② setup.py에 db_addr/db_full 등록 ③ 모든 벤치가 측정한 .so 경로 출력 (스테일 바이너리 오독 방지)
 
+## 4.6 SDPA race path (2026-07-08, 브랜치 race/sdpa-win, 미머지)
+
+`cuda/flash_attn_fa3_race.cu` = db_full + ①split-loop(마지막 타일 peel, has_next 분기 제거)
++ ②N_STATIC 2048/4096 특수화 + ③cp.async **.ca** (A/B에서 .cg에 명확 승리 — L2 상주
+K/V를 같은 SM 후속 q-block이 L1 재히트). O-only = **API-latency 프레이밍** (SDPA도 API론
+O만 반환하지만 내부에서 lse 계산 — 우리 O-only는 진짜 skip이므로 이 프레임에서만 방어됨).
+
+- correctness 18/18, **O는 db_full과 비트 일치** (L만 ~1ulp, epilogue FMA contraction)
+- REG 80~96 전부 ≤102, LOCAL 0 (N4096 O-only 인스턴스만 STACK:8)
+- **결정 런 (사전 선언 100-rep paired, GPU idle 게이트 통과)**:
+  - ca/sdpa median: N=2048 **0.9959** (67/100승), N=4096 **0.9966** (63/100승)
+  - ca/full: +2.15% / +2.51%
+- **판정: 사전 컷(both ≤0.99) 미달 → "SDPA 이김" 채택 불가.** 30-rep의 0.991은 노이즈.
+  방어 가능 문구: "reaches statistical parity with SDPA-Flash (paired median ~0.996,
+  wins 63–67/100) on the shape-specialized O-only path"
+- 교훈: 벤치에 GPU idle 게이트 필수 (오염 런에선 2.2x 느려지고 비율도 뒤집힘 — SDPA가
+  경합에 더 취약하게 나옴, 그것도 채택 근거 아님)
+
+## 4.7 E 루트: PAD=0 swizzle + 6블록/SM (2026-07-08) — **기각, 원인 분리 완료**
+
+`cuda/flash_attn_fa3_swz.cu` = race + PAD=0 (smem 18432→16384B) + 128B XOR swizzle
+(phys_chunk = logical_chunk ^ (row&7), cp.async/Q스테이징/전체 ldmatrix 일관 적용,
+r1=r0+16·V+32행이 &7 보존이라 고정 오프셋 유지) + `__launch_bounds__(128,6)`.
+
+- correctness 18/18, **O는 db_full과 비트 일치** (스위즐 전단사 전수 검증)
+- 서류상 목표 달성: REG 80, SHARED 16384, LOCAL 0 → 이론 6블록/SM (50%)
+- **성능: race-ca 대비 +5.7~6.5% 느림 (wins 0~3/30) → 기각**
+- 원인 A/B (`bench_fa3_swz_ab.py`, SWZ_MINBLOCKS 매크로):
+  - **REG 압축 비용 +5.3%p**: ptxas가 96→80 맞추며 STACK:64 사용 — LOCAL:0이어도
+    스택 프레임은 로컬 메모리 트래픽임. **"LOCAL>0 기각" kill condition의 맹점 —
+    앞으로 STACK>0도 같이 봐야 함**
+  - swizzle 자체 비용 +1.2%p (XOR 주소 연산)
+  - **결정타: LB 해제 시 REG 128 → 4블록(33%)인데도 -1.2%뿐 = 이 커널은 occupancy
+    둔감 (ILP가 레이턴시를 이미 흡수).** 6블록을 공짜로 얻어도 이득 미미했을 것
+- 논문 서사: "occupancy를 41.7→50%로 올리는 조건을 만들어도 못 이기는 이유" —
+  reg-file이 아니라 issue-slot이 진짜 자원이라는 §5 결론의 실증
+
+### E 이후 총괄: exact-FP32(FP16 in/FP32 acc) 조건의 결론
+
+GPT 플랜 A~E 전부 소진: A(O-only) ✓, B(split-loop) +, C(.ca) +, D(N_STATIC) + →
+**SDPA 대비 statistical parity (0.996)가 이 커널 구조의 천장.** E(occupancy) 기각으로
+남은 이론 레버 없음. 더 가려면 알고리즘 shape 변경(cross-iter 파이프라인, warp
+specialization)인데 갭 0.4% 대비 리스크 비대칭.
+
 ### 남은 레버 (미실행, 우선순위 순)
 
 주의: ⑧에서 같은-반복 내 재배열은 컴파일러가 이미 하고 있음이 확인됨. 남은 것 중
