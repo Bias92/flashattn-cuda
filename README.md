@@ -103,10 +103,10 @@ Actual Nsight Compute GUI captures:
 
 | Section | Before | After |
 |---|---|---|
-| GPU Speed of Light | <img src="docs/profiling/gpu_speed_of_light.png" width="420" height="122" alt="before GPU Speed of Light"> | <img src="docs/profiling/ncu_compare/after_gpu_sol.png" width="420" height="122" alt="after GPU Speed of Light"> |
-| Roofline | <img src="docs/profiling/roofline_fp32.png" width="420" height="185" alt="before roofline"> | <img src="docs/profiling/ncu_compare/after_roofline.png" width="420" height="185" alt="after roofline"> |
-| Memory Workload | <img src="docs/profiling/memory_workload.png" width="420" height="189" alt="before memory workload"> | <img src="docs/profiling/ncu_compare/after_memory_workload.png" width="420" height="189" alt="after memory workload"> |
-| Occupancy | <img src="docs/profiling/occupancy.png" width="420" height="81" alt="before occupancy"> | <img src="docs/profiling/ncu_compare/after_occupancy.png" width="420" height="81" alt="after occupancy"> |
+| GPU Speed of Light | <img src="docs/profiling/gpu_speed_of_light.png" width="420" alt="before GPU Speed of Light"> | <img src="docs/profiling/ncu_compare/after_gpu_sol.png" width="420" alt="after GPU Speed of Light"> |
+| Roofline | <img src="docs/profiling/roofline_fp32.png" width="420" alt="before roofline"> | <img src="docs/profiling/ncu_compare/after_roofline.png" width="420" alt="after roofline"> |
+| Memory Workload | <img src="docs/profiling/memory_workload.png" width="420" alt="before memory workload"> | <img src="docs/profiling/ncu_compare/after_memory_workload.png" width="420" alt="after memory workload"> |
+| Occupancy | <img src="docs/profiling/occupancy.png" width="420" alt="before occupancy"> | <img src="docs/profiling/ncu_compare/after_occupancy.png" width="420" alt="after occupancy"> |
 
 The full `.ncu-rep` files and text exports are kept under `docs/profiling/ncu/`
 and `docs/profiling/ncu_sections/`.
