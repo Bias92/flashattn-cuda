@@ -4,8 +4,10 @@
 // FlashAttention-2 style forward: each warp owns 16 Q rows and streams
 // K/V in BC-row blocks with online softmax. The kernel body is split into
 // named __forceinline__ steps (stage K/V, QK^T, mask, online softmax,
-// PV, normalize) so the algorithm reads top to bottom; the hardware
-// details live in the helpers.
+// PV, epilogue) so the algorithm reads top to bottom; the hardware
+// details live in the helpers. Identifiers follow the official
+// FlashAttention-2 source (acc_s, acc_o, tSrQ, tOrP, row_max, row_sum,
+// scores_scale, softmax_rescale_o, apply_mask).
 //
 // Two-stage K/V copies with precomputed shared-memory addresses.
 // FULL_TILES removes load, mask, and store guards when N is divisible by BR and BC.
@@ -107,14 +109,15 @@ __device__ __forceinline__ void cp_async_wait() {
     asm volatile("cp.async.wait_group %0;\n" :: "n"(NGROUPS));
 }
 
-// Row-wide reductions over the 4 lanes that share an accumulator row.
-__device__ __forceinline__ float quad_max(float v) {
+// Row-wide reductions over the 4 lanes that share an accumulator row
+// (FA2: quad_allreduce_ with MaxOp / SumOp).
+__device__ __forceinline__ float quad_allreduce_max(float v) {
     v = fmaxf(v, __shfl_xor_sync(0xffffffff, v, 1));
     v = fmaxf(v, __shfl_xor_sync(0xffffffff, v, 2));
     return v;
 }
 
-__device__ __forceinline__ float quad_sum(float v) {
+__device__ __forceinline__ float quad_allreduce_sum(float v) {
     v += __shfl_xor_sync(0xffffffff, v, 1);
     v += __shfl_xor_sync(0xffffffff, v, 2);
     return v;
@@ -173,7 +176,7 @@ struct KVStager {
 };
 
 // ============================================================
-// Step 2: Q -> smem -> per-warp A fragments (kept in registers for the whole loop)
+// Step 2: Q -> smem -> per-warp A fragments tSrQ (kept in registers for the whole loop)
 // ============================================================
 template <int D, bool FULL_TILES>
 __device__ __forceinline__ void stage_q_to_smem(
@@ -201,7 +204,7 @@ __device__ __forceinline__ void stage_q_to_smem(
 
 template <int D>
 __device__ __forceinline__ void load_q_fragments(
-    uint32_t (&qf)[Tile<D>::KSLICES][4], const half* sQ_raw, int warp, int lane)
+    uint32_t (&tSrQ)[Tile<D>::KSLICES][4], const half* sQ_raw, int warp, int lane)
 {
     using T = Tile<D>;
     const half (*sQ)[T::LDS] = reinterpret_cast<const half(*)[T::LDS]>(sQ_raw);
@@ -210,36 +213,36 @@ __device__ __forceinline__ void load_q_fragments(
     #pragma unroll
     for (int ks = 0; ks < T::KSLICES; ks++) {
         uint32_t addr = smem_u32(&sQ[r][ks * 16 + kbase]);
-        ldmatrix_x4(qf[ks][0], qf[ks][1], qf[ks][2], qf[ks][3], addr);
+        ldmatrix_x4(tSrQ[ks][0], tSrQ[ks][1], tSrQ[ks][2], tSrQ[ks][3], addr);
     }
 }
 
 // ============================================================
-// Step 3: S = (Q K^T) * scale * log2(e)
+// Step 3: acc_s = (Q K^T) * softmax_scale * log2(e)
 //
 // The log2(e) factor is folded into the scale so softmax can use exp2.
 // ============================================================
 template <int D>
 __device__ __forceinline__ void compute_qk(
-    float (&s)[Tile<D>::NTILES_S][4],
-    const uint32_t (&qf)[Tile<D>::KSLICES][4],
-    uint32_t qk_base, float scale_log2)
+    float (&acc_s)[Tile<D>::NTILES_S][4],
+    const uint32_t (&tSrQ)[Tile<D>::KSLICES][4],
+    uint32_t qk_base, float softmax_scale_log2)
 {
     using T = Tile<D>;
     #pragma unroll
     for (int t = 0; t < T::NTILES_S; t++) {
-        s[t][0] = s[t][1] = s[t][2] = s[t][3] = 0.0f;
+        acc_s[t][0] = acc_s[t][1] = acc_s[t][2] = acc_s[t][3] = 0.0f;
         #pragma unroll
         for (int ks = 0; ks < T::KSLICES; ks++) {
-            uint32_t b0, b1;
-            ldmatrix_x2(b0, b1,
+            uint32_t tSrK0, tSrK1;
+            ldmatrix_x2(tSrK0, tSrK1,
                 qk_base + (uint32_t)(t * 8) * T::ROW_BYTES
                         + (uint32_t)(ks * 16) * sizeof(half));
-            mma_m16n8k16(s[t][0], s[t][1], s[t][2], s[t][3],
-                         qf[ks][0], qf[ks][1], qf[ks][2], qf[ks][3], b0, b1);
+            mma_m16n8k16(acc_s[t][0], acc_s[t][1], acc_s[t][2], acc_s[t][3],
+                         tSrQ[ks][0], tSrQ[ks][1], tSrQ[ks][2], tSrQ[ks][3], tSrK0, tSrK1);
         }
         #pragma unroll
-        for (int j = 0; j < 4; j++) s[t][j] *= scale_log2;
+        for (int j = 0; j < 4; j++) acc_s[t][j] *= softmax_scale_log2;
     }
 }
 
@@ -247,141 +250,142 @@ __device__ __forceinline__ void compute_qk(
 // Step 4: mask columns past N in the last (partial) K/V block
 // ============================================================
 template <int NT>
-__device__ __forceinline__ void mask_tail_columns(float (&s)[NT][4], int kv, int N, int lane)
+__device__ __forceinline__ void apply_mask(float (&acc_s)[NT][4], int kv, int N, int lane)
 {
     #pragma unroll
     for (int t = 0; t < NT; t++) {
         int col0 = kv + t * 8 + 2 * (lane % 4);
-        if (col0 >= N)     { s[t][0] = -INFINITY; s[t][2] = -INFINITY; }
-        if (col0 + 1 >= N) { s[t][1] = -INFINITY; s[t][3] = -INFINITY; }
+        if (col0 >= N)     { acc_s[t][0] = -INFINITY; acc_s[t][2] = -INFINITY; }
+        if (col0 + 1 >= N) { acc_s[t][1] = -INFINITY; acc_s[t][3] = -INFINITY; }
     }
 }
 
 // ============================================================
-// Step 5: online softmax (FlashAttention-2 form)
+// Step 5: online softmax (FlashAttention-2 form, names as in FA2 softmax.h)
 //
 // Running statistics per row, in the log2 domain:
-//   m = running max of scaled scores
-//   l = running sum of exp2(s - m)
-// One step per K/V block:
-//   m_new = max(m, blockmax(s))
-//   alpha = exp2(m - m_new)          // rescale factor for old contributions
-//   P     = exp2(s - m_new)          // written back into s
-//   l     = alpha * l + rowsum(P)
-//   O     = alpha * O                // P V is added afterwards by accumulate_pv
-// O is NOT divided by l here; that happens once in normalize_and_store.
+//   row_max = running max of scaled scores
+//   row_sum = running sum of exp2(acc_s - row_max)
+// One softmax_rescale_o per K/V block:
+//   scores_max_cur = max(row_max, blockmax(acc_s))
+//   scores_scale   = exp2(row_max - scores_max_cur)   // rescale factor for old contributions
+//   acc_s          = exp2(acc_s - scores_max_cur)      // acc_s now holds P
+//   row_sum        = scores_scale * row_sum + rowsum(P)
+//   acc_o          = scores_scale * acc_o              // P V is added afterwards by accumulate_pv
+// acc_o is NOT divided by row_sum here; that happens once in the epilogue.
 // ============================================================
-struct SoftmaxState {
-    float m[2];  // [0] = row lo, [1] = row hi
-    float l[2];
+struct Softmax {
+    float row_max[2];  // [0] = row lo, [1] = row hi
+    float row_sum[2];
 
-    __device__ __forceinline__ SoftmaxState() {
-        m[0] = m[1] = -INFINITY;
-        l[0] = l[1] = 0.0f;
+    __device__ __forceinline__ Softmax() {
+        row_max[0] = row_max[1] = -INFINITY;
+        row_sum[0] = row_sum[1] = 0.0f;
     }
 };
 
 template <int NT, int NO>
-__device__ __forceinline__ void online_softmax_step(
-    float (&s)[NT][4], float (&o_acc)[NO][4], SoftmaxState& st)
+__device__ __forceinline__ void softmax_rescale_o(
+    float (&acc_s)[NT][4], float (&acc_o)[NO][4], Softmax& softmax)
 {
-    // Block max per row (thread-local, then across the quad).
-    float bm[2] = {-INFINITY, -INFINITY};
+    // reduce_max: block max per row (thread-local, then across the quad).
+    float block_max[2] = {-INFINITY, -INFINITY};
     #pragma unroll
     for (int t = 0; t < NT; t++) {
-        bm[0] = fmaxf(bm[0], fmaxf(s[t][0], s[t][1]));
-        bm[1] = fmaxf(bm[1], fmaxf(s[t][2], s[t][3]));
+        block_max[0] = fmaxf(block_max[0], fmaxf(acc_s[t][0], acc_s[t][1]));
+        block_max[1] = fmaxf(block_max[1], fmaxf(acc_s[t][2], acc_s[t][3]));
     }
-    bm[0] = quad_max(bm[0]);
-    bm[1] = quad_max(bm[1]);
+    block_max[0] = quad_allreduce_max(block_max[0]);
+    block_max[1] = quad_allreduce_max(block_max[1]);
 
     // New running max and the rescale factor for what was accumulated so far.
-    float mn[2], alpha[2];
+    float scores_max_cur[2], scores_scale[2];
     #pragma unroll
     for (int r = 0; r < 2; r++) {
-        mn[r]    = fmaxf(st.m[r], bm[r]);
-        alpha[r] = exp2f(st.m[r] - mn[r]);
+        scores_max_cur[r] = fmaxf(softmax.row_max[r], block_max[r]);
+        scores_scale[r]   = exp2f(softmax.row_max[r] - scores_max_cur[r]);
     }
 
-    // P = exp2(s - m_new), and its row sums.
-    float rs[2] = {0.0f, 0.0f};
+    // scale_apply_exp2 + reduce_sum: acc_s = exp2(acc_s - scores_max_cur), and its row sums.
+    float scores_sum[2] = {0.0f, 0.0f};
     #pragma unroll
     for (int t = 0; t < NT; t++) {
-        s[t][0] = exp2f(s[t][0] - mn[0]);
-        s[t][1] = exp2f(s[t][1] - mn[0]);
-        s[t][2] = exp2f(s[t][2] - mn[1]);
-        s[t][3] = exp2f(s[t][3] - mn[1]);
-        rs[0] += s[t][0] + s[t][1];
-        rs[1] += s[t][2] + s[t][3];
+        acc_s[t][0] = exp2f(acc_s[t][0] - scores_max_cur[0]);
+        acc_s[t][1] = exp2f(acc_s[t][1] - scores_max_cur[0]);
+        acc_s[t][2] = exp2f(acc_s[t][2] - scores_max_cur[1]);
+        acc_s[t][3] = exp2f(acc_s[t][3] - scores_max_cur[1]);
+        scores_sum[0] += acc_s[t][0] + acc_s[t][1];
+        scores_sum[1] += acc_s[t][2] + acc_s[t][3];
     }
-    rs[0] = quad_sum(rs[0]);
-    rs[1] = quad_sum(rs[1]);
+    scores_sum[0] = quad_allreduce_sum(scores_sum[0]);
+    scores_sum[1] = quad_allreduce_sum(scores_sum[1]);
 
     #pragma unroll
     for (int r = 0; r < 2; r++) {
-        st.l[r] = st.l[r] * alpha[r] + rs[r];
-        st.m[r] = mn[r];
+        softmax.row_sum[r] = softmax.row_sum[r] * scores_scale[r] + scores_sum[r];
+        softmax.row_max[r] = scores_max_cur[r];
     }
 
     // Rescale the unnormalized output accumulator.
     #pragma unroll
     for (int t = 0; t < NO; t++) {
-        o_acc[t][0] *= alpha[0];
-        o_acc[t][1] *= alpha[0];
-        o_acc[t][2] *= alpha[1];
-        o_acc[t][3] *= alpha[1];
+        acc_o[t][0] *= scores_scale[0];
+        acc_o[t][1] *= scores_scale[0];
+        acc_o[t][2] *= scores_scale[1];
+        acc_o[t][3] *= scores_scale[1];
     }
 }
 
 // ============================================================
-// Step 6: O += P V
+// Step 6: acc_o += P V
 //
-// P (fp32 accumulator layout) is repacked in registers into the fp16
-// A-fragment layout of the next mma; V is read transposed from smem.
+// P (fp32 accumulator layout in acc_s) is repacked in registers into the
+// fp16 A-fragment layout tOrP of the next mma; V is read transposed from smem.
 // ============================================================
 template <int D>
 __device__ __forceinline__ void accumulate_pv(
-    float (&o_acc)[Tile<D>::NTILES_O][4],
-    const float (&p)[Tile<D>::NTILES_S][4],
+    float (&acc_o)[Tile<D>::NTILES_O][4],
+    const float (&acc_s)[Tile<D>::NTILES_S][4],
     uint32_t pv_base)
 {
     using T = Tile<D>;
-    uint32_t pf[T::KSLICES_PV][4];
+    uint32_t tOrP[T::KSLICES_PV][4];
     #pragma unroll
     for (int ks = 0; ks < T::KSLICES_PV; ks++) {
-        pf[ks][0] = pack_half2(p[2 * ks][0],     p[2 * ks][1]);
-        pf[ks][1] = pack_half2(p[2 * ks][2],     p[2 * ks][3]);
-        pf[ks][2] = pack_half2(p[2 * ks + 1][0], p[2 * ks + 1][1]);
-        pf[ks][3] = pack_half2(p[2 * ks + 1][2], p[2 * ks + 1][3]);
+        tOrP[ks][0] = pack_half2(acc_s[2 * ks][0],     acc_s[2 * ks][1]);
+        tOrP[ks][1] = pack_half2(acc_s[2 * ks][2],     acc_s[2 * ks][3]);
+        tOrP[ks][2] = pack_half2(acc_s[2 * ks + 1][0], acc_s[2 * ks + 1][1]);
+        tOrP[ks][3] = pack_half2(acc_s[2 * ks + 1][2], acc_s[2 * ks + 1][3]);
     }
 
     #pragma unroll
     for (int t = 0; t < T::NTILES_O; t++) {
         #pragma unroll
         for (int ks = 0; ks < T::KSLICES_PV; ks++) {
-            uint32_t b0, b1;
-            ldmatrix_x2_trans(b0, b1,
+            uint32_t tOrVt0, tOrVt1;
+            ldmatrix_x2_trans(tOrVt0, tOrVt1,
                 pv_base + (uint32_t)(ks * 16) * T::ROW_BYTES
                         + (uint32_t)(t * 8) * sizeof(half));
-            mma_m16n8k16(o_acc[t][0], o_acc[t][1], o_acc[t][2], o_acc[t][3],
-                         pf[ks][0], pf[ks][1], pf[ks][2], pf[ks][3], b0, b1);
+            mma_m16n8k16(acc_o[t][0], acc_o[t][1], acc_o[t][2], acc_o[t][3],
+                         tOrP[ks][0], tOrP[ks][1], tOrP[ks][2], tOrP[ks][3], tOrVt0, tOrVt1);
         }
     }
 }
 
 // ============================================================
-// Step 7: O = O / l (the single normalization), optional L = m*ln2 + log(l)
+// Step 7: epilogue -- FA2's normalize_softmax_lse (the single division by
+//         row_sum, lse = row_max*ln2 + log(row_sum)) fused with the O / L stores.
 // ============================================================
 template <int D, bool WRITE_L, bool FULL_TILES>
-__device__ __forceinline__ void normalize_and_store(
-    const float (&o_acc)[Tile<D>::NTILES_O][4],
-    const SoftmaxState& st,
+__device__ __forceinline__ void epilogue(
+    const float (&acc_o)[Tile<D>::NTILES_O][4],
+    const Softmax& softmax,
     half* __restrict__ O_bh, float* __restrict__ L,
     int bh, int N, int q_block, int warp, int lane)
 {
     using T = Tile<D>;
-    const float inv_lo = 1.0f / st.l[0];
-    const float inv_hi = 1.0f / st.l[1];
+    const float inv_sum_lo = 1.0f / softmax.row_sum[0];
+    const float inv_sum_hi = 1.0f / softmax.row_sum[1];
     const int r_lo = q_block + warp * 16 + lane / 4;
     const int r_hi = r_lo + 8;
     const int cbase = 2 * (lane % 4);
@@ -390,19 +394,19 @@ __device__ __forceinline__ void normalize_and_store(
     for (int t = 0; t < T::NTILES_O; t++) {
         int col = t * 8 + cbase;
         if (FULL_TILES || r_lo < N) {
-            half2 v = __floats2half2_rn(o_acc[t][0] * inv_lo, o_acc[t][1] * inv_lo);
+            half2 v = __floats2half2_rn(acc_o[t][0] * inv_sum_lo, acc_o[t][1] * inv_sum_lo);
             *reinterpret_cast<half2*>(&O_bh[(size_t)r_lo * D + col]) = v;
         }
         if (FULL_TILES || r_hi < N) {
-            half2 v = __floats2half2_rn(o_acc[t][2] * inv_hi, o_acc[t][3] * inv_hi);
+            half2 v = __floats2half2_rn(acc_o[t][2] * inv_sum_hi, acc_o[t][3] * inv_sum_hi);
             *reinterpret_cast<half2*>(&O_bh[(size_t)r_hi * D + col]) = v;
         }
     }
     if constexpr (WRITE_L) {
         if (lane % 4 == 0) {
             float* L_bh = L + (size_t)bh * N;
-            if (FULL_TILES || r_lo < N) L_bh[r_lo] = st.m[0] * LN2f + logf(st.l[0]);
-            if (FULL_TILES || r_hi < N) L_bh[r_hi] = st.m[1] * LN2f + logf(st.l[1]);
+            if (FULL_TILES || r_lo < N) L_bh[r_lo] = softmax.row_max[0] * LN2f + logf(softmax.row_sum[0]);
+            if (FULL_TILES || r_hi < N) L_bh[r_hi] = softmax.row_max[1] * LN2f + logf(softmax.row_sum[1]);
         }
     }
 }
@@ -432,7 +436,7 @@ attention_fwd_kernel(
     const half* K_bh = K + (size_t)bh * N * D;
     const half* V_bh = V + (size_t)bh * N * D;
     half* O_bh = O + (size_t)bh * N * D;
-    // L is only dereferenced inside normalize_and_store when WRITE_L.
+    // L is only dereferenced inside the epilogue when WRITE_L.
 
     // Two K/V stages, double-buffered. Q is staged through stage 1 before
     // the loop starts using it.
@@ -447,8 +451,8 @@ attention_fwd_kernel(
 
     stage_q_to_smem<D, FULL_TILES>(smem + T::STAGE, Q_bh, q_block, N, tid);
     __syncthreads();
-    uint32_t qf[T::KSLICES][4];
-    load_q_fragments<D>(qf, smem + T::STAGE, warp, lane);
+    uint32_t tSrQ[T::KSLICES][4];
+    load_q_fragments<D>(tSrQ, smem + T::STAGE, warp, lane);
     __syncthreads();
 
     // Per-lane smem offsets for the B operands of QK^T (K rows) and PV (V rows).
@@ -457,12 +461,12 @@ attention_fwd_kernel(
     const uint32_t pv_lane_base =
         (uint32_t)((BC + (lane & 15)) * T::LDS) * sizeof(half);
 
-    float o_acc[T::NTILES_O][4];
+    float acc_o[T::NTILES_O][4];
     #pragma unroll
     for (int t = 0; t < T::NTILES_O; t++)
-        o_acc[t][0] = o_acc[t][1] = o_acc[t][2] = o_acc[t][3] = 0.0f;
-    SoftmaxState st;
-    const float scale_log2 = rsqrtf((float)D) * LOG2Ef;
+        acc_o[t][0] = acc_o[t][1] = acc_o[t][2] = acc_o[t][3] = 0.0f;
+    Softmax softmax;
+    const float softmax_scale_log2 = rsqrtf((float)D) * LOG2Ef;
 
     // ---- Main loop over K/V blocks ----
     const int nblocks = (N + BC - 1) / BC;
@@ -479,19 +483,19 @@ attention_fwd_kernel(
         }
         __syncthreads();
 
-        float s[T::NTILES_S][4];
-        compute_qk<D>(s, qf, cur_base + qk_lane_base, scale_log2);
+        float acc_s[T::NTILES_S][4];
+        compute_qk<D>(acc_s, tSrQ, cur_base + qk_lane_base, softmax_scale_log2);
         if constexpr (!FULL_TILES) {
-            if (kv + BC > N) mask_tail_columns(s, kv, N, lane);
+            if (kv + BC > N) apply_mask(acc_s, kv, N, lane);
         }
-        online_softmax_step(s, o_acc, st);          // s becomes P, o_acc *= alpha
-        accumulate_pv<D>(o_acc, s, cur_base + pv_lane_base);
+        softmax_rescale_o(acc_s, acc_o, softmax);   // acc_s becomes P, acc_o *= scores_scale
+        accumulate_pv<D>(acc_o, acc_s, cur_base + pv_lane_base);
         __syncthreads();                            // everyone done reading this stage
 
         uint32_t tmp = cur_base; cur_base = next_base; next_base = tmp;
     }
 
-    normalize_and_store<D, WRITE_L, FULL_TILES>(o_acc, st, O_bh, L, bh, N, q_block, warp, lane);
+    epilogue<D, WRITE_L, FULL_TILES>(acc_o, softmax, O_bh, L, bh, N, q_block, warp, lane);
 }
 
 // ============================================================
