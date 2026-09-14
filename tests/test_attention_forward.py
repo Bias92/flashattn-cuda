@@ -103,6 +103,12 @@ def main():
         dict(B=2, H=8, N=2048, D=64, H_kv=4, causal=True),
         dict(B=1, H=4, N=4095, D=64, H_kv=2, causal=True),   # guarded path under GQA
         dict(B=1, H=8, N=127, D=64, H_kv=8),                 # equal heads still takes the plain path
+        # head dimension 128
+        dict(B=1, H=4, N=1024, D=128),
+        dict(B=1, H=4, N=1024, D=128, causal=True),
+        dict(B=1, H=4, N=127, D=128, causal=True),           # guarded path at D=128
+        dict(B=1, H=8, N=512, D=128, H_kv=2, causal=True),   # D=128 with GQA
+        dict(B=1, H=2, N=2048, D=128, amp=16.0),             # D=128 stress
     ]
     for e in extras:
         passed += test_config(**e)

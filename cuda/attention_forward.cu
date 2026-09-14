@@ -22,9 +22,22 @@
 #include <cuda_fp16.h>
 #include <cstdint>
 
-constexpr int HD = 64;          // head dimension
-constexpr int BR = 64;          // Q rows per block
-constexpr int BC = 32;          // K/V rows per streamed block
+#ifndef ATTN_BR
+#define ATTN_BR 64
+#endif
+#ifndef ATTN_BC
+#define ATTN_BC 32
+#endif
+// One K/V stage instead of two. Halves shared memory, which buys residency at
+// larger tiles, and gives up the overlap of the next tile's copies with this
+// tile's math.
+#ifndef ATTN_DOUBLE_BUFFER
+#define ATTN_DOUBLE_BUFFER 1
+#endif
+constexpr int NSTAGE = ATTN_DOUBLE_BUFFER ? 2 : 1;
+
+constexpr int BR = ATTN_BR;     // Q rows per block
+constexpr int BC = ATTN_BC;     // K/V rows per streamed block
 constexpr int PAD = 8;          // smem row padding (halves) to avoid ldmatrix bank conflicts
 constexpr int NWARPS = BR / 16; // one warp per 16 Q rows
 
@@ -44,6 +57,18 @@ struct Tile {
     static constexpr int STAGE      = 2 * BC * LDS; // halves per stage: K block then V block
     static constexpr uint32_t STAGE_BYTES = STAGE * sizeof(half);
     static constexpr uint32_t ROW_BYTES   = LDS * sizeof(half);
+
+    // Q is staged in shared memory before the loop starts. With two stages it
+    // borrows the second one, so that stage has to hold a whole Q block; with
+    // one stage it reuses the single K/V buffer, which is sized for whichever
+    // is larger. Getting this wrong overruns shared memory at run time, so it
+    // is checked at compile time instead.
+    static_assert(NSTAGE == 1 || BR * LDS <= STAGE,
+                  "with two stages BR must be <= 2*BC: Q is staged in one K/V stage");
+    static constexpr int SMEM_HALVES = (NSTAGE == 2)
+        ? 2 * STAGE
+        : (STAGE > BR * LDS ? STAGE : BR * LDS);
+    static constexpr int SMEM_BYTES = SMEM_HALVES * (int)sizeof(half);
 };
 
 // ------------------------------------------------------------
@@ -135,43 +160,53 @@ __device__ __forceinline__ float quad_allreduce_sum(float v) {
 template <int D, bool FULL_TILES>
 struct KVStager {
     using T = Tile<D>;
+    static constexpr int THREADS   = NWARPS * 32;
+    static constexpr int COLCHUNKS = D / 8;                 // 16-byte chunks per row
+    static constexpr int CHUNKS    = 2 * BC * COLCHUNKS;    // K block then V block
+    static constexpr int PER_THREAD = CHUNKS / THREADS;
+    // The fixed-offset form below needs each thread to own one column chunk in
+    // two K rows and the same two V rows.
+    static constexpr bool FIXED = (COLCHUNKS * 2 * (BC / 16) == PER_THREAD * COLCHUNKS)
+                                  && (BC % 16 == 0) && (THREADS * 8 == BC * D / 2);
+
     const half* K_bh;
     const half* V_bh;
     int N;
-    int r0, r1, cc;
-    uint32_t k0_off, k1_off, v0_off, v1_off;
+    int r0, cc;
+    uint32_t k0_off;
 
     __device__ __forceinline__ KVStager(const half* K, const half* V, int N_, int tid)
         : K_bh(K), V_bh(V), N(N_)
     {
-        r0 = tid >> 3;
-        r1 = r0 + 16;
-        cc = (tid & 7) << 3;
+        r0 = tid / COLCHUNKS;
+        cc = (tid % COLCHUNKS) * 8;
         k0_off = (uint32_t)(r0 * T::LDS + cc) * sizeof(half);
-        k1_off = (uint32_t)(r1 * T::LDS + cc) * sizeof(half);
-        v0_off = (uint32_t)((BC + r0) * T::LDS + cc) * sizeof(half);
-        v1_off = (uint32_t)((BC + r1) * T::LDS + cc) * sizeof(half);
+    }
+
+    // One 16-byte copy of row `row` of `src` into the stage row `srow`.
+    __device__ __forceinline__ void copy_row(uint32_t sbase, uint32_t srow_off,
+                                             const half* src, int row) const {
+        if constexpr (FULL_TILES) {
+            cp_async_16(sbase + srow_off, src + (size_t)row * D + cc, 16);
+        } else {
+            const half* p = src + (size_t)(row < N ? row : 0) * D + cc;
+            cp_async_16(sbase + srow_off, p, (row < N) ? 16 : 0);
+        }
     }
 
     // Issue the copies for K/V rows [kv, kv + BC) into the stage at sbase.
+    // Each thread owns column chunk `cc` of rows r0, r0 + ROWSTEP, ... in both
+    // K and V, where ROWSTEP = THREADS / COLCHUNKS.
     __device__ __forceinline__ void issue(uint32_t sbase, int kv) const {
-        if constexpr (FULL_TILES) {
-            // N % BC == 0 guarantees every issued row is in range.
-            cp_async_16(sbase + k0_off, K_bh + (size_t)(kv + r0) * D + cc, 16);
-            cp_async_16(sbase + k1_off, K_bh + (size_t)(kv + r1) * D + cc, 16);
-            cp_async_16(sbase + v0_off, V_bh + (size_t)(kv + r0) * D + cc, 16);
-            cp_async_16(sbase + v1_off, V_bh + (size_t)(kv + r1) * D + cc, 16);
-        } else {
-            // Out-of-range rows read row 0 with src_size 0 (zero-fill).
-            int g0 = kv + r0, g1 = kv + r1;
-            const half* k0 = K_bh + (size_t)(g0 < N ? g0 : 0) * D + cc;
-            const half* k1 = K_bh + (size_t)(g1 < N ? g1 : 0) * D + cc;
-            const half* v0 = V_bh + (size_t)(g0 < N ? g0 : 0) * D + cc;
-            const half* v1 = V_bh + (size_t)(g1 < N ? g1 : 0) * D + cc;
-            cp_async_16(sbase + k0_off, k0, (g0 < N) ? 16 : 0);
-            cp_async_16(sbase + k1_off, k1, (g1 < N) ? 16 : 0);
-            cp_async_16(sbase + v0_off, v0, (g0 < N) ? 16 : 0);
-            cp_async_16(sbase + v1_off, v1, (g1 < N) ? 16 : 0);
+        constexpr int ROWSTEP = THREADS / COLCHUNKS;
+        constexpr uint32_t ROWSTEP_OFF = (uint32_t)(ROWSTEP * T::LDS) * sizeof(half);
+        constexpr uint32_t VBLOCK_OFF  = (uint32_t)(BC * T::LDS) * sizeof(half);
+        #pragma unroll
+        for (int i = 0; i < BC / ROWSTEP; i++) {
+            const uint32_t off = k0_off + (uint32_t)i * ROWSTEP_OFF;
+            const int row = kv + r0 + i * ROWSTEP;
+            copy_row(sbase, off, K_bh, row);
+            copy_row(sbase, off + VBLOCK_OFF, V_bh, row);
         }
         cp_async_commit();
     }
@@ -472,22 +507,34 @@ attention_fwd_kernel(
     half* O_bh = O + (size_t)bh * N * D;
     // L is only dereferenced inside the epilogue when WRITE_L.
 
-    // Two K/V stages, double-buffered. Q is staged through stage 1 before
-    // the loop starts using it.
-    __shared__ __align__(16) half smem[2 * T::STAGE];
+    // Dynamic shared memory: a static __shared__ array is capped at 48 KB per
+    // block, which is not enough for the larger head dims. The host asks for
+    // T::SMEM_BYTES and raises the opt-in limit when it is above 48 KB.
+    extern __shared__ __align__(16) char smem_raw[];
+    half* smem = reinterpret_cast<half*>(smem_raw);
     const uint32_t smem_base = smem_u32(smem);
     uint32_t cur_base  = smem_base;
     uint32_t next_base = smem_base + T::STAGE_BYTES;
 
-    // ---- Prologue: kick off K/V block 0, stage Q, pull Q into registers ----
     KVStager<D, FULL_TILES> kv_stager(K_bh, V_bh, N, tid);
-    kv_stager.issue(cur_base, 0);
-
-    stage_q_to_smem<D, FULL_TILES>(smem + T::STAGE, Q_bh, q_block, N, tid);
-    __syncthreads();
     uint32_t tSrQ[T::KSLICES][4];
-    load_q_fragments<D>(tSrQ, smem + T::STAGE, warp, lane);
-    __syncthreads();
+
+    // ---- Prologue: stage Q and pull it into registers ----
+    if constexpr (NSTAGE == 2) {
+        // Q borrows the second stage, so block 0 of K/V can already be in flight.
+        kv_stager.issue(cur_base, 0);
+        stage_q_to_smem<D, FULL_TILES>(smem + T::STAGE, Q_bh, q_block, N, tid);
+        __syncthreads();
+        load_q_fragments<D>(tSrQ, smem + T::STAGE, warp, lane);
+        __syncthreads();
+    } else {
+        // Q shares the single K/V buffer, so it has to be consumed first.
+        stage_q_to_smem<D, FULL_TILES>(smem, Q_bh, q_block, N, tid);
+        __syncthreads();
+        load_q_fragments<D>(tSrQ, smem, warp, lane);
+        __syncthreads();
+        kv_stager.issue(cur_base, 0);
+    }
 
     // Per-lane smem offsets for the B operands of QK^T (K rows) and PV (V rows).
     const uint32_t qk_lane_base =
@@ -510,10 +557,15 @@ attention_fwd_kernel(
         const int kv = i * BC;
         const bool has_next = (i + 1) < nblocks;
 
-        // Prefetch the next block into the other stage, wait for this one.
-        if (has_next) {
-            kv_stager.issue(next_base, kv + BC);
-            cp_async_wait<1>();
+        // With two stages the next block is already on its way while this one
+        // is used; with one stage the copies have to land before any math.
+        if constexpr (NSTAGE == 2) {
+            if (has_next) {
+                kv_stager.issue(next_base, kv + BC);
+                cp_async_wait<1>();
+            } else {
+                cp_async_wait<0>();
+            }
         } else {
             cp_async_wait<0>();
         }
@@ -531,7 +583,11 @@ attention_fwd_kernel(
         accumulate_pv<D>(acc_o, acc_s, cur_base + pv_lane_base);
         __syncthreads();                            // everyone done reading this stage
 
-        uint32_t tmp = cur_base; cur_base = next_base; next_base = tmp;
+        if constexpr (NSTAGE == 2) {
+            uint32_t tmp = cur_base; cur_base = next_base; next_base = tmp;
+        } else if (has_next) {
+            kv_stager.issue(cur_base, kv + BC);
+        }
     }
 
     epilogue<D, WRITE_L, FULL_TILES>(acc_o, softmax, O_bh, L, bh, N, q_block, warp, lane);
@@ -547,7 +603,7 @@ static std::pair<torch::Tensor, torch::Tensor> attention_forward_impl(
     TORCH_CHECK(Q.dim() == 4, "Q must be 4D [B, H, N, D]");
 
     int B = Q.size(0), H = Q.size(1), N = Q.size(2), D = Q.size(3);
-    TORCH_CHECK(D == HD, "Head dimension must be ", HD);
+    TORCH_CHECK(D == 64 || D == 128, "Head dimension must be 64 or 128, got ", D);
     TORCH_CHECK(N > 0, "N must be > 0");
     TORCH_CHECK(K.dim() == 4 && V.dim() == 4, "K and V must be 4D [B, H_kv, N, D]");
     TORCH_CHECK(K.sizes() == V.sizes(), "K and V must have the same shape");
@@ -580,8 +636,12 @@ static std::pair<torch::Tensor, torch::Tensor> attention_forward_impl(
     dim3 block(NWARPS * 32);
     auto stream = at::cuda::getCurrentCUDAStream();
 
-    auto launch = [&](auto kernel) {
-        kernel<<<grid, block, 0, stream>>>(
+    auto launch = [&](auto kernel, int smem_bytes) {
+        if (smem_bytes > 48 * 1024) {
+            C10_CUDA_CHECK(cudaFuncSetAttribute(
+                kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, smem_bytes));
+        }
+        kernel<<<grid, block, smem_bytes, stream>>>(
             reinterpret_cast<const half*>(Q_h.data_ptr<at::Half>()),
             reinterpret_cast<const half*>(K_h.data_ptr<at::Half>()),
             reinterpret_cast<const half*>(V_h.data_ptr<at::Half>()),
@@ -590,28 +650,36 @@ static std::pair<torch::Tensor, torch::Tensor> attention_forward_impl(
             N, H, H_kv);
     };
     const bool full_tiles = (N % BR == 0) && (N % BC == 0);
-    #define LAUNCH_FWD(WL, FT, CA, GQ) launch(attention_fwd_kernel<HD, WL, FT, CA, GQ>)
-    #define DISPATCH_GQA(WL, FT, CA) \
-        do { if (gqa) LAUNCH_FWD(WL, FT, CA, true); else LAUNCH_FWD(WL, FT, CA, false); } while (0)
-    if (want_L) {
-        if (causal) {
-            if (full_tiles) DISPATCH_GQA(true, true, true);
-            else            DISPATCH_GQA(true, false, true);
-        } else {
-            if (full_tiles) DISPATCH_GQA(true, true, false);
-            else            DISPATCH_GQA(true, false, false);
-        }
-    } else {
-        if (causal) {
-            if (full_tiles) DISPATCH_GQA(false, true, true);
-            else            DISPATCH_GQA(false, false, true);
-        } else {
-            if (full_tiles) DISPATCH_GQA(false, true, false);
-            else            DISPATCH_GQA(false, false, false);
-        }
-    }
+    #define DISPATCH_GQA(HDIM, WL, FT, CA)                                          \
+        do {                                                                        \
+            constexpr int SB = Tile<HDIM>::SMEM_BYTES;                              \
+            if (gqa) launch(attention_fwd_kernel<HDIM, WL, FT, CA, true>,  SB);      \
+            else     launch(attention_fwd_kernel<HDIM, WL, FT, CA, false>, SB);      \
+        } while (0)
+    #define DISPATCH_REST(HDIM)                                                 \
+        do {                                                                    \
+            if (want_L) {                                                       \
+                if (causal) {                                                   \
+                    if (full_tiles) DISPATCH_GQA(HDIM, true, true, true);        \
+                    else            DISPATCH_GQA(HDIM, true, false, true);       \
+                } else {                                                        \
+                    if (full_tiles) DISPATCH_GQA(HDIM, true, true, false);       \
+                    else            DISPATCH_GQA(HDIM, true, false, false);      \
+                }                                                               \
+            } else {                                                            \
+                if (causal) {                                                   \
+                    if (full_tiles) DISPATCH_GQA(HDIM, false, true, true);       \
+                    else            DISPATCH_GQA(HDIM, false, false, true);      \
+                } else {                                                        \
+                    if (full_tiles) DISPATCH_GQA(HDIM, false, true, false);      \
+                    else            DISPATCH_GQA(HDIM, false, false, false);     \
+                }                                                               \
+            }                                                                   \
+        } while (0)
+    if (D == 64) DISPATCH_REST(64);
+    else         DISPATCH_REST(128);
+    #undef DISPATCH_REST
     #undef DISPATCH_GQA
-    #undef LAUNCH_FWD
     C10_CUDA_KERNEL_LAUNCH_CHECK();
 
     return {O_h.reshape({B, H, N, D}),
