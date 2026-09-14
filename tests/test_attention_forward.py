@@ -16,9 +16,19 @@ mod = load(
 BR, BC = 64, 32
 
 
+def repeat_kv(X, groups):
+    """Expand [B, H_kv, N, D] to [B, H_kv*groups, N, D], the GQA mapping."""
+    if groups == 1:
+        return X
+    B, H_kv, N, D = X.shape
+    return X[:, :, None].expand(B, H_kv, groups, N, D).reshape(B, H_kv * groups, N, D)
+
+
 def naive_attention(Q, K, V, causal):
     D = Q.shape[-1]
     scale = D ** -0.5
+    K = repeat_kv(K, Q.shape[1] // K.shape[1])
+    V = repeat_kv(V, Q.shape[1] // V.shape[1])
     S = Q @ K.transpose(-2, -1) * scale
     if causal:
         N = Q.shape[-2]
@@ -28,11 +38,13 @@ def naive_attention(Q, K, V, causal):
     return P @ V, torch.logsumexp(S, dim=-1)
 
 
-def test_config(B, H, N, D, device="cuda", dtype=torch.float32, amp=1.0, causal=False):
+def test_config(B, H, N, D, device="cuda", dtype=torch.float32, amp=1.0, causal=False,
+                H_kv=None):
     torch.manual_seed(42)
+    H_kv = H if H_kv is None else H_kv
     Q = (torch.randn(B, H, N, D, device=device, dtype=torch.float32) * amp).to(dtype)
-    K = (torch.randn(B, H, N, D, device=device, dtype=torch.float32) * amp).to(dtype)
-    V = (torch.randn(B, H, N, D, device=device, dtype=torch.float32) * amp).to(dtype)
+    K = (torch.randn(B, H_kv, N, D, device=device, dtype=torch.float32) * amp).to(dtype)
+    V = (torch.randn(B, H_kv, N, D, device=device, dtype=torch.float32) * amp).to(dtype)
 
     Qh, Kh, Vh = Q.half().float(), K.half().float(), V.half().float()
     O_ref, L_ref = naive_attention(Qh, Kh, Vh, causal)
@@ -50,6 +62,7 @@ def test_config(B, H, N, D, device="cuda", dtype=torch.float32, amp=1.0, causal=
     mask = "causal" if causal else "dense"
     tag = f" dtype={str(dtype).split('.')[-1]}" if dtype != torch.float32 else ""
     tag += f" amp={amp:g}" if amp != 1.0 else ""
+    tag += f" H_kv={H_kv}" if H_kv != H else ""
     print(f"[{'PASS' if ok else 'FAIL'}] B={B}, H={H}, N={N:>5}, D={D} "
           f"[{path:>7}, {mask:>6}]{tag}  |  "
           f"O_diff={O_diff:.3e}  L_diff={L_diff:.3e}  o_only_match={oo_same}")
@@ -84,6 +97,12 @@ def main():
         dict(B=1, H=1, N=1024, D=64, dtype=torch.float16, causal=True),
         dict(B=1, H=1, N=4095, D=64, amp=16.0, causal=True),
         dict(B=1, H=1, N=65, D=64, causal=True),             # first row of the second Q block
+        # grouped-query attention: several query heads share one K/V head
+        dict(B=1, H=8, N=1024, D=64, H_kv=1),                # multi-query, one K/V head
+        dict(B=1, H=8, N=1024, D=64, H_kv=2),
+        dict(B=2, H=8, N=2048, D=64, H_kv=4, causal=True),
+        dict(B=1, H=4, N=4095, D=64, H_kv=2, causal=True),   # guarded path under GQA
+        dict(B=1, H=8, N=127, D=64, H_kv=8),                 # equal heads still takes the plain path
     ]
     for e in extras:
         passed += test_config(**e)
