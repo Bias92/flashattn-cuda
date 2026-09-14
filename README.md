@@ -6,34 +6,38 @@ It takes fp16 inputs, accumulates in fp32, supports head dim 64, and runs dense 
 Query and key lengths are equal (N_q = N_kv). There is no KV cache and no single-query decode path,
 so this is the training and prefill shape, not decode.
 
-## Latency vs PyTorch SDPA (FlashAttention-2 backend)
+## Latency vs PyTorch SDPA
 
-B=1, H=8, D=64, fp16. Each benchmark run is 10 paired reps with alternating order;
-the tables are the median of three such runs. Positive gap = custom slower.
+SDPA is an API with several backends and they do not perform alike, so both are measured:
+`FLASH_ATTENTION` (the FlashAttention-2 kernels PyTorch vendors, pinned at upstream v2.7.4, and
+what plain `scaled_dot_product_attention` dispatches to on this GPU) and `CUDNN_ATTENTION`.
+
+B=1, H=8, D=64, fp16. Each run is 10 paired reps with the three implementations in rotating
+order; the tables are the median of three runs. Positive gap = custom slower.
 
 Dense:
 
-| N | Custom ms | Custom TFLOPS | SDPA ms | SDPA TFLOPS | gap |
-|---:|---:|---:|---:|---:|---:|
-| 1024 | 0.0636 | 33.8 | 0.0607 | 35.4 | +4.12% |
-| 2048 | 0.2169 | 39.6 | 0.2166 | 39.7 | +0.74% |
-| 4096 | 0.8499 | 40.4 | 0.8415 | 40.8 | +0.78% |
+| N | Custom ms | flash ms | cuDNN ms | Custom TF | flash TF | cuDNN TF | vs flash | vs cuDNN |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2048 | 0.2170 | 0.2173 | 0.2083 | 39.6 | 39.5 | 41.2 | +0.37% | +4.49% |
+| 4096 | 0.8520 | 0.8455 | 0.8141 | 40.3 | 40.6 | 42.2 | +0.80% | +4.39% |
 
 Causal:
 
-| N | Custom ms | Custom TFLOPS | SDPA ms | SDPA TFLOPS | gap |
-|---:|---:|---:|---:|---:|---:|
-| 1024 | 0.0552 | 19.5 | 0.0537 | 20.0 | +2.56% |
-| 2048 | 0.1460 | 29.4 | 0.1516 | 28.3 | -3.80% |
-| 4096 | 0.4858 | 35.4 | 0.5008 | 34.3 | -2.99% |
+| N | Custom ms | flash ms | cuDNN ms | Custom TF | flash TF | cuDNN TF | vs flash | vs cuDNN |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2048 | 0.1464 | 0.1528 | 0.1418 | 29.3 | 28.1 | 30.3 | -4.13% | +2.98% |
+| 4096 | 0.4905 | 0.5056 | 0.4999 | 35.0 | 34.0 | 34.4 | -2.80% | -2.23% |
 
-At N=1024 the per-rep gap swings by more than 10 points in both tables, so those rows carry
-launch and dispatch noise rather than kernel time. N=2048 and N=4096 are stable across runs.
+Causal N=4096 is the only cell where this kernel is ahead of both. It beats the
+FlashAttention-2 backend on causal at either length and loses to it on dense; cuDNN is ahead
+everywhere else. N=1024 is left out of the tables because its per-rep gap swings by more than
+10 points; `bench/compare_pytorch.py` still prints it.
 
-The causal rows are the one case where this kernel is ahead, and tile size is the likely reason.
-PyTorch runs `Flash_fwd_kernel_traits<64, 128, 128, 4>` for both dense and causal, so its 128-row
-query block carries a large fully masked triangle; a 64-row block with 32-column K/V steps throws
-away less of the diagonal block. The same small tile is what costs it on the dense rows.
+Tile size explains the causal column. PyTorch runs `Flash_fwd_kernel_traits<64, 128, 128, 4>`
+for both mask modes, so its 128-row query block carries a large fully masked triangle; a 64-row
+block with 32-column K/V steps throws away less of the diagonal block. The same small tile is
+what costs it on the dense rows.
 
 FLOPs counted as 4·N²·D·H, halved for causal. For fp16 multiply with fp32 accumulate this GPU peaks
 at 34 SM × 512 FLOP/clk × 3.12 GHz = 54.3 TFLOPS, and the sustained clock under load is lower.

@@ -1,10 +1,15 @@
 """
-Paired benchmark: Custom CUDA forward()+L vs PyTorch SDPA (FlashAttention-2 backend).
+Paired benchmark: Custom CUDA forward()+L vs PyTorch SDPA.
 
-Both implementations run back-to-back with alternating order after a clock
-warmup; the reported gap is the median of 10 per-rep latency gaps. Dense and
-causal masking are measured separately, and the PyTorch side is given the
-matching is_causal flag.
+SDPA is an API with several backends, and they do not perform alike, so this
+measures two of them: FLASH_ATTENTION (the FlashAttention-2 kernels PyTorch
+vendors, and the one plain `scaled_dot_product_attention` dispatches to here)
+and CUDNN_ATTENTION.
+
+The three implementations run in rotating order within each rep, so no one of
+them always runs on a cold or a hot clock. The reported gap is the median of
+10 per-rep gaps. Dense and causal masking are measured separately, with the
+matching is_causal flag on the PyTorch side.
 """
 from pathlib import Path
 
@@ -46,8 +51,8 @@ def main():
     B, H, D = 1, 8, 64
     torch.manual_seed(42)
     print("=" * 100)
-    print(f"Custom CUDA (+L) vs PyTorch SDPA (FlashAttention-2 backend) — "
-          f"{REPS} paired reps, B={B} H={H} D={D} FP16")
+    print(f"Custom CUDA (+L) vs PyTorch SDPA backends — {REPS} paired reps, "
+          f"B={B} H={H} D={D} FP16")
     print(f"GPU: {torch.cuda.get_device_name(0)}  torch {torch.__version__}")
     print("=" * 100)
 
@@ -70,30 +75,38 @@ def main():
             def run_ours():
                 return time_once(lambda: mod.forward(Q, K, V, causal), warmup, iters)
 
-            def run_sdpa():
-                with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
-                    return time_once(
-                        lambda: F.scaled_dot_product_attention(Q, K, V, is_causal=causal),
-                        warmup, iters)
+            def run_backend(backend):
+                def f():
+                    with sdpa_kernel(backend):
+                        return time_once(
+                            lambda: F.scaled_dot_product_attention(Q, K, V, is_causal=causal),
+                            warmup, iters)
+                return f
 
-            t_ours, t_sdpa, gaps = [], [], []
+            runners = {
+                "ours": run_ours,
+                "flash": run_backend(SDPBackend.FLASH_ATTENTION),
+                "cudnn": run_backend(SDPBackend.CUDNN_ATTENTION),
+            }
+            names = list(runners)
+            t = {k: [] for k in names}
+            gaps = {"flash": [], "cudnn": []}
             for r in range(REPS):
-                if r % 2 == 0:
-                    o = run_ours(); s = run_sdpa()
-                else:
-                    s = run_sdpa(); o = run_ours()
-                t_ours.append(o)
-                t_sdpa.append(s)
-                gaps.append((o / s - 1.0) * 100.0)
+                order = names[r % len(names):] + names[:r % len(names)]
+                rep = {k: runners[k]() for k in order}
+                for k in names:
+                    t[k].append(rep[k])
+                for k in gaps:
+                    gaps[k].append((rep["ours"] / rep[k] - 1.0) * 100.0)
 
             # a causal block computes about half the score matrix
             flops = 4 * N * N * D * H * (0.5 if causal else 1.0)
-            tf_o = flops / (med(t_ours) * 1e-3) / 1e12
-            tf_s = flops / (med(t_sdpa) * 1e-3) / 1e12
-            print(f"N={N:>5}: Custom {med(t_ours):.4f}ms ({tf_o:4.1f} TFLOPS)  "
-                  f"SDPA {med(t_sdpa):.4f}ms ({tf_s:4.1f} TFLOPS)  "
-                  f"| paired median gap {med(gaps):+.2f}%  "
-                  f"(per-rep: {', '.join(f'{g:+.1f}' for g in gaps)})")
+            tf = {k: flops / (med(v) * 1e-3) / 1e12 for k, v in t.items()}
+            print(f"N={N:>5}: ours {med(t['ours']):.4f}ms ({tf['ours']:4.1f} TF)  "
+                  f"flash {med(t['flash']):.4f}ms ({tf['flash']:4.1f} TF)  "
+                  f"cudnn {med(t['cudnn']):.4f}ms ({tf['cudnn']:4.1f} TF)")
+            print(f"        paired gap vs flash {med(gaps['flash']):+.2f}%  "
+                  f"vs cudnn {med(gaps['cudnn']):+.2f}%  (positive = ours slower)")
             del Q, K, V
             torch.cuda.empty_cache()
 
