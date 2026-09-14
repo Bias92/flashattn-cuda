@@ -1,8 +1,10 @@
 """
-Paired benchmark: Custom CUDA forward()+L vs PyTorch Flash, 10 reps.
+Paired benchmark: Custom CUDA forward()+L vs PyTorch SDPA (FlashAttention-2 backend).
 
-After clock warmup, both implementations run back-to-back with alternating
-order. The result is the median of 10 per-rep latency gaps. Custom CUDA returns O and L.
+Both implementations run back-to-back with alternating order after a clock
+warmup; the reported gap is the median of 10 per-rep latency gaps. Dense and
+causal masking are measured separately, and the PyTorch side is given the
+matching is_causal flag.
 """
 from pathlib import Path
 
@@ -44,8 +46,8 @@ def main():
     B, H, D = 1, 8, 64
     torch.manual_seed(42)
     print("=" * 100)
-    print(f"Custom CUDA (+L) vs PyTorch Flash — {REPS} paired reps, "
-          f"B={B} H={H} D={D} FP16 non-causal")
+    print(f"Custom CUDA (+L) vs PyTorch SDPA (FlashAttention-2 backend) — "
+          f"{REPS} paired reps, B={B} H={H} D={D} FP16")
     print(f"GPU: {torch.cuda.get_device_name(0)}  torch {torch.__version__}")
     print("=" * 100)
 
@@ -53,35 +55,47 @@ def main():
     for _ in range(100):
         mod.forward_only(Qb, Qb, Qb)
     torch.cuda.synchronize()
+    del Qb
 
-    for N in [1024, 2048, 4096]:
-        Q = torch.randn(B, H, N, D, device="cuda", dtype=torch.float16)
-        K = torch.randn(B, H, N, D, device="cuda", dtype=torch.float16)
-        V = torch.randn(B, H, N, D, device="cuda", dtype=torch.float16)
-        warmup = 30
-        iters = 200 if N <= 1024 else (100 if N <= 2048 else 50)
+    for causal in (False, True):
+        print(f"--- causal={causal} "
+              f"({'lower-triangular mask' if causal else 'dense'}) ---")
+        for N in [1024, 2048, 4096]:
+            Q = torch.randn(B, H, N, D, device="cuda", dtype=torch.float16)
+            K = torch.randn(B, H, N, D, device="cuda", dtype=torch.float16)
+            V = torch.randn(B, H, N, D, device="cuda", dtype=torch.float16)
+            warmup = 30
+            iters = 200 if N <= 1024 else (100 if N <= 2048 else 50)
 
-        def run_ours():
-            return time_once(lambda: mod.forward(Q, K, V), warmup, iters)
+            def run_ours():
+                return time_once(lambda: mod.forward(Q, K, V, causal), warmup, iters)
 
-        def run_sdpa():
-            with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
-                return time_once(
-                    lambda: F.scaled_dot_product_attention(Q, K, V), warmup, iters)
+            def run_sdpa():
+                with sdpa_kernel(SDPBackend.FLASH_ATTENTION):
+                    return time_once(
+                        lambda: F.scaled_dot_product_attention(Q, K, V, is_causal=causal),
+                        warmup, iters)
 
-        t_ours, t_sdpa, gaps = [], [], []
-        for r in range(REPS):
-            if r % 2 == 0:
-                o = run_ours(); s = run_sdpa()
-            else:
-                s = run_sdpa(); o = run_ours()
-            t_ours.append(o)
-            t_sdpa.append(s)
-            gaps.append((o / s - 1.0) * 100.0)
+            t_ours, t_sdpa, gaps = [], [], []
+            for r in range(REPS):
+                if r % 2 == 0:
+                    o = run_ours(); s = run_sdpa()
+                else:
+                    s = run_sdpa(); o = run_ours()
+                t_ours.append(o)
+                t_sdpa.append(s)
+                gaps.append((o / s - 1.0) * 100.0)
 
-        print(f"N={N:>5}: Custom CUDA {med(t_ours):.4f}ms  PyTorch Flash {med(t_sdpa):.4f}ms  "
-              f"| paired median gap {med(gaps):+.2f}%  "
-              f"(per-rep: {', '.join(f'{g:+.1f}' for g in gaps)})")
+            # a causal block computes about half the score matrix
+            flops = 4 * N * N * D * H * (0.5 if causal else 1.0)
+            tf_o = flops / (med(t_ours) * 1e-3) / 1e12
+            tf_s = flops / (med(t_sdpa) * 1e-3) / 1e12
+            print(f"N={N:>5}: Custom {med(t_ours):.4f}ms ({tf_o:4.1f} TFLOPS)  "
+                  f"SDPA {med(t_sdpa):.4f}ms ({tf_s:4.1f} TFLOPS)  "
+                  f"| paired median gap {med(gaps):+.2f}%  "
+                  f"(per-rep: {', '.join(f'{g:+.1f}' for g in gaps)})")
+            del Q, K, V
+            torch.cuda.empty_cache()
 
     print("=" * 100)
 

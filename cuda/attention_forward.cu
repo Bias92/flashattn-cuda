@@ -261,6 +261,28 @@ __device__ __forceinline__ void apply_mask(float (&acc_s)[NT][4], int kv, int N,
 }
 
 // ============================================================
+// Step 4b: causal mask -- drop keys that come after the query
+//
+// row_lo is the first of the two rows this lane owns, row_hi = row_lo + 8.
+// A tile only reaches here when some of its columns can exceed a row of this
+// warp. Tiles fully below the diagonal skip the call, and tiles fully above it
+// are never issued because the main loop stops at the diagonal.
+// ============================================================
+template <int NT>
+__device__ __forceinline__ void apply_causal_mask(float (&acc_s)[NT][4], int kv, int row_lo, int lane)
+{
+    const int row_hi = row_lo + 8;
+    #pragma unroll
+    for (int t = 0; t < NT; t++) {
+        const int col0 = kv + t * 8 + 2 * (lane % 4);
+        if (col0     > row_lo) acc_s[t][0] = -INFINITY;
+        if (col0 + 1 > row_lo) acc_s[t][1] = -INFINITY;
+        if (col0     > row_hi) acc_s[t][2] = -INFINITY;
+        if (col0 + 1 > row_hi) acc_s[t][3] = -INFINITY;
+    }
+}
+
+// ============================================================
 // Step 5: online softmax (FlashAttention-2 form, names as in FA2 softmax.h)
 //
 // Running statistics per row, in the log2 domain:
@@ -414,7 +436,7 @@ __device__ __forceinline__ void epilogue(
 // ============================================================
 // Forward kernel
 // ============================================================
-template <int D, bool WRITE_L, bool FULL_TILES>
+template <int D, bool WRITE_L, bool FULL_TILES, bool CAUSAL>
 __global__ void __launch_bounds__(NWARPS * 32)
 attention_fwd_kernel(
     const half* __restrict__ Q,
@@ -431,6 +453,7 @@ attention_fwd_kernel(
     const int lane = tid % 32;
     const int bh = blockIdx.y;
     const int q_block = blockIdx.x * BR;
+    const int warp_row0 = q_block + warp * 16;   // first Q row this warp owns
 
     const half* Q_bh = Q + (size_t)bh * N * D;
     const half* K_bh = K + (size_t)bh * N * D;
@@ -469,7 +492,9 @@ attention_fwd_kernel(
     const float softmax_scale_log2 = rsqrtf((float)D) * LOG2Ef;
 
     // ---- Main loop over K/V blocks ----
-    const int nblocks = (N + BC - 1) / BC;
+    // Causal blocks stop at the diagonal: no key past the last query row of the block.
+    const int kv_end  = CAUSAL ? ((q_block + BR < N) ? q_block + BR : N) : N;
+    const int nblocks = (kv_end + BC - 1) / BC;
     for (int i = 0; i < nblocks; i++) {
         const int kv = i * BC;
         const bool has_next = (i + 1) < nblocks;
@@ -488,6 +513,9 @@ attention_fwd_kernel(
         if constexpr (!FULL_TILES) {
             if (kv + BC > N) apply_mask(acc_s, kv, N, lane);
         }
+        if constexpr (CAUSAL) {
+            if (kv + BC > warp_row0) apply_causal_mask(acc_s, kv, warp_row0 + lane / 4, lane);
+        }
         softmax_rescale_o(acc_s, acc_o, softmax);   // acc_s becomes P, acc_o *= scores_scale
         accumulate_pv<D>(acc_o, acc_s, cur_base + pv_lane_base);
         __syncthreads();                            // everyone done reading this stage
@@ -502,7 +530,7 @@ attention_fwd_kernel(
 // Host launchers
 // ============================================================
 static std::pair<torch::Tensor, torch::Tensor> attention_forward_impl(
-    torch::Tensor Q, torch::Tensor K, torch::Tensor V, bool want_L)
+    torch::Tensor Q, torch::Tensor K, torch::Tensor V, bool want_L, bool causal)
 {
     TORCH_CHECK(Q.is_cuda() && K.is_cuda() && V.is_cuda(), "Q/K/V must be CUDA tensors");
     TORCH_CHECK(Q.dim() == 4, "Q must be 4D [B, H, N, D]");
@@ -545,11 +573,21 @@ static std::pair<torch::Tensor, torch::Tensor> attention_forward_impl(
     };
     const bool full_tiles = (N % BR == 0) && (N % BC == 0);
     if (want_L) {
-        if (full_tiles) launch(attention_fwd_kernel<HD, true, true>);
-        else            launch(attention_fwd_kernel<HD, true, false>);
+        if (causal) {
+            if (full_tiles) launch(attention_fwd_kernel<HD, true, true, true>);
+            else            launch(attention_fwd_kernel<HD, true, false, true>);
+        } else {
+            if (full_tiles) launch(attention_fwd_kernel<HD, true, true, false>);
+            else            launch(attention_fwd_kernel<HD, true, false, false>);
+        }
     } else {
-        if (full_tiles) launch(attention_fwd_kernel<HD, false, true>);
-        else            launch(attention_fwd_kernel<HD, false, false>);
+        if (causal) {
+            if (full_tiles) launch(attention_fwd_kernel<HD, false, true, true>);
+            else            launch(attention_fwd_kernel<HD, false, false, true>);
+        } else {
+            if (full_tiles) launch(attention_fwd_kernel<HD, false, true, false>);
+            else            launch(attention_fwd_kernel<HD, false, false, false>);
+        }
     }
     C10_CUDA_KERNEL_LAUNCH_CHECK();
 
@@ -557,17 +595,23 @@ static std::pair<torch::Tensor, torch::Tensor> attention_forward_impl(
             want_L ? L.reshape({B, H, N}) : torch::Tensor()};
 }
 
-std::vector<torch::Tensor> attention_forward(torch::Tensor Q, torch::Tensor K, torch::Tensor V) {
-    auto [O, L] = attention_forward_impl(Q, K, V, /*want_L=*/true);
+std::vector<torch::Tensor> attention_forward(torch::Tensor Q, torch::Tensor K, torch::Tensor V,
+                                             bool causal) {
+    auto [O, L] = attention_forward_impl(Q, K, V, /*want_L=*/true, causal);
     return {O, L};
 }
 
-torch::Tensor attention_forward_only(torch::Tensor Q, torch::Tensor K, torch::Tensor V) {
-    auto [O, L] = attention_forward_impl(Q, K, V, /*want_L=*/false);
+torch::Tensor attention_forward_only(torch::Tensor Q, torch::Tensor K, torch::Tensor V,
+                                     bool causal) {
+    auto [O, L] = attention_forward_impl(Q, K, V, /*want_L=*/false, causal);
     return O;
 }
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
-    m.def("forward", &attention_forward, "Custom CUDA forward: returns O half, L float");
-    m.def("forward_only", &attention_forward_only, "Custom CUDA forward, true O-only");
+    m.def("forward", &attention_forward, "Custom CUDA forward: returns O half, L float",
+          pybind11::arg("Q"), pybind11::arg("K"), pybind11::arg("V"),
+          pybind11::arg("causal") = false);
+    m.def("forward_only", &attention_forward_only, "Custom CUDA forward, true O-only",
+          pybind11::arg("Q"), pybind11::arg("K"), pybind11::arg("V"),
+          pybind11::arg("causal") = false);
 }
