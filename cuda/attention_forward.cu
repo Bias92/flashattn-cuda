@@ -11,6 +11,8 @@
 //
 // Two-stage K/V copies with precomputed shared-memory addresses.
 // FULL_TILES removes load, mask, and store guards when N is divisible by BR and BC.
+// CAUSAL stops the K/V loop at the diagonal. GQA lets several query heads share
+// one key/value head; with equal head counts that path compiles out.
 // ============================================================
 #include <torch/extension.h>
 #include <ATen/cuda/CUDAContext.h>
@@ -436,7 +438,7 @@ __device__ __forceinline__ void epilogue(
 // ============================================================
 // Forward kernel
 // ============================================================
-template <int D, bool WRITE_L, bool FULL_TILES, bool CAUSAL>
+template <int D, bool WRITE_L, bool FULL_TILES, bool CAUSAL, bool GQA>
 __global__ void __launch_bounds__(NWARPS * 32)
 attention_fwd_kernel(
     const half* __restrict__ Q,
@@ -444,7 +446,9 @@ attention_fwd_kernel(
     const half* __restrict__ V,
     half* __restrict__ O,
     float* __restrict__ L,    // may be nullptr when WRITE_L == false
-    int N)
+    int N,
+    int H_q,                  // query heads; only read when GQA
+    int H_kv)                 // key/value heads; only read when GQA
 {
     using T = Tile<D>;
 
@@ -455,9 +459,16 @@ attention_fwd_kernel(
     const int q_block = blockIdx.x * BR;
     const int warp_row0 = q_block + warp * 16;   // first Q row this warp owns
 
+    // bh indexes (batch, query head). Under GQA several query heads share one
+    // key/value head, so K and V are addressed through the grouped index.
+    int bh_kv = bh;
+    if constexpr (GQA) {
+        bh_kv = (bh / H_q) * H_kv + (bh % H_q) / (H_q / H_kv);
+    }
+
     const half* Q_bh = Q + (size_t)bh * N * D;
-    const half* K_bh = K + (size_t)bh * N * D;
-    const half* V_bh = V + (size_t)bh * N * D;
+    const half* K_bh = K + (size_t)bh_kv * N * D;
+    const half* V_bh = V + (size_t)bh_kv * N * D;
     half* O_bh = O + (size_t)bh * N * D;
     // L is only dereferenced inside the epilogue when WRITE_L.
 
@@ -538,17 +549,24 @@ static std::pair<torch::Tensor, torch::Tensor> attention_forward_impl(
     int B = Q.size(0), H = Q.size(1), N = Q.size(2), D = Q.size(3);
     TORCH_CHECK(D == HD, "Head dimension must be ", HD);
     TORCH_CHECK(N > 0, "N must be > 0");
-    TORCH_CHECK(K.sizes() == Q.sizes() && V.sizes() == Q.sizes(),
-                "K and V must have the same shape as Q (self-attention only)");
+    TORCH_CHECK(K.dim() == 4 && V.dim() == 4, "K and V must be 4D [B, H_kv, N, D]");
+    TORCH_CHECK(K.sizes() == V.sizes(), "K and V must have the same shape");
+    int H_kv = K.size(1);
+    TORCH_CHECK(K.size(0) == B && K.size(2) == N && K.size(3) == D,
+                "K and V must match Q in batch, sequence length and head dimension");
+    TORCH_CHECK(H_kv > 0 && H % H_kv == 0,
+                "Query heads (", H, ") must be a multiple of key/value heads (", H_kv, ")");
     TORCH_CHECK(K.device() == Q.device() && V.device() == Q.device(),
                 "Q/K/V must be on the same device");
+    const bool gqa = (H_kv != H);
     int64_t BH = (int64_t)B * H;
+    int64_t BH_kv = (int64_t)B * H_kv;
     TORCH_CHECK(BH <= 65535, "B*H must be <= 65535 (gridDim.y limit)");
 
     const at::cuda::CUDAGuard guard(Q.device());
     auto Q_h = Q.to(torch::kHalf).reshape({BH, N, D}).contiguous();
-    auto K_h = K.to(torch::kHalf).reshape({BH, N, D}).contiguous();
-    auto V_h = V.to(torch::kHalf).reshape({BH, N, D}).contiguous();
+    auto K_h = K.to(torch::kHalf).reshape({BH_kv, N, D}).contiguous();
+    auto V_h = V.to(torch::kHalf).reshape({BH_kv, N, D}).contiguous();
 
     auto O_h = torch::empty({BH, N, D}, Q_h.options());
     torch::Tensor L;
@@ -569,26 +587,31 @@ static std::pair<torch::Tensor, torch::Tensor> attention_forward_impl(
             reinterpret_cast<const half*>(V_h.data_ptr<at::Half>()),
             reinterpret_cast<half*>(O_h.data_ptr<at::Half>()),
             L_ptr,
-            N);
+            N, H, H_kv);
     };
     const bool full_tiles = (N % BR == 0) && (N % BC == 0);
+    #define LAUNCH_FWD(WL, FT, CA, GQ) launch(attention_fwd_kernel<HD, WL, FT, CA, GQ>)
+    #define DISPATCH_GQA(WL, FT, CA) \
+        do { if (gqa) LAUNCH_FWD(WL, FT, CA, true); else LAUNCH_FWD(WL, FT, CA, false); } while (0)
     if (want_L) {
         if (causal) {
-            if (full_tiles) launch(attention_fwd_kernel<HD, true, true, true>);
-            else            launch(attention_fwd_kernel<HD, true, false, true>);
+            if (full_tiles) DISPATCH_GQA(true, true, true);
+            else            DISPATCH_GQA(true, false, true);
         } else {
-            if (full_tiles) launch(attention_fwd_kernel<HD, true, true, false>);
-            else            launch(attention_fwd_kernel<HD, true, false, false>);
+            if (full_tiles) DISPATCH_GQA(true, true, false);
+            else            DISPATCH_GQA(true, false, false);
         }
     } else {
         if (causal) {
-            if (full_tiles) launch(attention_fwd_kernel<HD, false, true, true>);
-            else            launch(attention_fwd_kernel<HD, false, false, true>);
+            if (full_tiles) DISPATCH_GQA(false, true, true);
+            else            DISPATCH_GQA(false, false, true);
         } else {
-            if (full_tiles) launch(attention_fwd_kernel<HD, false, true, false>);
-            else            launch(attention_fwd_kernel<HD, false, false, false>);
+            if (full_tiles) DISPATCH_GQA(false, true, false);
+            else            DISPATCH_GQA(false, false, false);
         }
     }
+    #undef DISPATCH_GQA
+    #undef LAUNCH_FWD
     C10_CUDA_KERNEL_LAUNCH_CHECK();
 
     return {O_h.reshape({B, H, N, D}),
