@@ -1,8 +1,8 @@
 # flashattn-cuda
 
 A FlashAttention-2 forward kernel written from scratch in CUDA without CUTLASS, for the RTX 4060 Ti.
-It takes fp16 inputs, accumulates in fp32, supports head dim 64, dense or causal masking, and
-grouped-query attention.
+It takes fp16 inputs, accumulates in fp32, supports head dim 64 or 128, dense or causal masking,
+and grouped-query attention.
 
 Query and key lengths are equal (N_q = N_kv). There is no KV cache and no single-query decode path,
 so this is the training and prefill shape, not decode.
@@ -67,7 +67,14 @@ MiB above the Q/K/V inputs. HF eager = Transformers `eager_attention_forward`, u
 QK and PV on `mma.sync`, softmax and O kept in registers, K/V double-buffered with `cp.async`.
 Causal blocks stop at the diagonal and mask only the block that crosses it. Under grouped-query
 attention several query heads read one key/value head; with equal head counts that path compiles out.
-Not implemented: dropout, varlen, backward, head dim other than 64.
+Shared memory is dynamic, so tiles above the 48 KB static limit are possible.
+`ATTN_BR`, `ATTN_BC` and `ATTN_DOUBLE_BUFFER` are build-time knobs; the defaults are what the
+numbers above were measured with.
+Not implemented: dropout, varlen, backward, head dim other than 64 or 128.
+
+At head dim 128 the kernel is correct but slower than both SDPA backends, by 1.5% on dense at
+N=2048 and about 14% on causal at N=2048. A sweep of BR, BC and single versus double buffering
+did not close that; see [the record](bench/results/headdim128_2026-09-14_rtx4060ti.md).
 
 ## Files
 
