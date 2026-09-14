@@ -8,16 +8,20 @@ and attention is non-causal, so this is the bidirectional full-attention shape r
 
 ## Latency vs PyTorch SDPA (FlashAttention-2 backend)
 
-B=1, H=8, D=64, fp16. 10 paired runs, median. Positive gap = custom slower.
+B=1, H=8, D=64, fp16. Each benchmark run is 10 paired reps with alternating order;
+the table is the median of three such runs. Positive gap = custom slower.
 
 | N | Custom ms | Custom TFLOPS | SDPA ms | SDPA TFLOPS | gap |
 |---:|---:|---:|---:|---:|---:|
-| 1024 | 0.0618 | 34.7 | 0.0572 | 37.5 | +6.75% |
-| 2048 | 0.2194 | 39.2 | 0.2183 | 39.3 | +1.24% |
-| 4096 | 0.8544 | 40.2 | 0.8413 | 40.8 | +1.37% |
+| 1024 | 0.0642 | 33.4 | 0.0624 | 34.4 | +2.98% |
+| 2048 | 0.2142 | 40.1 | 0.2139 | 40.2 | +0.76% |
+| 4096 | 0.8383 | 41.0 | 0.8302 | 41.4 | +0.90% |
+
+At N=1024 the per-rep gap ranges from -15% to +15% across reps, so that row is dominated by
+launch and dispatch noise rather than kernel time.
 
 FLOPs counted as 4·N²·D·H. For fp16 multiply with fp32 accumulate this GPU peaks at
-34 SM × 512 FLOP/clk × 3.12 GHz = 54.3 TFLOPS, and the sustained clock under load is lower than 3.12 GHz.
+34 SM × 512 FLOP/clk × 3.12 GHz = 54.3 TFLOPS, and the sustained clock under load is lower.
 
 ## Peak memory
 
