@@ -1,0 +1,49 @@
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7f1f7969ba60>, trust_remote_code=False, seed=42, num_prompts=64, dataset_name='random', no_stream=False, dataset_path=None, no_oversample=False, skip_chat_template=False, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, spec_bench_output_len=256, spec_bench_category=None, sonnet_input_len=550, sonnet_output_len=150, sonnet_prefix_len=200, sharegpt_output_len=None, blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=32640, random_output_len=128, random_range_ratio=0.0, random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, label=None, backend='openai', base_url=None, host='127.0.0.1', port=36911, endpoint='/v1/completions', header=None, max_concurrency=1, model='Qwen/Qwen2.5-0.5B-Instruct', input_len=None, output_len=None, tokenizer='/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775', tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, disable_tqdm=False, num_warmups=0, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/mnt/c/Users/PC/flashattn-cuda-main/docs/serving/prefill_campaign_2026-09-20/serving/eager/sessions/long_context_FLASH_ATTN_r0_a0/n32640_c1', result_filename='client.json', ignore_eos=True, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,95,99', goodput=None, request_id_prefix='bench-ffc8011e-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, extra_body=None, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds=[25.0, 50.0], plot_dataset_stats=False)
+INFO 09-20 16:28:07 [datasets.py:700] Sampling input_len from [32640, 32640] and output_len from [128, 128]
+Starting initial single prompt test run...
+Skipping endpoint ready check.
+Starting main benchmark run...
+Traffic request rate: inf
+Burstiness factor: 1.0 (Poisson process)
+Maximum request concurrency: 1
+  0%|          | 0/64 [00:00<?, ?it/s]  2%|▏         | 1/64 [00:04<04:34,  4.36s/it]  3%|▎         | 2/64 [00:08<04:26,  4.30s/it]  5%|▍         | 3/64 [00:12<04:13,  4.16s/it]  6%|▋         | 4/64 [00:16<04:07,  4.13s/it]  8%|▊         | 5/64 [00:20<03:55,  4.00s/it]  9%|▉         | 6/64 [00:24<03:49,  3.96s/it] 11%|█         | 7/64 [00:28<03:42,  3.90s/it] 12%|█▎        | 8/64 [00:31<03:35,  3.84s/it] 14%|█▍        | 9/64 [00:35<03:28,  3.79s/it] 16%|█▌        | 10/64 [00:39<03:25,  3.80s/it] 17%|█▋        | 11/64 [00:43<03:22,  3.81s/it] 19%|█▉        | 12/64 [00:46<03:15,  3.76s/it] 20%|██        | 13/64 [00:50<03:15,  3.83s/it] 22%|██▏       | 14/64 [00:54<03:12,  3.85s/it] 23%|██▎       | 15/64 [00:58<03:11,  3.90s/it] 25%|██▌       | 16/64 [01:02<03:08,  3.92s/it] 27%|██▋       | 17/64 [01:06<03:03,  3.90s/it] 28%|██▊       | 18/64 [01:10<02:55,  3.82s/it] 30%|██▉       | 19/64 [01:14<02:56,  3.92s/it] 31%|███▏      | 20/64 [01:17<02:48,  3.84s/it] 33%|███▎      | 21/64 [01:21<02:47,  3.89s/it] 34%|███▍      | 22/64 [01:26<02:46,  3.96s/it] 36%|███▌      | 23/64 [01:30<02:41,  3.95s/it] 38%|███▊      | 24/64 [01:33<02:36,  3.90s/it] 39%|███▉      | 25/64 [01:37<02:32,  3.91s/it] 41%|████      | 26/64 [01:41<02:32,  4.02s/it] 42%|████▏     | 27/64 [01:45<02:26,  3.96s/it] 44%|████▍     | 28/64 [01:49<02:22,  3.97s/it] 45%|████▌     | 29/64 [01:53<02:17,  3.92s/it] 47%|████▋     | 30/64 [01:57<02:13,  3.92s/it] 48%|████▊     | 31/64 [02:01<02:13,  4.04s/it] 50%|█████     | 32/64 [02:05<02:09,  4.05s/it] 52%|█████▏    | 33/64 [02:09<02:04,  4.02s/it] 53%|█████▎    | 34/64 [02:13<01:58,  3.95s/it] 55%|█████▍    | 35/64 [02:17<01:52,  3.89s/it] 56%|█████▋    | 36/64 [02:21<01:48,  3.86s/it] 58%|█████▊    | 37/64 [02:24<01:43,  3.83s/it] 59%|█████▉    | 38/64 [02:29<01:41,  3.90s/it] 61%|██████    | 39/64 [02:33<01:38,  3.93s/it] 62%|██████▎   | 40/64 [02:36<01:33,  3.90s/it] 64%|██████▍   | 41/64 [02:40<01:29,  3.89s/it] 66%|██████▌   | 42/64 [02:44<01:25,  3.89s/it] 67%|██████▋   | 43/64 [02:48<01:22,  3.94s/it] 69%|██████▉   | 44/64 [02:52<01:19,  3.95s/it] 70%|███████   | 45/64 [02:56<01:14,  3.93s/it] 72%|███████▏  | 46/64 [03:00<01:11,  3.95s/it] 73%|███████▎  | 47/64 [03:04<01:06,  3.91s/it] 75%|███████▌  | 48/64 [03:08<01:01,  3.84s/it] 77%|███████▋  | 49/64 [03:11<00:56,  3.78s/it] 78%|███████▊  | 50/64 [03:15<00:55,  3.93s/it] 80%|███████▉  | 51/64 [03:19<00:51,  3.95s/it] 81%|████████▏ | 52/64 [03:23<00:47,  3.98s/it] 83%|████████▎ | 53/64 [03:27<00:43,  3.92s/it] 84%|████████▍ | 54/64 [03:31<00:38,  3.87s/it] 86%|████████▌ | 55/64 [03:35<00:34,  3.83s/it] 88%|████████▊ | 56/64 [03:39<00:30,  3.85s/it] 89%|████████▉ | 57/64 [03:43<00:27,  3.94s/it] 91%|█████████ | 58/64 [03:47<00:24,  4.04s/it] 92%|█████████▏| 59/64 [03:51<00:20,  4.07s/it] 94%|█████████▍| 60/64 [03:55<00:16,  4.04s/it] 95%|█████████▌| 61/64 [03:59<00:12,  4.05s/it] 97%|█████████▋| 62/64 [04:03<00:07,  3.99s/it] 98%|█████████▊| 63/64 [04:07<00:04,  4.06s/it]100%|██████████| 64/64 [04:11<00:00,  3.96s/it]100%|██████████| 64/64 [04:11<00:00,  3.93s/it]
+tip: install termplotlib and gnuplot to plot the metrics
+============ Serving Benchmark Result ============
+Successful requests:                     64        
+Failed requests:                         0         
+Maximum request concurrency:             1         
+Benchmark duration (s):                  251.57    
+Total input tokens:                      2088960   
+Total generated tokens:                  8192      
+Request throughput (req/s):              0.25      
+Output token throughput (tok/s):         32.56     
+Peak output token throughput (tok/s):    79.00     
+Peak concurrent requests:                2.00      
+Total token throughput (tok/s):          8336.40   
+---------------Time to First Token----------------
+Mean TTFT (ms):                          2067.96   
+Median TTFT (ms):                        2063.09   
+P50 TTFT (ms):                           2063.09   
+P95 TTFT (ms):                           2084.47   
+P99 TTFT (ms):                           2192.99   
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          14.66     
+Median TPOT (ms):                        14.57     
+P50 TPOT (ms):                           14.57     
+P95 TPOT (ms):                           17.46     
+P99 TPOT (ms):                           17.65     
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           14.86     
+Median ITL (ms):                         14.91     
+P50 ITL (ms):                            14.91     
+P95 ITL (ms):                            24.37     
+P99 ITL (ms):                            25.43     
+----------------End-to-end Latency----------------
+Mean E2EL (ms):                          3930.31   
+Median E2EL (ms):                        3909.92   
+P50 E2EL (ms):                           3909.92   
+P95 E2EL (ms):                           4273.28   
+P99 E2EL (ms):                           4342.78   
+==================================================

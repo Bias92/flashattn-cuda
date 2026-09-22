@@ -13,6 +13,13 @@
 // FULL_TILES removes load, mask, and store guards when N is divisible by BR and BC.
 // CAUSAL stops the K/V loop at the diagonal. GQA lets several query heads share
 // one key/value head; with equal head counts that path compiles out.
+// Q, K, V and O are addressed through their strides. The last dimension has to be contiguous
+// and rows have to start on a 4-byte (Q, O) or 16-byte (K, V) boundary, so a token-major
+// [N, H, D] buffer is used in place as a transposed view. Inputs that do not qualify are
+// copied on the host; an `out` that does not is rejected.
+// The query may be shorter than the keys (N_q <= N_kv): a causal mask is then aligned to the
+// bottom right, the way a chunk of a longer sequence needs it. K and V come either from
+// ordinary tensors (DenseKV) or straight out of a vLLM-style paged cache (PagedKV).
 // ============================================================
 #include <torch/extension.h>
 #include <ATen/cuda/CUDAContext.h>
@@ -20,7 +27,13 @@
 #include <c10/cuda/CUDAGuard.h>
 #include <cuda_runtime.h>
 #include <cuda_fp16.h>
+#include <algorithm>
+#include <cmath>
 #include <cstdint>
+#include <initializer_list>
+#include <optional>
+#include <utility>
+#include <vector>
 
 #ifndef ATTN_BR
 #define ATTN_BR 64
@@ -43,6 +56,69 @@ constexpr int NWARPS = BR / 16; // one warp per 16 Q rows
 
 #define LN2f 0.69314718056f
 #define LOG2Ef 1.44269504089f
+
+// Element strides of a [B, H, N, D] tensor whose last dimension is contiguous.
+struct Strides {
+    int64_t b, h, n;
+};
+
+// ------------------------------------------------------------
+// Where K and V rows live. A source hands out a Head, the rows of one (batch, K/V head),
+// and a Head turns a row index into the two row pointers.
+//
+// A source crosses the kernel launch as its members, one argument each in declaration
+// order, and the kernel puts it together again. Handed over as one struct it costs the
+// dense path with L about 3% (measured, with and without __restrict__ on the members).
+// ------------------------------------------------------------
+
+// Ordinary [B, H_kv, N_kv, D] tensors: row r sits at base + r * row stride.
+struct DenseKV {
+    const half* K;
+    const half* V;
+    Strides sK, sV;
+
+    struct Head {
+        static constexpr bool LINEAR = true;   // the address is linear in the row index
+        const half* K;
+        const half* V;
+        int64_t k_row, v_row;
+        __device__ __forceinline__ void rows(int row, const half*& k, const half*& v) const {
+            k = K + row * k_row;
+            v = V + row * v_row;
+        }
+    };
+    __device__ __forceinline__ Head head(int b, int h_kv) const {
+        return {K + b * sK.b + h_kv * sK.h, V + b * sV.b + h_kv * sV.h, sK.n, sV.n};
+    }
+};
+
+// A vLLM-style paged cache, K and V each [pages, page_size, H_kv, D] with the same strides:
+// row r is slot r & (page_size - 1) of page table[r >> page_shift]. One sequence per launch.
+struct PagedKV {
+    const half* K;
+    const half* V;
+    const int32_t* table;       // page ids of this sequence, in order
+    int page_shift;             // log2(page_size)
+    int64_t page, slot, hd;     // element strides of the cache: page, slot in page, head
+
+    struct Head {
+        static constexpr bool LINEAR = false;
+        const half* K;
+        const half* V;
+        const int32_t* table;
+        int page_shift;
+        int64_t page, slot;
+        __device__ __forceinline__ void rows(int row, const half*& k, const half*& v) const {
+            const int64_t at = table[row >> page_shift] * page
+                             + (row & ((1 << page_shift) - 1)) * slot;
+            k = K + at;
+            v = V + at;
+        }
+    };
+    __device__ __forceinline__ Head head(int /*b*/, int h_kv) const {
+        return {K + h_kv * hd, V + h_kv * hd, table, page_shift, page, slot};
+    }
+};
 
 // ------------------------------------------------------------
 // Compile-time tile geometry
@@ -153,60 +229,63 @@ __device__ __forceinline__ float quad_allreduce_sum(float v) {
 // ============================================================
 // Step 1: K/V block staging (global -> smem via cp.async)
 //
-// One stage holds a BC-row K block followed by a BC-row V block.
-// Each thread copies two 16-byte chunks of K and two of V per block;
-// the smem offsets depend only on tid, so they are computed once.
+// One stage holds a BC-row K block followed by a BC-row V block. A thread owns one
+// 16-byte column chunk in every ROWSTEP-th row of the block, the same rows in K and V.
+// The smem offsets depend only on tid, so they are computed once.
 // ============================================================
-template <int D, bool FULL_TILES>
+template <int D, bool FULL_TILES, typename KVHead>
 struct KVStager {
     using T = Tile<D>;
     static constexpr int THREADS   = NWARPS * 32;
     static constexpr int COLCHUNKS = D / 8;                 // 16-byte chunks per row
-    static constexpr int CHUNKS    = 2 * BC * COLCHUNKS;    // K block then V block
-    static constexpr int PER_THREAD = CHUNKS / THREADS;
-    // The fixed-offset form below needs each thread to own one column chunk in
-    // two K rows and the same two V rows.
-    static constexpr bool FIXED = (COLCHUNKS * 2 * (BC / 16) == PER_THREAD * COLCHUNKS)
-                                  && (BC % 16 == 0) && (THREADS * 8 == BC * D / 2);
+    static constexpr int ROWSTEP   = THREADS / COLCHUNKS;   // rows between a thread's copies
+    static_assert(THREADS % COLCHUNKS == 0 && BC % ROWSTEP == 0,
+                  "the threads of a block must tile the chunks of a K/V block exactly");
 
-    const half* K_bh;
-    const half* V_bh;
-    int N;
+    KVHead src;
+    int N_kv;
     int r0, cc;
     uint32_t k0_off;
 
-    __device__ __forceinline__ KVStager(const half* K, const half* V, int N_, int tid)
-        : K_bh(K), V_bh(V), N(N_)
+    __device__ __forceinline__ KVStager(KVHead src_, int N_kv_, int tid) : src(src_), N_kv(N_kv_)
     {
         r0 = tid / COLCHUNKS;
         cc = (tid % COLCHUNKS) * 8;
         k0_off = (uint32_t)(r0 * T::LDS + cc) * sizeof(half);
     }
 
-    // One 16-byte copy of row `row` of `src` into the stage row `srow`.
-    __device__ __forceinline__ void copy_row(uint32_t sbase, uint32_t srow_off,
-                                             const half* src, int row) const {
-        if constexpr (FULL_TILES) {
-            cp_async_16(sbase + srow_off, src + (size_t)row * D + cc, 16);
-        } else {
-            const half* p = src + (size_t)(row < N ? row : 0) * D + cc;
-            cp_async_16(sbase + srow_off, p, (row < N) ? 16 : 0);
-        }
-    }
-
-    // Issue the copies for K/V rows [kv, kv + BC) into the stage at sbase.
-    // Each thread owns column chunk `cc` of rows r0, r0 + ROWSTEP, ... in both
-    // K and V, where ROWSTEP = THREADS / COLCHUNKS.
+    // Issue the copies for K/V rows [kv, kv + BC) into the stage at sbase: column chunk
+    // `cc` of rows kv + r0, kv + r0 + ROWSTEP, ...
     __device__ __forceinline__ void issue(uint32_t sbase, int kv) const {
-        constexpr int ROWSTEP = THREADS / COLCHUNKS;
         constexpr uint32_t ROWSTEP_OFF = (uint32_t)(ROWSTEP * T::LDS) * sizeof(half);
         constexpr uint32_t VBLOCK_OFF  = (uint32_t)(BC * T::LDS) * sizeof(half);
-        #pragma unroll
-        for (int i = 0; i < BC / ROWSTEP; i++) {
-            const uint32_t off = k0_off + (uint32_t)i * ROWSTEP_OFF;
-            const int row = kv + r0 + i * ROWSTEP;
-            copy_row(sbase, off, K_bh, row);
-            copy_row(sbase, off + VBLOCK_OFF, V_bh, row);
+        const int row0 = kv + r0;
+        if constexpr (FULL_TILES && KVHead::LINEAR) {
+            // Every row exists and addresses are linear: locate the first row with one
+            // multiply per tensor and step to the others. (Measured: this form with a pointer
+            // select for rows past N_kv costs 2-3% on causal inputs, so the guarded path
+            // below clamps the row index instead.)
+            const half* k = src.K + row0 * src.k_row + cc;
+            const half* v = src.V + row0 * src.v_row + cc;
+            #pragma unroll
+            for (int i = 0; i < BC / ROWSTEP; i++) {
+                const uint32_t saddr = sbase + k0_off + (uint32_t)i * ROWSTEP_OFF;
+                cp_async_16(saddr, k + (i * ROWSTEP) * src.k_row, 16);
+                cp_async_16(saddr + VBLOCK_OFF, v + (i * ROWSTEP) * src.v_row, 16);
+            }
+        } else {
+            // Past N_kv the row index is clamped to 0, a valid source, and nothing is copied.
+            #pragma unroll
+            for (int i = 0; i < BC / ROWSTEP; i++) {
+                const uint32_t saddr = sbase + k0_off + (uint32_t)i * ROWSTEP_OFF;
+                const int row = row0 + i * ROWSTEP;
+                const bool valid = FULL_TILES || row < N_kv;
+                const half* k;
+                const half* v;
+                src.rows(valid ? row : 0, k, v);
+                cp_async_16(saddr, k + cc, valid ? 16 : 0);
+                cp_async_16(saddr + VBLOCK_OFF, v + cc, valid ? 16 : 0);
+            }
         }
         cp_async_commit();
     }
@@ -217,7 +296,7 @@ struct KVStager {
 // ============================================================
 template <int D, bool FULL_TILES>
 __device__ __forceinline__ void stage_q_to_smem(
-    half* sQ_raw, const half* __restrict__ Q_bh, int q_block, int N, int tid)
+    half* sQ_raw, const half* __restrict__ Q_bh, int64_t q_row, int q_block, int N, int tid)
 {
     using T = Tile<D>;
     half (*sQ)[T::LDS] = reinterpret_cast<half(*)[T::LDS]>(sQ_raw);
@@ -228,11 +307,11 @@ __device__ __forceinline__ void stage_q_to_smem(
         if constexpr (FULL_TILES) {
             // N % BR == 0 guarantees every Q row in this block is valid.
             *reinterpret_cast<half2*>(&sQ[r][c]) =
-                *reinterpret_cast<const half2*>(&Q_bh[(size_t)(q_block + r) * D + c]);
+                *reinterpret_cast<const half2*>(&Q_bh[(q_block + r) * q_row + c]);
         } else {
             int gr = q_block + r;
             half2 val = (gr < N)
-                ? *reinterpret_cast<const half2*>(&Q_bh[(size_t)gr * D + c])
+                ? *reinterpret_cast<const half2*>(&Q_bh[gr * q_row + c])
                 : __float2half2_rn(0.0f);
             *reinterpret_cast<half2*>(&sQ[r][c]) = val;
         }
@@ -439,8 +518,8 @@ template <int D, bool WRITE_L, bool FULL_TILES>
 __device__ __forceinline__ void epilogue(
     const float (&acc_o)[Tile<D>::NTILES_O][4],
     const Softmax& softmax,
-    half* __restrict__ O_bh, float* __restrict__ L,
-    int bh, int N, int q_block, int warp, int lane)
+    half* __restrict__ O_bh, int64_t o_row, float* __restrict__ L_bh,
+    int N, int q_block, int warp, int lane)
 {
     using T = Tile<D>;
     const float inv_sum_lo = 1.0f / softmax.row_sum[0];
@@ -454,16 +533,15 @@ __device__ __forceinline__ void epilogue(
         int col = t * 8 + cbase;
         if (FULL_TILES || r_lo < N) {
             half2 v = __floats2half2_rn(acc_o[t][0] * inv_sum_lo, acc_o[t][1] * inv_sum_lo);
-            *reinterpret_cast<half2*>(&O_bh[(size_t)r_lo * D + col]) = v;
+            *reinterpret_cast<half2*>(&O_bh[r_lo * o_row + col]) = v;
         }
         if (FULL_TILES || r_hi < N) {
             half2 v = __floats2half2_rn(acc_o[t][2] * inv_sum_hi, acc_o[t][3] * inv_sum_hi);
-            *reinterpret_cast<half2*>(&O_bh[(size_t)r_hi * D + col]) = v;
+            *reinterpret_cast<half2*>(&O_bh[r_hi * o_row + col]) = v;
         }
     }
     if constexpr (WRITE_L) {
         if (lane % 4 == 0) {
-            float* L_bh = L + (size_t)bh * N;
             if (FULL_TILES || r_lo < N) L_bh[r_lo] = softmax.row_max[0] * LN2f + logf(softmax.row_sum[0]);
             if (FULL_TILES || r_hi < N) L_bh[r_hi] = softmax.row_max[1] * LN2f + logf(softmax.row_sum[1]);
         }
@@ -473,39 +551,71 @@ __device__ __forceinline__ void epilogue(
 // ============================================================
 // Forward kernel
 // ============================================================
-template <int D, bool WRITE_L, bool FULL_TILES, bool CAUSAL, bool GQA>
+enum class AddressLayout { Strided, ContiguousRows, ContiguousHeads };
+
+template <int D, AddressLayout LAYOUT, bool WRITE_L, bool CAUSAL, bool SQUARE, bool FULL_TILES, bool GQA,
+          typename KV, typename... KVFields>
 __global__ void __launch_bounds__(NWARPS * 32)
 attention_fwd_kernel(
     const half* __restrict__ Q,
-    const half* __restrict__ K,
-    const half* __restrict__ V,
     half* __restrict__ O,
-    float* __restrict__ L,    // may be nullptr when WRITE_L == false
-    int N,
-    int H_q,                  // query heads; only read when GQA
-    int H_kv)                 // key/value heads; only read when GQA
+    float* __restrict__ L,    // contiguous [B, H_q, N_q]; may be nullptr when WRITE_L == false
+    Strides sQ, Strides sO,
+    int N_q,
+    int N_kv_launch,          // keys per sequence, >= N_q under a causal mask, which is
+                              // aligned to the bottom right; not read when SQUARE
+    int H_q,                  // query heads; also used by contiguous GQA addressing
+    int kv_group,             // query heads per key/value head; only read when GQA
+    float softmax_scale,
+    KVFields... kv_fields)    // the members of KV (DenseKV or PagedKV)
 {
     using T = Tile<D>;
+    // A square launch (N_q == N_kv) carries one length: a second one kept alive through the
+    // block loop costs guarded causal inputs 3-5% at D=128 (measured).
+    const int N_kv = SQUARE ? N_q : N_kv_launch;
+    KV kv_source{kv_fields...};
+    constexpr bool FLAT_HEADS = LAYOUT == AddressLayout::ContiguousHeads;
+    if constexpr (LAYOUT != AddressLayout::Strided) {
+        sQ.n = sO.n = D;
+        kv_source.sK.n = kv_source.sV.n = D;
+    }
 
     const int tid  = threadIdx.x;
     const int warp = tid / 32;
     const int lane = tid % 32;
     const int bh = blockIdx.y;
+    const int b = FLAT_HEADS ? bh / H_q : blockIdx.z;
+    const int h = FLAT_HEADS ? bh % H_q : blockIdx.y;
     const int q_block = blockIdx.x * BR;
-    const int warp_row0 = q_block + warp * 16;   // first Q row this warp owns
+    // Key column that the first Q row of this warp may see last: its own index, shifted by
+    // the keys that precede the query (N_kv - N_q of them).
+    const int causal_row0 = q_block + warp * 16 + (N_kv - N_q);
 
-    // bh indexes (batch, query head). Under GQA several query heads share one
-    // key/value head, so K and V are addressed through the grouped index.
-    int bh_kv = bh;
+    // Under GQA several query heads share one key/value head.
+    int h_kv = h;
     if constexpr (GQA) {
-        bh_kv = (bh / H_q) * H_kv + (bh % H_q) / (H_q / H_kv);
+        h_kv = h / kv_group;
     }
 
-    const half* Q_bh = Q + (size_t)bh * N * D;
-    const half* K_bh = K + (size_t)bh_kv * N * D;
-    const half* V_bh = V + (size_t)bh_kv * N * D;
-    half* O_bh = O + (size_t)bh * N * D;
-    // L is only dereferenced inside the epilogue when WRITE_L.
+    const half* Q_bh;
+    half* O_bh;
+    auto kv_head = kv_source.head(b, h_kv);
+    if constexpr (FLAT_HEADS) {
+        const int bh_kv = GQA ? b * (H_q / kv_group) + h_kv : bh;
+        Q_bh = Q + (int64_t)bh * N_q * D;
+        O_bh = O + (int64_t)bh * N_q * D;
+        kv_head.K = kv_source.K + (int64_t)bh_kv * N_kv * D;
+        kv_head.V = kv_source.V + (int64_t)bh_kv * N_kv * D;
+        kv_head.k_row = kv_head.v_row = D;
+    } else {
+        Q_bh = Q + b * sQ.b + h * sQ.h;
+        O_bh = O + b * sO.b + h * sO.h;
+    }
+    float* L_bh = nullptr;
+    if constexpr (WRITE_L) {
+        const int64_t l_head = FLAT_HEADS ? bh : (int64_t)b * H_q + h;
+        L_bh = L + l_head * N_q;
+    }
 
     // Dynamic shared memory: a static __shared__ array is capped at 48 KB per
     // block, which is not enough for the larger head dims. The host asks for
@@ -516,20 +626,20 @@ attention_fwd_kernel(
     uint32_t cur_base  = smem_base;
     uint32_t next_base = smem_base + T::STAGE_BYTES;
 
-    KVStager<D, FULL_TILES> kv_stager(K_bh, V_bh, N, tid);
+    KVStager<D, FULL_TILES, typename KV::Head> kv_stager(kv_head, N_kv, tid);
     uint32_t tSrQ[T::KSLICES][4];
 
     // ---- Prologue: stage Q and pull it into registers ----
     if constexpr (NSTAGE == 2) {
         // Q borrows the second stage, so block 0 of K/V can already be in flight.
         kv_stager.issue(cur_base, 0);
-        stage_q_to_smem<D, FULL_TILES>(smem + T::STAGE, Q_bh, q_block, N, tid);
+        stage_q_to_smem<D, FULL_TILES>(smem + T::STAGE, Q_bh, sQ.n, q_block, N_q, tid);
         __syncthreads();
         load_q_fragments<D>(tSrQ, smem + T::STAGE, warp, lane);
         __syncthreads();
     } else {
         // Q shares the single K/V buffer, so it has to be consumed first.
-        stage_q_to_smem<D, FULL_TILES>(smem, Q_bh, q_block, N, tid);
+        stage_q_to_smem<D, FULL_TILES>(smem, Q_bh, sQ.n, q_block, N_q, tid);
         __syncthreads();
         load_q_fragments<D>(tSrQ, smem, warp, lane);
         __syncthreads();
@@ -547,11 +657,13 @@ attention_fwd_kernel(
     for (int t = 0; t < T::NTILES_O; t++)
         acc_o[t][0] = acc_o[t][1] = acc_o[t][2] = acc_o[t][3] = 0.0f;
     Softmax softmax;
-    const float softmax_scale_log2 = rsqrtf((float)D) * LOG2Ef;
+    const float softmax_scale_log2 = softmax_scale * LOG2Ef;
 
     // ---- Main loop over K/V blocks ----
-    // Causal blocks stop at the diagonal: no key past the last query row of the block.
-    const int kv_end  = CAUSAL ? ((q_block + BR < N) ? q_block + BR : N) : N;
+    // Causal blocks stop at the diagonal: no key past the one the last query row of the
+    // block may see.
+    const int causal_end = q_block + BR + (N_kv - N_q);
+    const int kv_end  = (CAUSAL && causal_end < N_kv) ? causal_end : N_kv;
     const int nblocks = (kv_end + BC - 1) / BC;
     for (int i = 0; i < nblocks; i++) {
         const int kv = i * BC;
@@ -574,10 +686,10 @@ attention_fwd_kernel(
         float acc_s[T::NTILES_S][4];
         compute_qk<D>(acc_s, tSrQ, cur_base + qk_lane_base, softmax_scale_log2);
         if constexpr (!FULL_TILES) {
-            if (kv + BC > N) apply_mask(acc_s, kv, N, lane);
+            if (kv + BC > N_kv) apply_mask(acc_s, kv, N_kv, lane);
         }
         if constexpr (CAUSAL) {
-            if (kv + BC > warp_row0) apply_causal_mask(acc_s, kv, warp_row0 + lane / 4, lane);
+            if (kv + BC > causal_row0) apply_causal_mask(acc_s, kv, causal_row0 + lane / 4, lane);
         }
         softmax_rescale_o(acc_s, acc_o, softmax);   // acc_s becomes P, acc_o *= scores_scale
         accumulate_pv<D>(acc_o, acc_s, cur_base + pv_lane_base);
@@ -590,119 +702,334 @@ attention_fwd_kernel(
         }
     }
 
-    epilogue<D, WRITE_L, FULL_TILES>(acc_o, softmax, O_bh, L, bh, N, q_block, warp, lane);
+    epilogue<D, WRITE_L, FULL_TILES>(acc_o, softmax, O_bh, sO.n, L_bh, N_q, q_block, warp, lane);
 }
 
 // ============================================================
 // Host launchers
 // ============================================================
-static std::pair<torch::Tensor, torch::Tensor> attention_forward_impl(
-    torch::Tensor Q, torch::Tensor K, torch::Tensor V, bool want_L, bool causal)
-{
-    TORCH_CHECK(Q.is_cuda() && K.is_cuda() && V.is_cuda(), "Q/K/V must be CUDA tensors");
-    TORCH_CHECK(Q.dim() == 4, "Q must be 4D [B, H, N, D]");
+static Strides strides_of(const torch::Tensor& t) {
+    return {t.stride(0), t.stride(1), t.stride(2)};
+}
 
-    int B = Q.size(0), H = Q.size(1), N = Q.size(2), D = Q.size(3);
-    TORCH_CHECK(D == 64 || D == 128, "Head dimension must be 64 or 128, got ", D);
-    TORCH_CHECK(N > 0, "N must be > 0");
-    TORCH_CHECK(K.dim() == 4 && V.dim() == 4, "K and V must be 4D [B, H_kv, N, D]");
-    TORCH_CHECK(K.sizes() == V.sizes(), "K and V must have the same shape");
-    int H_kv = K.size(1);
-    TORCH_CHECK(K.size(0) == B && K.size(2) == N && K.size(3) == D,
-                "K and V must match Q in batch, sequence length and head dimension");
-    TORCH_CHECK(H_kv > 0 && H % H_kv == 0,
-                "Query heads (", H, ") must be a multiple of key/value heads (", H_kv, ")");
-    TORCH_CHECK(K.device() == Q.device() && V.device() == Q.device(),
-                "Q/K/V must be on the same device");
-    const bool gqa = (H_kv != H);
-    int64_t BH = (int64_t)B * H;
-    int64_t BH_kv = (int64_t)B * H_kv;
-    TORCH_CHECK(BH <= 65535, "B*H must be <= 65535 (gridDim.y limit)");
+// Row alignment the device code needs, in bytes (measured: anything less faults with
+// "misaligned address"). Q and O are touched two halves at a time, K and V by the
+// 16-byte cp.async copies.
+constexpr int64_t QO_ROW_ALIGN = 4;
+constexpr int64_t KV_ROW_ALIGN = 16;
 
-    const at::cuda::CUDAGuard guard(Q.device());
-    auto Q_h = Q.to(torch::kHalf).reshape({BH, N, D}).contiguous();
-    auto K_h = K.to(torch::kHalf).reshape({BH_kv, N, D}).contiguous();
-    auto V_h = V.to(torch::kHalf).reshape({BH_kv, N, D}).contiguous();
-
-    auto O_h = torch::empty({BH, N, D}, Q_h.options());
-    torch::Tensor L;
-    float* L_ptr = nullptr;
-    if (want_L) {
-        L = torch::empty({BH, N}, Q.options().dtype(torch::kFloat));
-        L_ptr = L.data_ptr<float>();
+// True when every row of t starts on an `align`-byte boundary.
+static bool rows_aligned(const torch::Tensor& t, int64_t align) {
+    const int64_t elems = align / (int64_t)sizeof(at::Half);
+    bool ok = reinterpret_cast<uintptr_t>(t.data_ptr()) % align == 0;
+    for (int d = 0; d < 3; d++) {
+        ok = ok && (t.size(d) == 1 || t.stride(d) % elems == 0);
     }
+    return ok;
+}
 
-    dim3 grid((N + BR - 1) / BR, BH);
+// No two elements of t share memory. Sufficient, not necessary: walking the dimensions from
+// the smallest stride up, each stride has to clear everything the smaller ones span.
+static bool no_internal_overlap(const torch::Tensor& t) {
+    std::vector<int> dims;
+    for (int d = 0; d < t.dim(); d++) {
+        if (t.size(d) > 1) dims.push_back(d);
+    }
+    std::sort(dims.begin(), dims.end(), [&](int a, int b) { return t.stride(a) < t.stride(b); });
+    int64_t span = 1;   // elements covered by the dimensions seen so far
+    for (int d : dims) {
+        if (t.stride(d) < span) return false;
+        span += (t.size(d) - 1) * t.stride(d);
+    }
+    return true;
+}
+
+// Byte range [lo, hi) that the elements of t fall in.
+static std::pair<uintptr_t, uintptr_t> byte_span(const torch::Tensor& t) {
+    int64_t last = 0;
+    for (int d = 0; d < t.dim(); d++) {
+        last += (t.size(d) - 1) * t.stride(d);
+    }
+    const auto lo = reinterpret_cast<uintptr_t>(t.data_ptr());
+    return {lo, lo + (uintptr_t)(last + 1) * t.element_size()};
+}
+
+// Conservative: compares the enclosing byte ranges, so interleaved but disjoint views
+// (two slots of one fused buffer) count as overlapping.
+static bool spans_overlap(const torch::Tensor& a, const torch::Tensor& b) {
+    const auto [alo, ahi] = byte_span(a);
+    const auto [blo, bhi] = byte_span(b);
+    return alo < bhi && blo < ahi;
+}
+
+// fp16 rows the kernel can read in place: contiguous last dimension, aligned row starts.
+// Anything else is copied into a fresh contiguous tensor.
+static torch::Tensor as_half_rows(const torch::Tensor& t, int64_t align) {
+    auto h = t.to(torch::kHalf);
+    return (h.stride(3) == 1 && rows_aligned(h, align))
+        ? h : h.clone(at::MemoryFormat::Contiguous);
+}
+
+// The output tensor: the caller's `out` after checking it, or a fresh one shaped like Q.
+// `inputs` are the tensors the kernel reads while blocks are already writing.
+static torch::Tensor output_for(const torch::Tensor& Q_h, const std::optional<torch::Tensor>& out,
+                                std::initializer_list<torch::Tensor> inputs) {
+    if (!out.has_value()) {
+        return torch::empty(Q_h.sizes(), Q_h.options());
+    }
+    const torch::Tensor& O_h = *out;
+    TORCH_CHECK(O_h.is_cuda() && O_h.device() == Q_h.device() && O_h.scalar_type() == torch::kHalf,
+                "out must be an fp16 CUDA tensor on the device of Q");
+    TORCH_CHECK(O_h.sizes() == Q_h.sizes() && O_h.stride(3) == 1 && rows_aligned(O_h, QO_ROW_ALIGN),
+                "out must have the shape of Q, a contiguous last dimension and rows "
+                "that start on a ", QO_ROW_ALIGN, "-byte boundary");
+    // Blocks write their rows while other blocks are still reading, so out may neither
+    // fold onto itself nor share memory with an input.
+    TORCH_CHECK(no_internal_overlap(O_h), "out has elements that share memory");
+    for (const auto& t : inputs) {
+        TORCH_CHECK(!spans_overlap(O_h, t), "the address range of out must not overlap an input");
+    }
+    return O_h;
+}
+
+template <bool... B>
+using Flags = std::integer_sequence<bool, B...>;
+
+// Turns run-time flags into template arguments, one instantiation per combination:
+// with_flags(f, Flags<>{}, a, b) ends in f.template run<a, b>().
+template <typename F, bool... Known>
+static void with_flags(F& f, Flags<Known...>) {
+    f.template run<Known...>();
+}
+
+template <typename F, bool... Known, typename... Rest>
+static void with_flags(F& f, Flags<Known...>, bool flag, Rest... rest) {
+    if (flag) with_flags(f, Flags<Known..., true>{}, rest...);
+    else      with_flags(f, Flags<Known..., false>{}, rest...);
+}
+
+// run<flags...>() hands the kernel instantiation with those flags to `launch`.
+template <int D, AddressLayout LAYOUT, typename KV, typename Launch, typename... KVFields>
+struct KernelChoice {
+    Launch& launch;
+    template <bool... FLAGS>
+    void run() {
+        launch(attention_fwd_kernel<D, LAYOUT, FLAGS..., KV, KVFields...>,
+               Tile<D>::SMEM_BYTES, LAYOUT == AddressLayout::ContiguousHeads);
+    }
+};
+
+template <int D, typename KV, bool ALL_MODES, typename Launch, typename... KVFields>
+static void choose_layout(Launch& launch, bool packed_rows, bool contiguous_rows,
+                          bool want_L, bool causal, bool square, bool full_tiles, bool gqa) {
+    KernelChoice<D, AddressLayout::Strided, KV, Launch, KVFields...> general{launch};
+    if constexpr (ALL_MODES) {
+        if (packed_rows) {
+            KernelChoice<D, AddressLayout::ContiguousHeads, KV, Launch, KVFields...> flat{launch};
+            if (want_L) with_flags(flat, Flags<true, true, true, false>{}, gqa);
+            else        with_flags(flat, Flags<false, true, true, false>{}, gqa);
+            return;
+        }
+        if constexpr (D == 64) {
+            if (contiguous_rows) {
+                KernelChoice<D, AddressLayout::ContiguousRows, KV, Launch, KVFields...> rows{launch};
+                if (square) with_flags(rows, Flags<false, false, true, true>{}, gqa);
+                else        with_flags(rows, Flags<false, false, false, true>{}, gqa);
+                return;
+            }
+        }
+        with_flags(general, Flags<>{}, want_L, causal, square, full_tiles, gqa);
+    } else {
+        with_flags(general, Flags<false, true, false>{}, full_tiles, gqa);
+    }
+}
+
+// Picks the kernel instantiation for the run-time flags and launches it over
+// (Q blocks, query heads, batch). ALL_MODES = false keeps only what inference needs (causal,
+// no L, two lengths), so a K/V source used that way does not pay for the other instantiations.
+// Specializations, all decided here: D; L wanted; causal; square (N_q == N_kv); full tiles
+// (N_q a multiple of BR and N_kv of BC, so no row or column needs a guard); GQA.
+template <typename KV, bool ALL_MODES, typename... KVFields>
+static void launch_forward(const torch::Tensor& Q_h, const torch::Tensor& O_h, float* L_ptr,
+                           int N_kv, int kv_group, bool causal, float scale, KVFields... kv_fields)
+{
+    const int B = Q_h.size(0), H = Q_h.size(1), N_q = Q_h.size(2), D = Q_h.size(3);
+    const bool want_L = (L_ptr != nullptr);
+    const bool gqa = (kv_group != 1);
+    const bool square = (N_q == N_kv);
+    const bool full_tiles = (N_q % BR == 0) && (N_kv % BC == 0);
+    bool packed_rows = false;
+    bool contiguous_rows = false;
+    if constexpr (ALL_MODES) {
+        const KV source{kv_fields...};
+        // D=64 output-only full tiles benefit from constant copy strides. Keep
+        // the general path for D=128 and +L, where this layout raises latency.
+        contiguous_rows = D == 64 && !want_L && !causal && full_tiles
+                       && Q_h.stride(2) == D && O_h.stride(2) == D
+                       && source.sK.n == D && source.sV.n == D;
+        const int H_kv = H / kv_group;
+        const bool k_contiguous = source.sK.n == D
+            && (H_kv == 1 || source.sK.h == (int64_t)N_kv * D)
+            && (B == 1 || source.sK.b == (int64_t)H_kv * N_kv * D);
+        const bool v_contiguous = source.sV.n == D
+            && (H_kv == 1 || source.sV.h == (int64_t)N_kv * D)
+            && (B == 1 || source.sV.b == (int64_t)H_kv * N_kv * D);
+        // Contiguous addressing helps masked causal copies. Full tiles already hoist
+        // their row addresses; keep their existing code generation and residency.
+        packed_rows = causal && square && !full_tiles
+                   && Q_h.is_contiguous() && O_h.is_contiguous()
+                   && k_contiguous && v_contiguous && (int64_t)B * H <= 65535;
+    }
+    TORCH_CHECK(B <= 65535 && H <= 65535, "B and H must each be <= 65535 (grid limits)");
+    TORCH_CHECK(ALL_MODES || (causal && !want_L), "this K/V source is built for causal, O-only use");
+
     dim3 block(NWARPS * 32);
     auto stream = at::cuda::getCurrentCUDAStream();
 
-    auto launch = [&](auto kernel, int smem_bytes) {
+    auto launch = [&](auto kernel, int smem_bytes, bool contiguous) {
+        const dim3 grid = contiguous ? dim3((N_q + BR - 1) / BR, B * H)
+                                     : dim3((N_q + BR - 1) / BR, H, B);
         if (smem_bytes > 48 * 1024) {
             C10_CUDA_CHECK(cudaFuncSetAttribute(
                 kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, smem_bytes));
         }
         kernel<<<grid, block, smem_bytes, stream>>>(
             reinterpret_cast<const half*>(Q_h.data_ptr<at::Half>()),
-            reinterpret_cast<const half*>(K_h.data_ptr<at::Half>()),
-            reinterpret_cast<const half*>(V_h.data_ptr<at::Half>()),
-            reinterpret_cast<half*>(O_h.data_ptr<at::Half>()),
-            L_ptr,
-            N, H, H_kv);
+            reinterpret_cast<half*>(O_h.data_ptr<at::Half>()), L_ptr,
+            strides_of(Q_h), strides_of(O_h), N_q, N_kv, H, kv_group, scale, kv_fields...);
     };
-    const bool full_tiles = (N % BR == 0) && (N % BC == 0);
-    #define DISPATCH_GQA(HDIM, WL, FT, CA)                                          \
-        do {                                                                        \
-            constexpr int SB = Tile<HDIM>::SMEM_BYTES;                              \
-            if (gqa) launch(attention_fwd_kernel<HDIM, WL, FT, CA, true>,  SB);      \
-            else     launch(attention_fwd_kernel<HDIM, WL, FT, CA, false>, SB);      \
-        } while (0)
-    #define DISPATCH_REST(HDIM)                                                 \
-        do {                                                                    \
-            if (want_L) {                                                       \
-                if (causal) {                                                   \
-                    if (full_tiles) DISPATCH_GQA(HDIM, true, true, true);        \
-                    else            DISPATCH_GQA(HDIM, true, false, true);       \
-                } else {                                                        \
-                    if (full_tiles) DISPATCH_GQA(HDIM, true, true, false);       \
-                    else            DISPATCH_GQA(HDIM, true, false, false);      \
-                }                                                               \
-            } else {                                                            \
-                if (causal) {                                                   \
-                    if (full_tiles) DISPATCH_GQA(HDIM, false, true, true);       \
-                    else            DISPATCH_GQA(HDIM, false, false, true);      \
-                } else {                                                        \
-                    if (full_tiles) DISPATCH_GQA(HDIM, false, true, false);      \
-                    else            DISPATCH_GQA(HDIM, false, false, false);     \
-                }                                                               \
-            }                                                                   \
-        } while (0)
-    if (D == 64) DISPATCH_REST(64);
-    else         DISPATCH_REST(128);
-    #undef DISPATCH_REST
-    #undef DISPATCH_GQA
+    if (D == 64)
+        choose_layout<64, KV, ALL_MODES, decltype(launch), KVFields...>(
+            launch, packed_rows, contiguous_rows, want_L, causal, square, full_tiles, gqa);
+    else
+        choose_layout<128, KV, ALL_MODES, decltype(launch), KVFields...>(
+            launch, packed_rows, contiguous_rows, want_L, causal, square, full_tiles, gqa);
     C10_CUDA_KERNEL_LAUNCH_CHECK();
+}
 
-    return {O_h.reshape({B, H, N, D}),
-            want_L ? L.reshape({B, H, N}) : torch::Tensor()};
+// Checks shared by both entry points; returns the number of query heads per K/V head.
+static int check_query(const torch::Tensor& Q, int64_t H_kv, int64_t N_kv, bool causal) {
+    TORCH_CHECK(Q.is_cuda() && Q.dim() == 4, "Q must be a 4D CUDA tensor [B, H, N_q, D]");
+    const int64_t H = Q.size(1), N_q = Q.size(2), D = Q.size(3);
+    TORCH_CHECK(Q.size(0) > 0 && H > 0, "batch and query head counts must be > 0");
+    TORCH_CHECK(D == 64 || D == 128, "Head dimension must be 64 or 128, got ", D);
+    TORCH_CHECK(N_q > 0 && N_kv > 0, "N_q and N_kv must be > 0");
+    TORCH_CHECK(!causal || N_kv >= N_q,
+                "a causal mask is aligned to the bottom right, which needs N_kv >= N_q");
+    TORCH_CHECK(H_kv > 0 && H % H_kv == 0,
+                "Query heads (", H, ") must be a multiple of key/value heads (", H_kv, ")");
+    return (int)(H / H_kv);
+}
+
+static std::pair<torch::Tensor, torch::Tensor> attention_forward_impl(
+    torch::Tensor Q, torch::Tensor K, torch::Tensor V, bool want_L, bool causal,
+    std::optional<double> softmax_scale, std::optional<torch::Tensor> out)
+{
+    TORCH_CHECK(K.is_cuda() && V.is_cuda() && K.dim() == 4 && V.dim() == 4,
+                "K and V must be 4D CUDA tensors [B, H_kv, N_kv, D]");
+    TORCH_CHECK(K.sizes() == V.sizes(), "K and V must have the same shape");
+    const int kv_group = check_query(Q, K.size(1), K.size(2), causal);
+    TORCH_CHECK(K.size(0) == Q.size(0) && K.size(3) == Q.size(3),
+                "K and V must match Q in batch and head dimension");
+    TORCH_CHECK(K.device() == Q.device() && V.device() == Q.device(),
+                "Q/K/V must be on the same device");
+    const int D = Q.size(3);
+    const float scale = softmax_scale.has_value() ? (float)*softmax_scale
+                                                  : 1.0f / std::sqrt((float)D);
+
+    const at::cuda::CUDAGuard guard(Q.device());
+    auto Q_h = as_half_rows(Q, QO_ROW_ALIGN);
+    auto K_h = as_half_rows(K, KV_ROW_ALIGN);
+    auto V_h = as_half_rows(V, KV_ROW_ALIGN);
+    auto O_h = output_for(Q_h, out, {Q_h, K_h, V_h});
+    torch::Tensor L;
+    if (want_L) {
+        L = torch::empty({Q.size(0), Q.size(1), Q.size(2)}, Q.options().dtype(torch::kFloat));
+    }
+
+    launch_forward<DenseKV, /*ALL_MODES=*/true>(
+        Q_h, O_h, want_L ? L.data_ptr<float>() : nullptr, (int)K.size(2), kv_group, causal, scale,
+        reinterpret_cast<const half*>(K_h.data_ptr<at::Half>()),
+        reinterpret_cast<const half*>(V_h.data_ptr<at::Half>()), strides_of(K_h), strides_of(V_h));
+    return {O_h, L};
 }
 
 std::vector<torch::Tensor> attention_forward(torch::Tensor Q, torch::Tensor K, torch::Tensor V,
-                                             bool causal) {
-    auto [O, L] = attention_forward_impl(Q, K, V, /*want_L=*/true, causal);
+                                             bool causal, std::optional<double> softmax_scale,
+                                             std::optional<torch::Tensor> out) {
+    auto [O, L] = attention_forward_impl(Q, K, V, /*want_L=*/true, causal, softmax_scale, out);
     return {O, L};
 }
 
 torch::Tensor attention_forward_only(torch::Tensor Q, torch::Tensor K, torch::Tensor V,
-                                     bool causal) {
-    auto [O, L] = attention_forward_impl(Q, K, V, /*want_L=*/false, causal);
+                                     bool causal, std::optional<double> softmax_scale,
+                                     std::optional<torch::Tensor> out) {
+    auto [O, L] = attention_forward_impl(Q, K, V, /*want_L=*/false, causal, softmax_scale, out);
     return O;
+}
+
+// Causal attention of one sequence whose keys and values sit in a paged cache: Q holds the
+// last N_q of its N_kv tokens, `block_table` lists its pages in order. The page ids are
+// trusted; checking them would need a device sync.
+torch::Tensor attention_forward_paged(torch::Tensor Q, torch::Tensor key_cache,
+                                      torch::Tensor value_cache, torch::Tensor block_table,
+                                      int64_t N_kv, std::optional<double> softmax_scale,
+                                      std::optional<torch::Tensor> out) {
+    TORCH_CHECK(key_cache.is_cuda() && key_cache.dim() == 4
+                    && key_cache.scalar_type() == torch::kHalf,
+                "key_cache must be an fp16 CUDA tensor [pages, page_size, H_kv, D]");
+    TORCH_CHECK(value_cache.scalar_type() == torch::kHalf && value_cache.device() == key_cache.device()
+                    && value_cache.sizes() == key_cache.sizes()
+                    && value_cache.strides() == key_cache.strides(),
+                "value_cache must match key_cache in dtype, device, shape and strides");
+    const int64_t page_size = key_cache.size(1);
+    TORCH_CHECK(page_size > 0 && (page_size & (page_size - 1)) == 0,
+                "page_size must be a power of two, got ", page_size);
+    TORCH_CHECK(key_cache.stride(3) == 1 && rows_aligned(key_cache, KV_ROW_ALIGN)
+                    && rows_aligned(value_cache, KV_ROW_ALIGN),
+                "cache rows must be contiguous and start on a ", KV_ROW_ALIGN, "-byte boundary");
+    const int kv_group = check_query(Q, key_cache.size(2), N_kv, /*causal=*/true);
+    TORCH_CHECK(Q.size(0) == 1, "one sequence per call: Q must be [1, H, N_q, D]");
+    TORCH_CHECK(Q.size(3) == key_cache.size(3) && Q.device() == key_cache.device(),
+                "Q must match the cache in head dimension and device");
+    TORCH_CHECK(block_table.is_cuda() && block_table.device() == Q.device()
+                    && block_table.scalar_type() == torch::kInt && block_table.dim() == 1
+                    && block_table.is_contiguous(),
+                "block_table must be a contiguous 1D int32 CUDA tensor on the device of Q");
+    TORCH_CHECK(block_table.numel() * page_size >= N_kv,
+                "block_table lists ", block_table.numel(), " pages, fewer than N_kv needs");
+    const int D = Q.size(3);
+    const float scale = softmax_scale.has_value() ? (float)*softmax_scale
+                                                  : 1.0f / std::sqrt((float)D);
+
+    const at::cuda::CUDAGuard guard(Q.device());
+    auto Q_h = as_half_rows(Q, QO_ROW_ALIGN);
+    auto O_h = output_for(Q_h, out, {Q_h, key_cache, value_cache});
+
+    int page_shift = 0;
+    while ((int64_t(1) << page_shift) < page_size) page_shift++;
+    launch_forward<PagedKV, /*ALL_MODES=*/false>(
+        Q_h, O_h, nullptr, (int)N_kv, kv_group, /*causal=*/true, scale,
+        reinterpret_cast<const half*>(key_cache.data_ptr<at::Half>()),
+        reinterpret_cast<const half*>(value_cache.data_ptr<at::Half>()),
+        (const int32_t*)block_table.data_ptr<int32_t>(), page_shift,
+        key_cache.stride(0), key_cache.stride(1), key_cache.stride(2));
+    return O_h;
 }
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
     m.def("forward", &attention_forward, "Custom CUDA forward: returns O half, L float",
           pybind11::arg("Q"), pybind11::arg("K"), pybind11::arg("V"),
-          pybind11::arg("causal") = false);
+          pybind11::arg("causal") = false, pybind11::arg("softmax_scale") = pybind11::none(),
+          pybind11::arg("out") = pybind11::none());
     m.def("forward_only", &attention_forward_only, "Custom CUDA forward, true O-only",
           pybind11::arg("Q"), pybind11::arg("K"), pybind11::arg("V"),
-          pybind11::arg("causal") = false);
+          pybind11::arg("causal") = false, pybind11::arg("softmax_scale") = pybind11::none(),
+          pybind11::arg("out") = pybind11::none());
+    m.def("forward_paged", &attention_forward_paged,
+          "Causal O-only forward of one sequence with K/V in a paged cache",
+          pybind11::arg("Q"), pybind11::arg("key_cache"), pybind11::arg("value_cache"),
+          pybind11::arg("block_table"), pybind11::arg("N_kv"),
+          pybind11::arg("softmax_scale") = pybind11::none(),
+          pybind11::arg("out") = pybind11::none());
 }

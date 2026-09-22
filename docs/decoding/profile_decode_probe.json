@@ -1,0 +1,86 @@
+{
+  "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+  "torch": "2.10.0+cu128",
+  "transformers": "4.57.6",
+  "source_sha256": "ab7d1630373290954cd3bc691056f477200ea32a28d70a6c196806b3d67ada16",
+  "script_sha256": "c27816bc5e7ae56c2b698c39037f37c00d4ef800668fec3c844e5fd204bc48dc",
+  "torch_threads": 8,
+  "interop_threads": 16,
+  "cpu_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "config": {
+    "lengths": [
+      2048
+    ],
+    "pairs": 1,
+    "steps": 4,
+    "profile_steps": 2,
+    "profile_repeats": 1,
+    "mask": "ones",
+    "output": "profile_decode_probe.json"
+  },
+  "telemetry_before": "name, utilization.gpu [%], temperature.gpu, clocks.current.sm [MHz], clocks.current.memory [MHz], power.draw [W], power.limit [W], memory.used [MiB]\nNVIDIA GeForce RTX 4060 Ti, 51 %, 40, 2835 MHz, 8751 MHz, 24.94 W, 160.00 W, 3414 MiB",
+  "controls": [
+    {
+      "n": 2048,
+      "samples": {
+        "sdpa": [
+          {
+            "wall_ms_per_token": 22.96315875000232,
+            "event_span_ms_per_token": 22.953983306884766,
+            "calls": {
+              "decode": 0,
+              "prefill": 0,
+              "fallback": 0
+            }
+          }
+        ],
+        "scratch_decode": [
+          {
+            "wall_ms_per_token": 12.673213500001168,
+            "event_span_ms_per_token": 12.66483211517334,
+            "calls": {
+              "decode": 88,
+              "prefill": 0,
+              "fallback": 0
+            }
+          }
+        ]
+      },
+      "paired_ratio": {
+        "median": 0.5518933017000497,
+        "bootstrap_95ci": [
+          0.5518933017000497,
+          0.5518933017000497
+        ],
+        "pairs": [
+          0.5518933017000497
+        ]
+      }
+    }
+  ],
+  "profiles": [],
+  "complete": false,
+  "ignored_readonly_pip_jobs": [],
+  "notes": [
+    "No CUDA kernel changes. Both modes use SDPA prefill.",
+    "Unprofiled controls include synchronization at the end, not per operation.",
+    "Profiled wall time is not a latency/speedup benchmark."
+  ]
+}

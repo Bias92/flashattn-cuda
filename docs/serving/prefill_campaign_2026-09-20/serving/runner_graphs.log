@@ -1,0 +1,172 @@
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Traceback (most recent call last):
+  File "/mnt/c/Users/PC/flashattn-cuda-main/bench/bench_serving_prefill.py", line 443, in <module>
+    main()
+  File "/mnt/c/Users/PC/flashattn-cuda-main/bench/bench_serving_prefill.py", line 438, in main
+    Campaign(args).run()
+  File "/mnt/c/Users/PC/flashattn-cuda-main/bench/bench_serving_prefill.py", line 369, in run
+    self.session(study, config, run, sources)
+  File "/mnt/c/Users/PC/flashattn-cuda-main/bench/bench_serving_prefill.py", line 315, in session
+    record = self.measure(spec, tokenizer, port, token, *key,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/Users/PC/flashattn-cuda-main/bench/bench_serving_prefill.py", line 261, in measure
+    stats, command = self.run_client(spec, tokenizer, port, token, run, length, concurrency,
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/Users/PC/flashattn-cuda-main/bench/bench_serving_prefill.py", line 247, in run_client
+    subprocess.run(command, env=dict(os.environ, OPENAI_API_KEY=token), stdout=log,
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2141, in _communicate
+    self.wait(timeout=self._remaining_time(endtime))
+  File "/usr/lib/python3.12/subprocess.py", line 1264, in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2047, in _wait
+    time.sleep(delay)
+KeyboardInterrupt
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Values: median over runs. Ratios: median of the per-run ratios against FLASH_ATTN, the per-run ratios in brackets. Rows with fewer runs than the others are incomplete.
+126 accepted cases, measured with 2 distinct set(s) of source files.
+
+### latency (TinyLlama/TinyLlama-1.1B-Chat-v1.0, graphs)
+
+| input | C | config | runs | TTFT p50 ms | TTFT p99 ms | TPOT p50 ms | E2E p50 ms | out tok/s | TTFT ratio | TPOT ratio | tok/s ratio |
+|---:|---:|---|---:|---:|---:|---:|---:|---:|---|---|---|
+| 128 | 1 | FLASH_ATTN | 3 | 16.9 | 98.6 | 8.25 | 1065 | 119.6 | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] |
+| 128 | 1 | SCRATCH_DECODE | 3 | 20.6 | 75.8 | 8.31 | 1076 | 118.7 | 1.216 [1.216 / 1.228 / 1.020] | 1.006 [1.007 / 1.006 / 0.982] | 0.992 [0.991 / 0.992 / 1.016] |
+| 128 | 1 | SCRATCH_FULL | 3 | 20.0 | 77.1 | 8.30 | 1074 | 119.0 | 1.188 [1.213 / 1.188 / 1.008] | 1.007 [1.007 / 1.005 / 1.007] | 0.994 [0.995 / 0.991 / 0.994] |
+| 512 | 1 | FLASH_ATTN | 3 | 33.8 | 140.6 | 8.26 | 1084 | 117.5 | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] |
+| 512 | 1 | SCRATCH_DECODE | 3 | 34.3 | 148.9 | 8.36 | 1096 | 116.4 | 1.007 [0.994 / 1.015 / 1.007] | 1.011 [1.013 / 1.011 / 0.982] | 0.990 [0.990 / 0.990 / 1.016] |
+| 512 | 1 | SCRATCH_FULL | 3 | 34.2 | 134.1 | 8.35 | 1095 | 116.5 | 0.999 [0.988 / 1.022 / 0.999] | 1.012 [1.012 / 1.010 / 1.012] | 0.991 [0.991 / 0.992 / 0.987] |
+| 1024 | 1 | FLASH_ATTN | 3 | 61.6 | 182.3 | 8.28 | 1114 | 114.3 | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] |
+| 1024 | 1 | SCRATCH_DECODE | 3 | 62.6 | 158.0 | 8.43 | 1135 | 112.8 | 1.009 [1.009 / 1.017 / 1.007] | 1.018 [1.018 / 1.018 / 0.982] | 0.986 [0.986 / 0.986 / 1.015] |
+| 1024 | 1 | SCRATCH_FULL | 3 | 61.2 | 130.3 | 8.43 | 1133 | 112.9 | 0.993 [0.984 / 0.993 / 1.000] | 1.018 [1.018 / 1.016 / 1.018] | 0.988 [0.988 / 0.987 / 0.988] |
+| 1920 | 1 | FLASH_ATTN | 3 | 115.8 | 217.3 | 8.38 | 1180 | 108.1 | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] |
+| 1920 | 1 | SCRATCH_DECODE | 3 | 117.6 | 195.4 | 8.49 | 1197 | 106.8 | 1.016 [1.017 / 1.016 / 0.999] | 1.013 [1.013 / 1.013 / 0.981] | 0.990 [0.988 / 0.990 / 1.018] |
+| 1920 | 1 | SCRATCH_FULL | 3 | 114.1 | 181.8 | 8.52 | 1195 | 106.9 | 0.985 [0.989 / 0.984 / 0.985] | 1.015 [1.017 / 1.015 / 1.013] | 0.989 [0.988 / 0.994 / 0.989] |
+
+### throughput (TinyLlama/TinyLlama-1.1B-Chat-v1.0, graphs)
+
+| input | C | config | runs | TTFT p50 ms | TTFT p99 ms | TPOT p50 ms | E2E p50 ms | out tok/s | TTFT ratio | TPOT ratio | tok/s ratio |
+|---:|---:|---|---:|---:|---:|---:|---:|---:|---|---|---|
+| 512 | 2 | FLASH_ATTN | 3 | 59.2 | 246.5 | 8.54 | 1133 | 224.5 | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] |
+| 512 | 2 | SCRATCH_DECODE | 3 | 59.1 | 240.2 | 8.54 | 1138 | 225.1 | 0.998 [1.010 / 0.857 / 0.998] | 1.001 [1.001 / 1.003 / 0.977] | 1.003 [0.997 / 1.003 / 1.020] |
+| 512 | 2 | SCRATCH_FULL | 3 | 58.2 | 235.4 | 8.53 | 1137 | 224.3 | 0.984 [0.984 / 0.998 / 0.981] | 0.999 [0.999 / 1.003 / 0.977] | 0.999 [0.999 / 0.995 / 1.018] |
+| 512 | 4 | FLASH_ATTN | 3 | 113.2 | 343.6 | 8.62 | 1207 | 419.0 | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] |
+| 512 | 4 | SCRATCH_DECODE | 3 | 114.2 | 461.0 | 8.63 | 1211 | 419.2 | 1.015 [0.980 / 1.015 / 1.029] | 1.002 [1.005 / 1.002 / 0.973] | 1.000 [1.000 / 0.991 / 1.020] |
+| 512 | 4 | SCRATCH_FULL | 3 | 113.4 | 349.0 | 8.64 | 1209 | 423.4 | 1.004 [0.999 / 1.012 / 1.004] | 1.003 [1.003 / 1.004 / 0.972] | 1.010 [1.010 / 0.999 / 1.028] |
+| 512 | 8 | FLASH_ATTN | 3 | 146.0 | 467.4 | 9.46 | 1343 | 744.5 | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] |
+| 512 | 8 | SCRATCH_DECODE | 3 | 172.8 | 492.2 | 9.52 | 1357 | 735.8 | 1.117 [1.117 / 1.395 / 1.005] | 0.991 [1.011 / 0.991 / 0.986] | 0.989 [0.989 / 0.978 / 1.010] |
+| 512 | 8 | SCRATCH_FULL | 3 | 144.4 | 478.3 | 9.53 | 1352 | 756.0 | 1.130 [0.801 / 1.160 / 1.130] | 0.992 [1.017 / 0.992 / 0.983] | 1.013 [0.988 / 1.013 / 1.018] |
+| 512 | 16 | FLASH_ATTN | 3 | 226.5 | 688.7 | 10.89 | 1603 | 1250.7 | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] |
+| 512 | 16 | SCRATCH_DECODE | 3 | 183.1 | 763.6 | 11.24 | 1645 | 1215.8 | 1.014 [1.014 / 1.041 / 0.794] | 1.032 [1.032 / 1.034 / 1.032] | 0.972 [0.965 / 0.972 / 1.008] |
+| 512 | 16 | SCRATCH_FULL | 3 | 206.1 | 656.9 | 11.02 | 1615 | 1261.5 | 0.908 [1.229 / 0.908 / 0.755] | 1.016 [0.985 / 1.016 / 1.019] | 1.009 [0.989 / 1.009 / 1.023] |
+| 512 | 32 | FLASH_ATTN | 3 | 321.4 | 1218.9 | 14.45 | 2162 | 1855.6 | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] |
+| 512 | 32 | SCRATCH_DECODE | 3 | 310.4 | 1133.0 | 15.13 | 2239 | 1803.6 | 0.966 [0.966 / 0.946 / 0.980] | 1.056 [1.056 / 1.059 / 0.997] | 0.970 [0.966 / 0.970 / 1.000] |
+| 512 | 32 | SCRATCH_FULL | 3 | 292.0 | 1152.2 | 14.49 | 2148 | 1875.3 | 0.928 [0.906 / 0.954 / 0.928] | 1.011 [1.011 / 1.014 / 0.969] | 1.004 [1.004 / 1.000 / 1.027] |
+
+### long_context (Qwen/Qwen2.5-0.5B-Instruct, graphs)
+
+| input | C | config | runs | TTFT p50 ms | TTFT p99 ms | TPOT p50 ms | E2E p50 ms | out tok/s | TTFT ratio | TPOT ratio | tok/s ratio |
+|---:|---:|---|---:|---:|---:|---:|---:|---:|---|---|---|
+| 2048 | 1 | FLASH_ATTN | 3 | 61.8 | 179.3 | 4.62 | 648 | 196.0 | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] |
+| 2048 | 1 | SCRATCH_DECODE | 3 | 61.7 | 139.8 | 4.61 | 646 | 197.5 | 0.999 [0.999 / 1.015 / 0.973] | 0.998 [0.998 / 0.998 / 0.962] | 1.007 [1.006 / 1.007 / 1.049] |
+| 2048 | 1 | SCRATCH_FULL | 3 | 60.4 | 145.9 | 4.60 | 644 | 198.0 | 0.978 [0.978 / 0.983 / 0.959] | 0.997 [0.997 / 0.997 / 0.962] | 1.010 [1.010 / 1.009 / 1.050] |
+| 4096 | 1 | FLASH_ATTN | 3 | 125.2 | 242.5 | 4.70 | 722 | 176.1 | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] |
+| 4096 | 1 | SCRATCH_DECODE | 3 | 126.6 | 135.3 | 4.66 | 716 | 178.8 | 1.011 [1.011 / 1.014 / 0.995] | 0.990 [0.990 / 0.991 / 0.959] | 1.016 [1.015 / 1.016 / 1.033] |
+| 4096 | 1 | SCRATCH_FULL | 3 | 121.8 | 201.5 | 4.66 | 712 | 180.0 | 0.972 [0.973 / 0.972 / 0.959] | 0.990 [0.990 / 0.991 / 0.959] | 1.022 [1.022 / 1.019 / 1.040] |
+| 8192 | 1 | FLASH_ATTN | 3 | 283.0 | 361.4 | 4.87 | 901 | 141.4 | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] |
+| 8192 | 1 | SCRATCH_DECODE | 3 | 286.9 | 351.8 | 4.83 | 898 | 142.5 | 1.014 [1.014 / 1.014 / 0.992] | 0.991 [0.993 / 0.991 / 0.961] | 1.006 [1.006 / 1.004 / 1.032] |
+| 8192 | 1 | SCRATCH_FULL | 3 | 275.7 | 359.0 | 4.83 | 887 | 144.3 | 0.972 [0.974 / 0.972 / 0.952] | 0.992 [0.993 / 0.992 / 0.962] | 1.020 [1.015 / 1.020 / 1.045] |
+| 16384 | 1 | FLASH_ATTN | 3 | 718.8 | 843.5 | 5.30 | 1392 | 91.7 | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] |
+| 16384 | 1 | SCRATCH_DECODE | 3 | 726.0 | 833.7 | 5.20 | 1386 | 92.1 | 1.010 [1.010 / 1.011 / 0.993] | 0.981 [0.982 / 0.981 / 0.951] | 1.004 [1.003 / 1.004 / 1.031] |
+| 16384 | 1 | SCRATCH_FULL | 3 | 692.9 | 805.3 | 5.19 | 1351 | 94.6 | 0.961 [0.965 / 0.961 / 0.946] | 0.981 [0.981 / 0.983 / 0.951] | 1.032 [1.028 / 1.032 / 1.056] |
+| 32640 | 1 | FLASH_ATTN | 3 | 2054.7 | 2166.7 | 5.90 | 2803 | 45.5 | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] | 1.000 [1.000 / 1.000 / 1.000] |
+| 32640 | 1 | SCRATCH_DECODE | 3 | 2088.4 | 2166.8 | 5.91 | 2839 | 45.0 | 1.015 [1.016 / 1.015 / 0.997] | 1.002 [1.009 / 1.002 / 0.973] | 0.989 [0.989 / 0.989 / 1.009] |
+| 32640 | 1 | SCRATCH_FULL | 3 | 1982.9 | 2055.3 | 5.92 | 2732 | 46.8 | 0.964 [0.965 / 0.964 / 0.945] | 1.004 [1.005 / 1.004 / 0.975] | 1.028 [1.027 / 1.028 / 1.050] |
+
+### routes inside the measured windows, tokens per layer summed over all accepted cases
+
+- FLASH_ATTN (42 cases): flash_calls=0, generation_tokens_total=442368, prompt_tokens_total=13737984, request_success_total=3456, scratch_decode_calls=0
+- SCRATCH_DECODE (42 cases): flash_calls=176948, generation_tokens_total=442368, prompt_tokens_total=13737984, request_success_total=3456, scratch_decode_calls=0
+- SCRATCH_FULL (42 cases): flash_calls=0, generation_tokens_total=442368, prompt_tokens_total=13737984, request_success_total=3456, route_calls.decode_in_mixed=617, route_calls.decode_only=0, route_calls.flash_fallback=0, route_calls.prefill_dense=3456, route_calls.prefill_paged=5145, route_tokens.decode_in_mixed=7201, route_tokens.decode_only=0, route_tokens.flash_fallback=0, route_tokens.prefill_dense=3532577, route_tokens.prefill_paged=10205396, scratch_decode_calls=13574
+
+### rejected attempts (failures.jsonl)
+
+- 2026-09-20T11:08:59Z latency_SCRATCH_DECODE_r0_n128_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T11:10:44Z latency_SCRATCH_DECODE_r0_n512_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T11:12:31Z latency_SCRATCH_DECODE_r0_n1024_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T11:14:22Z latency_SCRATCH_DECODE_r0_n1920_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T11:23:51Z throughput_SCRATCH_DECODE_r0_n512_c2: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T11:24:45Z throughput_SCRATCH_DECODE_r0_n512_c4: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T11:25:31Z throughput_SCRATCH_DECODE_r0_n512_c8: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T11:26:20Z throughput_SCRATCH_DECODE_r0_n512_c16: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T11:27:16Z throughput_SCRATCH_DECODE_r0_n512_c32: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T12:01:12Z long_context_SCRATCH_DECODE_r0_n2048_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T12:02:33Z long_context_SCRATCH_DECODE_r0_n4096_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T12:04:07Z long_context_SCRATCH_DECODE_r0_n8192_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T12:06:15Z long_context_SCRATCH_DECODE_r0_n16384_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T12:10:05Z long_context_SCRATCH_DECODE_r0_n32640_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T12:12:27Z latency_SCRATCH_DECODE_r1_n128_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T12:14:10Z latency_SCRATCH_DECODE_r1_n512_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T12:15:57Z latency_SCRATCH_DECODE_r1_n1024_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T12:17:48Z latency_SCRATCH_DECODE_r1_n1920_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T12:45:13Z throughput_SCRATCH_DECODE_r1_n512_c2: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T12:46:07Z throughput_SCRATCH_DECODE_r1_n512_c4: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T12:46:53Z throughput_SCRATCH_DECODE_r1_n512_c8: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T12:47:42Z throughput_SCRATCH_DECODE_r1_n512_c16: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T12:48:37Z throughput_SCRATCH_DECODE_r1_n512_c32: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T13:01:24Z long_context_SCRATCH_DECODE_r1_n2048_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T13:02:45Z long_context_SCRATCH_DECODE_r1_n4096_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T13:04:20Z long_context_SCRATCH_DECODE_r1_n8192_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T13:06:29Z long_context_SCRATCH_DECODE_r1_n16384_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T13:10:17Z long_context_SCRATCH_DECODE_r1_n32640_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T13:38:29Z latency_SCRATCH_DECODE_r2_n128_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T13:40:12Z latency_SCRATCH_DECODE_r2_n512_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T13:41:58Z latency_SCRATCH_DECODE_r2_n1024_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T13:43:49Z latency_SCRATCH_DECODE_r2_n1920_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T13:50:40Z throughput_SCRATCH_DECODE_r2_n512_c2: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T13:51:34Z throughput_SCRATCH_DECODE_r2_n512_c4: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T13:52:19Z throughput_SCRATCH_DECODE_r2_n512_c8: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T13:53:08Z throughput_SCRATCH_DECODE_r2_n512_c16: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T13:54:02Z throughput_SCRATCH_DECODE_r2_n512_c32: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:00:57Z long_context_SCRATCH_DECODE_r2_n2048_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:02:17Z long_context_SCRATCH_DECODE_r2_n4096_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:03:50Z long_context_SCRATCH_DECODE_r2_n8192_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:05:57Z long_context_SCRATCH_DECODE_r2_n16384_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:09:44Z long_context_SCRATCH_DECODE_r2_n32640_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:33:34Z latency_SCRATCH_DECODE_r0_n128_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:35:19Z latency_SCRATCH_DECODE_r0_n512_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:37:06Z latency_SCRATCH_DECODE_r0_n1024_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:38:56Z latency_SCRATCH_DECODE_r0_n1920_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:40:43Z throughput_SCRATCH_DECODE_r0_n512_c2: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:41:37Z throughput_SCRATCH_DECODE_r0_n512_c4: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:42:23Z throughput_SCRATCH_DECODE_r0_n512_c8: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:43:11Z throughput_SCRATCH_DECODE_r0_n512_c16: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:44:06Z throughput_SCRATCH_DECODE_r0_n512_c32: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:45:59Z long_context_SCRATCH_DECODE_r0_n2048_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:47:20Z long_context_SCRATCH_DECODE_r0_n4096_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:48:54Z long_context_SCRATCH_DECODE_r0_n8192_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:51:02Z long_context_SCRATCH_DECODE_r0_n16384_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:54:51Z long_context_SCRATCH_DECODE_r0_n32640_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:57:14Z latency_SCRATCH_DECODE_r1_n128_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T14:59:00Z latency_SCRATCH_DECODE_r1_n512_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T15:00:47Z latency_SCRATCH_DECODE_r1_n1024_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T15:02:41Z latency_SCRATCH_DECODE_r1_n1920_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T15:04:31Z throughput_SCRATCH_DECODE_r1_n512_c2: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T15:05:25Z throughput_SCRATCH_DECODE_r1_n512_c4: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T15:06:13Z throughput_SCRATCH_DECODE_r1_n512_c8: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T15:07:02Z throughput_SCRATCH_DECODE_r1_n512_c16: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T15:07:58Z throughput_SCRATCH_DECODE_r1_n512_c32: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T15:09:51Z long_context_SCRATCH_DECODE_r1_n2048_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T15:11:13Z long_context_SCRATCH_DECODE_r1_n4096_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T15:12:47Z long_context_SCRATCH_DECODE_r1_n8192_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T15:14:57Z long_context_SCRATCH_DECODE_r1_n16384_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T15:18:49Z long_context_SCRATCH_DECODE_r1_n32640_c1: Rejected('no decode call reached the scratch kernel')
+- 2026-09-20T15:21:10Z latency_SCRATCH_DECODE_r2_n128_c1: Rejected('no decode call reached the scratch kernel')

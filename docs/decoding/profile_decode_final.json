@@ -1,0 +1,2394 @@
+{
+  "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+  "torch": "2.10.0+cu128",
+  "transformers": "4.57.6",
+  "source_sha256": "ab7d1630373290954cd3bc691056f477200ea32a28d70a6c196806b3d67ada16",
+  "script_sha256": "c27816bc5e7ae56c2b698c39037f37c00d4ef800668fec3c844e5fd204bc48dc",
+  "torch_threads": 8,
+  "interop_threads": 16,
+  "cpu_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "config": {
+    "lengths": [
+      512,
+      2048
+    ],
+    "pairs": 3,
+    "steps": 12,
+    "profile_steps": 3,
+    "profile_repeats": 2,
+    "mask": "ones",
+    "output": "profile_decode_final.json"
+  },
+  "telemetry_before": "name, utilization.gpu [%], temperature.gpu, clocks.current.sm [MHz], clocks.current.memory [MHz], power.draw [W], power.limit [W], memory.used [MiB]\nNVIDIA GeForce RTX 4060 Ti, 57 %, 42, 2550 MHz, 8751 MHz, 22.79 W, 160.00 W, 3407 MiB",
+  "controls": [
+    {
+      "n": 512,
+      "samples": {
+        "sdpa": [
+          {
+            "wall_ms_per_token": 15.418939666668999,
+            "event_span_ms_per_token": 15.41171137491862,
+            "calls": {
+              "decode": 0,
+              "prefill": 0,
+              "fallback": 0
+            }
+          },
+          {
+            "wall_ms_per_token": 23.302412583333876,
+            "event_span_ms_per_token": 23.289225260416668,
+            "calls": {
+              "decode": 0,
+              "prefill": 0,
+              "fallback": 0
+            }
+          },
+          {
+            "wall_ms_per_token": 30.184370583337266,
+            "event_span_ms_per_token": 30.178731282552082,
+            "calls": {
+              "decode": 0,
+              "prefill": 0,
+              "fallback": 0
+            }
+          }
+        ],
+        "scratch_decode": [
+          {
+            "wall_ms_per_token": 15.037363333334497,
+            "event_span_ms_per_token": 15.029844919840494,
+            "calls": {
+              "decode": 264,
+              "prefill": 0,
+              "fallback": 0
+            }
+          },
+          {
+            "wall_ms_per_token": 21.02502500000014,
+            "event_span_ms_per_token": 21.02118428548177,
+            "calls": {
+              "decode": 264,
+              "prefill": 0,
+              "fallback": 0
+            }
+          },
+          {
+            "wall_ms_per_token": 36.2730464166674,
+            "event_span_ms_per_token": 36.26970926920573,
+            "calls": {
+              "decode": 264,
+              "prefill": 0,
+              "fallback": 0
+            }
+          }
+        ]
+      },
+      "paired_ratio": {
+        "median": 0.9752527513834591,
+        "bootstrap_95ci": [
+          0.902268163213171,
+          1.2017161768048024
+        ],
+        "pairs": [
+          0.9752527513834591,
+          0.902268163213171,
+          1.2017161768048024
+        ]
+      }
+    },
+    {
+      "n": 2048,
+      "samples": {
+        "sdpa": [
+          {
+            "wall_ms_per_token": 32.765468083335726,
+            "event_span_ms_per_token": 32.77684020996094,
+            "calls": {
+              "decode": 0,
+              "prefill": 0,
+              "fallback": 0
+            }
+          },
+          {
+            "wall_ms_per_token": 30.559143499999664,
+            "event_span_ms_per_token": 30.57147471110026,
+            "calls": {
+              "decode": 0,
+              "prefill": 0,
+              "fallback": 0
+            }
+          },
+          {
+            "wall_ms_per_token": 23.13815041666582,
+            "event_span_ms_per_token": 23.147054036458332,
+            "calls": {
+              "decode": 0,
+              "prefill": 0,
+              "fallback": 0
+            }
+          }
+        ],
+        "scratch_decode": [
+          {
+            "wall_ms_per_token": 27.228095333332664,
+            "event_span_ms_per_token": 27.234156290690105,
+            "calls": {
+              "decode": 264,
+              "prefill": 0,
+              "fallback": 0
+            }
+          },
+          {
+            "wall_ms_per_token": 16.47596925000035,
+            "event_span_ms_per_token": 16.480621337890625,
+            "calls": {
+              "decode": 264,
+              "prefill": 0,
+              "fallback": 0
+            }
+          },
+          {
+            "wall_ms_per_token": 24.287326249999335,
+            "event_span_ms_per_token": 24.297706604003906,
+            "calls": {
+              "decode": 264,
+              "prefill": 0,
+              "fallback": 0
+            }
+          }
+        ]
+      },
+      "paired_ratio": {
+        "median": 0.8309997361881325,
+        "bootstrap_95ci": [
+          0.5391502301103607,
+          1.0496658467785651
+        ],
+        "pairs": [
+          0.8309997361881325,
+          0.5391502301103607,
+          1.0496658467785651
+        ]
+      }
+    }
+  ],
+  "profiles": [
+    {
+      "steps": 3,
+      "trace_wall_ms_per_token": 36.72412633333333,
+      "gpu_active_union_ms_per_token": 9.20301171875,
+      "gpu_activity_sum_ms_per_token": 9.20299099999999,
+      "gpu_span_ms_per_token": 36.196590169270834,
+      "gaps_between_gpu_activities_ms_per_token": 26.993578450520832,
+      "gpu_active_fraction_of_trace_window": 0.25059852030834334,
+      "gpu_ms_per_token": {
+        "mlp": 5.778753999999995,
+        "qkvo_projection": 1.6815923333333327,
+        "lm_head": 0.6624473333333333,
+        "rmsnorm": 0.4293369999999972,
+        "rope": 0.31313599999999936,
+        "attention": 0.1925303333333333,
+        "kv_cache": 0.08759499999999999,
+        "other": 0.04064433333333336,
+        "sampling": 0.0076033333333333335,
+        "mask_build": 0.0051076666666666675,
+        "token_input": 0.0023456666666666665,
+        "embedding": 0.0018980000000000002
+      },
+      "gpu_activity_fraction": {
+        "mlp": 0.6279212921103585,
+        "qkvo_projection": 0.18272237073070421,
+        "lm_head": 0.0719817430369468,
+        "rmsnorm": 0.046651898279591666,
+        "rope": 0.03402545976628681,
+        "attention": 0.02092040873813019,
+        "kv_cache": 0.009518101234696423,
+        "other": 0.004416426500181669,
+        "sampling": 0.0008261806768400992,
+        "mask_build": 0.0005550007238588708,
+        "token_input": 0.00025488090411765794,
+        "embedding": 0.00020623729828704625
+      },
+      "gpu_calls_per_token": {
+        "rmsnorm": 360.0,
+        "rope": 229.0,
+        "mlp": 110.0,
+        "qkvo_projection": 88.0,
+        "other": 45.0,
+        "kv_cache": 44.0,
+        "attention": 44.0,
+        "mask_build": 3.0,
+        "token_input": 2.0,
+        "embedding": 1.0,
+        "lm_head": 1.0,
+        "sampling": 1.0
+      },
+      "host_phase_ms_per_token": {
+        "rmsnorm": 10.862120666666666,
+        "rope": 6.9502830000000015,
+        "qkvo_projection": 5.130259333333334,
+        "mlp": 4.038960333333333,
+        "attention": 2.390926666666666,
+        "kv_cache": 1.3549963333333332,
+        "token_input": 0.5601706666666667,
+        "final_sync": 0.33223166666666665,
+        "mask_build": 0.23950133333333334,
+        "embedding": 0.16155566666666668,
+        "lm_head": 0.06510166666666667,
+        "sampling": 0.05097433333333333
+      },
+      "cuda_api_ms_per_token": {
+        "cudaLaunchKernel": 12.612697333333331,
+        "cudaDeviceSynchronize": 0.31579799999999997,
+        "cudaStreamSynchronize": 0.08719166666666665,
+        "cudaFuncSetAttribute": 0.08155933333333334,
+        "cudaMemcpyAsync": 0.022443666666666664
+      },
+      "cuda_api_calls_per_token": {
+        "cudaLaunchKernel": 927.0,
+        "cudaFuncSetAttribute": 22.0,
+        "cudaMemcpyAsync": 1.0,
+        "cudaStreamSynchronize": 1.0,
+        "cudaDeviceSynchronize": 0.3333333333333333
+      },
+      "sync_sites_ms_per_token": {
+        "final_sync:cudaDeviceSynchronize": 0.31579799999999997,
+        "mask_build:cudaStreamSynchronize": 0.08719166666666665,
+        "mask_build:cudaMemcpyAsync": 0.022443666666666664
+      },
+      "top_gpu_activities": [
+        {
+          "phase": "mlp",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 5.729320666666663
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 1.439638666666667
+        },
+        {
+          "phase": "lm_head",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.6624473333333333
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 7, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.24195366666666676
+        },
+        {
+          "phase": "attention",
+          "kernel": "void pytorch_flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<64, 64, 256, 4, false, false, cutlass::half_t, Flash_kernel_traits<64, 64, 256, 4, cutlass::half_t> >, false, false, false, false, true, false, true, false>(pytorch_flash::Flash_fwd_params)",
+          "ms_per_token": 0.13958900000000007
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.12521166666666664
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4> >(at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>)",
+          "ms_per_token": 0.09024900000000004
+        },
+        {
+          "phase": "kv_cache",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 3, 128, 1, 16, 8>(char*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.08759499999999999
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 4, 64, 64>(at::native::(anonymous namespace)::OpaqueType<2u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 64, 64>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.07702733333333325
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "ms_per_token": 0.07693166666666652
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1})",
+          "ms_per_token": 0.05985433333333333
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.05391166666666665
+        },
+        {
+          "phase": "attention",
+          "kernel": "void pytorch_flash::flash_fwd_splitkv_combine_kernel<Flash_fwd_kernel_traits<64, 64, 256, 4, false, false, cutlass::half_t, Flash_kernel_traits<64, 64, 256, 4, cutlass::half_t> >, 8, 2, true>(pytorch_flash::Flash_fwd_params)",
+          "ms_per_token": 0.05294133333333335
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul>)",
+          "ms_per_token": 0.044088333333333354
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.043578999999999986
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.04105199999999997
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.040401000000000006
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.040124666666666677
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul> >(int, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul>)",
+          "ms_per_token": 0.04005166666666669
+        },
+        {
+          "phase": "other",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.03984500000000002
+        }
+      ],
+      "unattributed": [],
+      "caveat": "Instrumented trace; host/GPU times overlap and must not be added. Gaps are not proof of CPU causality.",
+      "n": 512,
+      "mode": "sdpa",
+      "repeat": 0,
+      "trace": "/mnt/c/Users/PC/flashattn-cuda-main/docs/decoding/profile_decode_final_traces/n512_sdpa_0.json.gz",
+      "calls": {
+        "decode": 0,
+        "prefill": 0,
+        "fallback": 0
+      },
+      "telemetry": "name, utilization.gpu [%], temperature.gpu, clocks.current.sm [MHz], clocks.current.memory [MHz], power.draw [W], power.limit [W], memory.used [MiB]\nNVIDIA GeForce RTX 4060 Ti, 3 %, 45, 2820 MHz, 8751 MHz, 52.33 W, 160.00 W, 3507 MiB",
+      "top_cpu_self_ms_per_token": [
+        {
+          "op": "cudaLaunchKernel",
+          "ms": 12.612697333333395,
+          "calls": 927.0
+        },
+        {
+          "op": "decode.window",
+          "ms": 3.505132333333391,
+          "calls": 0.3333333333333333
+        },
+        {
+          "op": "phase::rmsnorm",
+          "ms": 2.6205429999999947,
+          "calls": 45.0
+        },
+        {
+          "op": "aten::mm",
+          "ms": 2.3120206666666765,
+          "calls": 155.0
+        },
+        {
+          "op": "phase::rope",
+          "ms": 1.8178576666666049,
+          "calls": 23.0
+        },
+        {
+          "op": "phase::qkvo_projection",
+          "ms": 1.5854316666666441,
+          "calls": 88.0
+        },
+        {
+          "op": "aten::mul",
+          "ms": 1.4452293333333854,
+          "calls": 202.0
+        },
+        {
+          "op": "phase::mlp",
+          "ms": 1.0472786666666731,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::add",
+          "ms": 0.9629010000000067,
+          "calls": 133.0
+        },
+        {
+          "op": "aten::cat",
+          "ms": 0.6400313333333486,
+          "calls": 90.0
+        },
+        {
+          "op": "phase::attention",
+          "ms": 0.6119380000000229,
+          "calls": 22.0
+        },
+        {
+          "op": "phase::kv_cache",
+          "ms": 0.5427063333333172,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::copy_",
+          "ms": 0.525408333333319,
+          "calls": 94.0
+        },
+        {
+          "op": "aten::matmul",
+          "ms": 0.4782523333333449,
+          "calls": 156.0
+        },
+        {
+          "op": "aten::empty_strided",
+          "ms": 0.45405633333333056,
+          "calls": 116.0
+        }
+      ]
+    },
+    {
+      "steps": 3,
+      "trace_wall_ms_per_token": 44.257397,
+      "gpu_active_union_ms_per_token": 9.060024739583334,
+      "gpu_activity_sum_ms_per_token": 9.060011666666664,
+      "gpu_span_ms_per_token": 44.1136376953125,
+      "gaps_between_gpu_activities_ms_per_token": 35.053612955729164,
+      "gpu_active_fraction_of_trace_window": 0.20471210133716933,
+      "gpu_ms_per_token": {
+        "mlp": 5.809748666666665,
+        "qkvo_projection": 1.697111333333333,
+        "lm_head": 0.480751,
+        "rmsnorm": 0.4696666666666653,
+        "rope": 0.34422166666666815,
+        "attention": 0.10906300000000002,
+        "kv_cache": 0.08727199999999997,
+        "other": 0.04422500000000003,
+        "sampling": 0.007633,
+        "mask_build": 0.005778333333333333,
+        "token_input": 0.0024836666666666666,
+        "embedding": 0.0020573333333333333
+      },
+      "gpu_activity_fraction": {
+        "mlp": 0.6412517864675302,
+        "qkvo_projection": 0.18731889050179662,
+        "lm_head": 0.053062955952779316,
+        "rmsnorm": 0.051839521177952715,
+        "rope": 0.03799351251755212,
+        "attention": 0.012037843218377023,
+        "kv_cache": 0.00963265867759184,
+        "other": 0.004881340292608163,
+        "sampling": 0.0008424933963477238,
+        "mask_build": 0.0006377843148472768,
+        "token_input": 0.0002741350406649587,
+        "embedding": 0.00022707844195196957
+      },
+      "gpu_calls_per_token": {
+        "rmsnorm": 360.0,
+        "rope": 229.0,
+        "mlp": 110.0,
+        "qkvo_projection": 88.0,
+        "other": 45.0,
+        "kv_cache": 44.0,
+        "attention": 44.0,
+        "mask_build": 3.0,
+        "token_input": 2.0,
+        "embedding": 1.0,
+        "lm_head": 1.0,
+        "sampling": 1.0
+      },
+      "host_phase_ms_per_token": {
+        "rmsnorm": 14.32345766666666,
+        "rope": 9.657439333333334,
+        "qkvo_projection": 5.815047666666665,
+        "mlp": 4.595879000000001,
+        "kv_cache": 1.8606626666666664,
+        "attention": 1.6965996666666663,
+        "mask_build": 0.2544626666666666,
+        "token_input": 0.16582433333333332,
+        "final_sync": 0.14839266666666667,
+        "lm_head": 0.05884633333333333,
+        "embedding": 0.055518333333333336,
+        "sampling": 0.04809133333333333
+      },
+      "cuda_api_ms_per_token": {
+        "cudaLaunchKernel": 14.490339666666648,
+        "cudaDeviceSynchronize": 0.13505033333333333,
+        "cudaStreamSynchronize": 0.12491633333333334,
+        "cudaMemcpyAsync": 0.021750666666666665
+      },
+      "cuda_api_calls_per_token": {
+        "cudaLaunchKernel": 927.0,
+        "cudaMemcpyAsync": 1.0,
+        "cudaStreamSynchronize": 1.0,
+        "cudaDeviceSynchronize": 0.3333333333333333
+      },
+      "sync_sites_ms_per_token": {
+        "final_sync:cudaDeviceSynchronize": 0.13505033333333333,
+        "mask_build:cudaStreamSynchronize": 0.12491633333333334,
+        "mask_build:cudaMemcpyAsync": 0.021750666666666665
+      },
+      "top_gpu_activities": [
+        {
+          "phase": "mlp",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 5.755737999999998
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 1.4494196666666666
+        },
+        {
+          "phase": "lm_head",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.480751
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 7, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.24769166666666653
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.13727399999999973
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4> >(at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>)",
+          "ms_per_token": 0.10008766666666655
+        },
+        {
+          "phase": "kv_cache",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 3, 128, 1, 16, 8>(char*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.08727199999999997
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 4, 64, 64>(at::native::(anonymous namespace)::OpaqueType<2u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 64, 64>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.0847986666666666
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "ms_per_token": 0.08380833333333329
+        },
+        {
+          "phase": "attention",
+          "kernel": "void (anonymous namespace)::decode_grouped_mma<64, false, false>(__half const*, __half const*, __half const*, float*, __half*, float*, (anonymous namespace)::Strides, (anonymous namespace)::Strides, (anonymous namespace)::Strides, int, int, int, int, int, float)",
+          "ms_per_token": 0.07460766666666661
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1})",
+          "ms_per_token": 0.06611766666666667
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.05872300000000003
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.04818833333333335
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul>)",
+          "ms_per_token": 0.04629966666666668
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.045061333333333356
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.04450033333333335
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.04420900000000003
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul> >(int, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul>)",
+          "ms_per_token": 0.043850333333333325
+        },
+        {
+          "phase": "other",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.04334000000000003
+        },
+        {
+          "phase": "attention",
+          "kernel": "void (anonymous namespace)::decode_merge_parallel<64, false>(float const*, __half*, float*, int)",
+          "ms_per_token": 0.03445533333333329
+        }
+      ],
+      "unattributed": [],
+      "caveat": "Instrumented trace; host/GPU times overlap and must not be added. Gaps are not proof of CPU causality.",
+      "n": 512,
+      "mode": "scratch_decode",
+      "repeat": 0,
+      "trace": "/mnt/c/Users/PC/flashattn-cuda-main/docs/decoding/profile_decode_final_traces/n512_scratch_decode_0.json.gz",
+      "calls": {
+        "decode": 66,
+        "prefill": 0,
+        "fallback": 0
+      },
+      "telemetry": "name, utilization.gpu [%], temperature.gpu, clocks.current.sm [MHz], clocks.current.memory [MHz], power.draw [W], power.limit [W], memory.used [MiB]\nNVIDIA GeForce RTX 4060 Ti, 3 %, 44, 2550 MHz, 8751 MHz, 38.01 W, 160.00 W, 3517 MiB",
+      "top_cpu_self_ms_per_token": [
+        {
+          "op": "cudaLaunchKernel",
+          "ms": 14.490339666666545,
+          "calls": 927.0
+        },
+        {
+          "op": "decode.window",
+          "ms": 4.340326666666588,
+          "calls": 0.3333333333333333
+        },
+        {
+          "op": "phase::rmsnorm",
+          "ms": 3.452154999999959,
+          "calls": 45.0
+        },
+        {
+          "op": "aten::mm",
+          "ms": 2.8754976666666456,
+          "calls": 155.0
+        },
+        {
+          "op": "aten::mul",
+          "ms": 2.649367000000101,
+          "calls": 202.0
+        },
+        {
+          "op": "phase::rope",
+          "ms": 2.4528320000000363,
+          "calls": 23.0
+        },
+        {
+          "op": "phase::qkvo_projection",
+          "ms": 1.9093033333333536,
+          "calls": 88.0
+        },
+        {
+          "op": "aten::add",
+          "ms": 1.5110409999999332,
+          "calls": 133.0
+        },
+        {
+          "op": "phase::mlp",
+          "ms": 1.2425753333333025,
+          "calls": 22.0
+        },
+        {
+          "op": "phase::attention",
+          "ms": 0.8574773333332911,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::cat",
+          "ms": 0.8447233333334155,
+          "calls": 90.0
+        },
+        {
+          "op": "aten::mean",
+          "ms": 0.8428423333332994,
+          "calls": 45.0
+        },
+        {
+          "op": "aten::empty_strided",
+          "ms": 0.7395536666666686,
+          "calls": 94.0
+        },
+        {
+          "op": "phase::kv_cache",
+          "ms": 0.7089676666666914,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::copy_",
+          "ms": 0.5708946666666663,
+          "calls": 94.0
+        }
+      ]
+    },
+    {
+      "steps": 3,
+      "trace_wall_ms_per_token": 47.58315966666666,
+      "gpu_active_union_ms_per_token": 16.730372721354165,
+      "gpu_activity_sum_ms_per_token": 16.73038033333333,
+      "gpu_span_ms_per_token": 47.47884700520833,
+      "gaps_between_gpu_activities_ms_per_token": 30.748474283854165,
+      "gpu_active_fraction_of_trace_window": 0.3516028115525557,
+      "gpu_ms_per_token": {
+        "mlp": 10.991042999999996,
+        "qkvo_projection": 2.961071333333334,
+        "rmsnorm": 0.8529416666666664,
+        "lm_head": 0.8393596666666667,
+        "rope": 0.6141166666666682,
+        "attention": 0.20256999999999992,
+        "kv_cache": 0.16039300000000006,
+        "other": 0.07686233333333323,
+        "sampling": 0.014034666666666666,
+        "mask_build": 0.010048666666666666,
+        "token_input": 0.004561333333333334,
+        "embedding": 0.003378
+      },
+      "gpu_activity_fraction": {
+        "mlp": 0.6569511739133405,
+        "qkvo_projection": 0.17698768792683958,
+        "rmsnorm": 0.05098160649505856,
+        "lm_head": 0.050169789923683955,
+        "rope": 0.0367066769811032,
+        "attention": 0.012107913625633654,
+        "kv_cache": 0.009586930888859457,
+        "other": 0.004594177287183006,
+        "sampling": 0.0008388731389868185,
+        "mask_build": 0.0006006239228552306,
+        "token_input": 0.00027263775493766923,
+        "embedding": 0.00020190814151844054
+      },
+      "gpu_calls_per_token": {
+        "rmsnorm": 360.0,
+        "rope": 229.0,
+        "mlp": 110.0,
+        "qkvo_projection": 88.0,
+        "other": 45.0,
+        "kv_cache": 44.0,
+        "attention": 44.0,
+        "mask_build": 3.0,
+        "token_input": 2.0,
+        "embedding": 1.0,
+        "lm_head": 1.0,
+        "sampling": 1.0
+      },
+      "host_phase_ms_per_token": {
+        "rmsnorm": 14.84288,
+        "rope": 10.517551666666668,
+        "qkvo_projection": 6.4717786666666655,
+        "mlp": 4.830085333333333,
+        "attention": 2.1140539999999994,
+        "kv_cache": 2.0263519999999997,
+        "mask_build": 0.5902463333333333,
+        "final_sync": 0.25014333333333333,
+        "token_input": 0.16309400000000002,
+        "lm_head": 0.08951833333333334,
+        "embedding": 0.059301000000000006,
+        "sampling": 0.05882366666666666
+      },
+      "cuda_api_ms_per_token": {
+        "cudaLaunchKernel": 16.885297,
+        "cudaStreamSynchronize": 0.4356276666666666,
+        "cudaDeviceSynchronize": 0.23673299999999997,
+        "cudaMemcpyAsync": 0.020490666666666667
+      },
+      "cuda_api_calls_per_token": {
+        "cudaLaunchKernel": 927.0,
+        "cudaMemcpyAsync": 1.0,
+        "cudaStreamSynchronize": 1.0,
+        "cudaDeviceSynchronize": 0.3333333333333333
+      },
+      "sync_sites_ms_per_token": {
+        "mask_build:cudaStreamSynchronize": 0.4356276666666666,
+        "final_sync:cudaDeviceSynchronize": 0.23673299999999997,
+        "mask_build:cudaMemcpyAsync": 0.020490666666666667
+      },
+      "top_gpu_activities": [
+        {
+          "phase": "mlp",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 10.895524333333332
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 2.5274146666666675
+        },
+        {
+          "phase": "lm_head",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.8393596666666667
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 7, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.43365666666666636
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.2423260000000003
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4> >(at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>)",
+          "ms_per_token": 0.19263800000000011
+        },
+        {
+          "phase": "kv_cache",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 3, 128, 1, 16, 8>(char*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.16039300000000006
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "ms_per_token": 0.15876766666666675
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 4, 64, 64>(at::native::(anonymous namespace)::OpaqueType<2u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 64, 64>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.1545926666666666
+        },
+        {
+          "phase": "attention",
+          "kernel": "void (anonymous namespace)::decode_grouped_mma<64, false, false>(__half const*, __half const*, __half const*, float*, __half*, float*, (anonymous namespace)::Strides, (anonymous namespace)::Strides, (anonymous namespace)::Strides, int, int, int, int, int, float)",
+          "ms_per_token": 0.14208300000000001
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1})",
+          "ms_per_token": 0.11706033333333335
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.10167033333333352
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.08531599999999995
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul>)",
+          "ms_per_token": 0.08283299999999999
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.07924099999999998
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.07793266666666658
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.07718499999999992
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul> >(int, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul>)",
+          "ms_per_token": 0.07659899999999992
+        },
+        {
+          "phase": "other",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.07527499999999988
+        },
+        {
+          "phase": "attention",
+          "kernel": "void (anonymous namespace)::decode_merge_parallel<64, false>(float const*, __half*, float*, int)",
+          "ms_per_token": 0.060487
+        }
+      ],
+      "unattributed": [],
+      "caveat": "Instrumented trace; host/GPU times overlap and must not be added. Gaps are not proof of CPU causality.",
+      "n": 512,
+      "mode": "scratch_decode",
+      "repeat": 1,
+      "trace": "/mnt/c/Users/PC/flashattn-cuda-main/docs/decoding/profile_decode_final_traces/n512_scratch_decode_1.json.gz",
+      "calls": {
+        "decode": 66,
+        "prefill": 0,
+        "fallback": 0
+      },
+      "telemetry": "name, utilization.gpu [%], temperature.gpu, clocks.current.sm [MHz], clocks.current.memory [MHz], power.draw [W], power.limit [W], memory.used [MiB]\nNVIDIA GeForce RTX 4060 Ti, 4 %, 44, 1515 MHz, 5001 MHz, 26.83 W, 160.00 W, 3517 MiB",
+      "top_cpu_self_ms_per_token": [
+        {
+          "op": "cudaLaunchKernel",
+          "ms": 16.885297000000026,
+          "calls": 927.0
+        },
+        {
+          "op": "decode.window",
+          "ms": 4.3250776666665285,
+          "calls": 0.3333333333333333
+        },
+        {
+          "op": "phase::rmsnorm",
+          "ms": 3.7182123333332897,
+          "calls": 45.0
+        },
+        {
+          "op": "aten::mm",
+          "ms": 2.7735403333332767,
+          "calls": 155.0
+        },
+        {
+          "op": "phase::rope",
+          "ms": 2.6836873333332205,
+          "calls": 23.0
+        },
+        {
+          "op": "aten::mul",
+          "ms": 2.3058573333333547,
+          "calls": 202.0
+        },
+        {
+          "op": "phase::qkvo_projection",
+          "ms": 2.0315770000000386,
+          "calls": 88.0
+        },
+        {
+          "op": "phase::mlp",
+          "ms": 1.2967310000000225,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::add",
+          "ms": 1.2289740000000597,
+          "calls": 133.0
+        },
+        {
+          "op": "phase::attention",
+          "ms": 1.0752296666666612,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::cat",
+          "ms": 0.9404746666666339,
+          "calls": 90.0
+        },
+        {
+          "op": "phase::kv_cache",
+          "ms": 0.8990003333333545,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::copy_",
+          "ms": 0.695036999999999,
+          "calls": 94.0
+        },
+        {
+          "op": "aten::mean",
+          "ms": 0.6322530000000103,
+          "calls": 45.0
+        },
+        {
+          "op": "aten::matmul",
+          "ms": 0.6298589999999729,
+          "calls": 156.0
+        }
+      ]
+    },
+    {
+      "steps": 3,
+      "trace_wall_ms_per_token": 35.440781333333334,
+      "gpu_active_union_ms_per_token": 16.7023779296875,
+      "gpu_activity_sum_ms_per_token": 16.702354333333336,
+      "gpu_span_ms_per_token": 35.23154069010417,
+      "gaps_between_gpu_activities_ms_per_token": 18.529162760416668,
+      "gpu_active_fraction_of_trace_window": 0.4712756689136058,
+      "gpu_ms_per_token": {
+        "mlp": 10.842427999999998,
+        "qkvo_projection": 2.946459333333334,
+        "lm_head": 1.0320406666666666,
+        "rmsnorm": 0.746319000000002,
+        "rope": 0.5386513333333347,
+        "attention": 0.34933266666666646,
+        "kv_cache": 0.15014533333333335,
+        "other": 0.06891366666666672,
+        "sampling": 0.012860333333333331,
+        "mask_build": 0.008342333333333332,
+        "token_input": 0.003963666666666667,
+        "embedding": 0.002898
+      },
+      "gpu_activity_fraction": {
+        "mlp": 0.6491556689323418,
+        "qkvo_projection": 0.1764098207073123,
+        "lm_head": 0.06179013126353064,
+        "rmsnorm": 0.044683461092102035,
+        "rope": 0.03225002431293975,
+        "attention": 0.020915175172011163,
+        "kv_cache": 0.008989471204887823,
+        "other": 0.004125985192945755,
+        "sampling": 0.0007699712912728489,
+        "mask_build": 0.0004994705037890565,
+        "token_input": 0.00023731185362031696,
+        "embedding": 0.00017350847324657602
+      },
+      "gpu_calls_per_token": {
+        "rmsnorm": 360.0,
+        "rope": 229.0,
+        "mlp": 110.0,
+        "qkvo_projection": 88.0,
+        "other": 45.0,
+        "kv_cache": 44.0,
+        "attention": 44.0,
+        "mask_build": 3.0,
+        "token_input": 2.0,
+        "embedding": 1.0,
+        "lm_head": 1.0,
+        "sampling": 1.0
+      },
+      "host_phase_ms_per_token": {
+        "rmsnorm": 9.926734333333336,
+        "rope": 6.961501333333332,
+        "qkvo_projection": 5.034389000000002,
+        "mlp": 3.480519999999999,
+        "attention": 2.325549666666666,
+        "kv_cache": 1.548396333333333,
+        "mask_build": 0.8303623333333333,
+        "final_sync": 0.44027066666666664,
+        "token_input": 0.2260083333333333,
+        "lm_head": 0.057301666666666654,
+        "embedding": 0.05662033333333333,
+        "sampling": 0.04591166666666666
+      },
+      "cuda_api_ms_per_token": {
+        "cudaLaunchKernel": 10.776302999999992,
+        "cudaStreamSynchronize": 0.7169006666666667,
+        "cudaDeviceSynchronize": 0.422459,
+        "cudaFuncSetAttribute": 0.023575000000000002,
+        "cudaMemcpyAsync": 0.014361666666666667
+      },
+      "cuda_api_calls_per_token": {
+        "cudaLaunchKernel": 927.0,
+        "cudaFuncSetAttribute": 22.0,
+        "cudaMemcpyAsync": 1.0,
+        "cudaStreamSynchronize": 1.0,
+        "cudaDeviceSynchronize": 0.3333333333333333
+      },
+      "sync_sites_ms_per_token": {
+        "mask_build:cudaStreamSynchronize": 0.7169006666666667,
+        "final_sync:cudaDeviceSynchronize": 0.422459,
+        "mask_build:cudaMemcpyAsync": 0.014361666666666667
+      },
+      "top_gpu_activities": [
+        {
+          "phase": "mlp",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 10.757529000000003
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 2.525121333333333
+        },
+        {
+          "phase": "lm_head",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 1.0320406666666666
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 7, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.4213380000000001
+        },
+        {
+          "phase": "attention",
+          "kernel": "void pytorch_flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<64, 64, 256, 4, false, false, cutlass::half_t, Flash_kernel_traits<64, 64, 256, 4, cutlass::half_t> >, false, false, false, false, true, false, true, false>(pytorch_flash::Flash_fwd_params)",
+          "ms_per_token": 0.2559763333333332
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.2138133333333335
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4> >(at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>)",
+          "ms_per_token": 0.16271733333333335
+        },
+        {
+          "phase": "kv_cache",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 3, 128, 1, 16, 8>(char*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.15014533333333335
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "ms_per_token": 0.13656166666666686
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 4, 64, 64>(at::native::(anonymous namespace)::OpaqueType<2u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 64, 64>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.13434633333333326
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1})",
+          "ms_per_token": 0.10301833333333331
+        },
+        {
+          "phase": "attention",
+          "kernel": "void pytorch_flash::flash_fwd_splitkv_combine_kernel<Flash_fwd_kernel_traits<64, 64, 256, 4, false, false, cutlass::half_t, Flash_kernel_traits<64, 64, 256, 4, cutlass::half_t> >, 8, 2, true>(pytorch_flash::Flash_fwd_params)",
+          "ms_per_token": 0.09335633333333332
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.09136100000000003
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.07512899999999993
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul>)",
+          "ms_per_token": 0.07452
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.06982899999999993
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.06888166666666663
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.06860466666666663
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul> >(int, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul>)",
+          "ms_per_token": 0.06854366666666661
+        },
+        {
+          "phase": "other",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.06755000000000005
+        }
+      ],
+      "unattributed": [],
+      "caveat": "Instrumented trace; host/GPU times overlap and must not be added. Gaps are not proof of CPU causality.",
+      "n": 512,
+      "mode": "sdpa",
+      "repeat": 1,
+      "trace": "/mnt/c/Users/PC/flashattn-cuda-main/docs/decoding/profile_decode_final_traces/n512_sdpa_1.json.gz",
+      "calls": {
+        "decode": 0,
+        "prefill": 0,
+        "fallback": 0
+      },
+      "telemetry": "name, utilization.gpu [%], temperature.gpu, clocks.current.sm [MHz], clocks.current.memory [MHz], power.draw [W], power.limit [W], memory.used [MiB]\nNVIDIA GeForce RTX 4060 Ti, 3 %, 43, 1935 MHz, 8751 MHz, 27.63 W, 160.00 W, 3517 MiB",
+      "top_cpu_self_ms_per_token": [
+        {
+          "op": "cudaLaunchKernel",
+          "ms": 10.776303000000047,
+          "calls": 927.0
+        },
+        {
+          "op": "decode.window",
+          "ms": 3.6263553333332528,
+          "calls": 0.3333333333333333
+        },
+        {
+          "op": "phase::rmsnorm",
+          "ms": 2.5086270000000654,
+          "calls": 45.0
+        },
+        {
+          "op": "aten::mm",
+          "ms": 2.165498333333369,
+          "calls": 155.0
+        },
+        {
+          "op": "phase::rope",
+          "ms": 2.123634999999925,
+          "calls": 23.0
+        },
+        {
+          "op": "phase::qkvo_projection",
+          "ms": 1.5657950000000085,
+          "calls": 88.0
+        },
+        {
+          "op": "aten::mul",
+          "ms": 1.4428586666666903,
+          "calls": 202.0
+        },
+        {
+          "op": "aten::add",
+          "ms": 0.9837739999999379,
+          "calls": 133.0
+        },
+        {
+          "op": "phase::mlp",
+          "ms": 0.9391903333333467,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::cat",
+          "ms": 0.7874820000000162,
+          "calls": 90.0
+        },
+        {
+          "op": "cudaStreamSynchronize",
+          "ms": 0.7169006666666683,
+          "calls": 1.0
+        },
+        {
+          "op": "phase::attention",
+          "ms": 0.5677686666666575,
+          "calls": 22.0
+        },
+        {
+          "op": "phase::kv_cache",
+          "ms": 0.5671306666666702,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::matmul",
+          "ms": 0.5050039999999383,
+          "calls": 156.0
+        },
+        {
+          "op": "aten::empty_strided",
+          "ms": 0.4890443333333405,
+          "calls": 116.0
+        }
+      ]
+    },
+    {
+      "steps": 3,
+      "trace_wall_ms_per_token": 32.95520033333333,
+      "gpu_active_union_ms_per_token": 9.3435234375,
+      "gpu_activity_sum_ms_per_token": 9.343523333333334,
+      "gpu_span_ms_per_token": 32.75331673177083,
+      "gaps_between_gpu_activities_ms_per_token": 23.409793294270834,
+      "gpu_active_fraction_of_trace_window": 0.2835219735578202,
+      "gpu_ms_per_token": {
+        "mlp": 5.7832810000000014,
+        "qkvo_projection": 1.692541333333334,
+        "lm_head": 0.4871673333333333,
+        "rmsnorm": 0.4330893333333311,
+        "rope": 0.3147269999999994,
+        "attention": 0.3134796666666671,
+        "kv_cache": 0.2623026666666667,
+        "other": 0.040199,
+        "sampling": 0.007238333333333333,
+        "mask_build": 0.005084333333333332,
+        "token_input": 0.002548,
+        "embedding": 0.0018653333333333332
+      },
+      "gpu_activity_fraction": {
+        "mlp": 0.6189614767020437,
+        "qkvo_projection": 0.18114594173432796,
+        "lm_head": 0.052139574757131234,
+        "rmsnorm": 0.04635182231399481,
+        "rope": 0.03368397431803914,
+        "attention": 0.03355047721113061,
+        "kv_cache": 0.028073207216264245,
+        "other": 0.004302338482592398,
+        "sampling": 0.0007746899188992589,
+        "mask_build": 0.000544155898363822,
+        "token_input": 0.00027270226756002464,
+        "embedding": 0.00019963917965278624
+      },
+      "gpu_calls_per_token": {
+        "rmsnorm": 360.0,
+        "rope": 229.0,
+        "mlp": 110.0,
+        "qkvo_projection": 88.0,
+        "other": 45.0,
+        "kv_cache": 44.0,
+        "attention": 44.0,
+        "mask_build": 3.0,
+        "token_input": 2.0,
+        "embedding": 1.0,
+        "lm_head": 1.0,
+        "sampling": 1.0
+      },
+      "host_phase_ms_per_token": {
+        "rmsnorm": 9.742851,
+        "rope": 6.208892333333336,
+        "qkvo_projection": 4.815198666666664,
+        "mlp": 3.739545666666667,
+        "attention": 2.1649643333333333,
+        "kv_cache": 1.241399,
+        "mask_build": 0.256562,
+        "final_sync": 0.240237,
+        "token_input": 0.23552399999999998,
+        "lm_head": 0.05798099999999999,
+        "embedding": 0.05107133333333333,
+        "sampling": 0.04493333333333334
+      },
+      "cuda_api_ms_per_token": {
+        "cudaLaunchKernel": 11.316097333333342,
+        "cudaDeviceSynchronize": 0.22933933333333334,
+        "cudaStreamSynchronize": 0.10960633333333333,
+        "cudaFuncSetAttribute": 0.029040666666666676,
+        "cudaMemcpyAsync": 0.026955999999999997
+      },
+      "cuda_api_calls_per_token": {
+        "cudaLaunchKernel": 927.0,
+        "cudaFuncSetAttribute": 22.0,
+        "cudaMemcpyAsync": 1.0,
+        "cudaStreamSynchronize": 1.0,
+        "cudaDeviceSynchronize": 0.3333333333333333
+      },
+      "sync_sites_ms_per_token": {
+        "final_sync:cudaDeviceSynchronize": 0.22933933333333334,
+        "mask_build:cudaStreamSynchronize": 0.10960633333333333,
+        "mask_build:cudaMemcpyAsync": 0.026955999999999997
+      },
+      "top_gpu_activities": [
+        {
+          "phase": "mlp",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 5.7337046666666645
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 1.451652999999999
+        },
+        {
+          "phase": "lm_head",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.4871673333333333
+        },
+        {
+          "phase": "kv_cache",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 3, 128, 1, 16, 8>(char*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.2623026666666667
+        },
+        {
+          "phase": "attention",
+          "kernel": "void pytorch_flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<64, 64, 256, 4, false, false, cutlass::half_t, Flash_kernel_traits<64, 64, 256, 4, cutlass::half_t> >, false, false, false, false, true, false, true, false>(pytorch_flash::Flash_fwd_params)",
+          "ms_per_token": 0.24580133333333343
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 7, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.2408883333333334
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.1253576666666667
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4> >(at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>)",
+          "ms_per_token": 0.09075866666666667
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 4, 64, 64>(at::native::(anonymous namespace)::OpaqueType<2u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 64, 64>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.07742099999999998
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "ms_per_token": 0.07688933333333324
+        },
+        {
+          "phase": "attention",
+          "kernel": "void pytorch_flash::flash_fwd_splitkv_combine_kernel<Flash_fwd_kernel_traits<64, 64, 256, 4, false, false, cutlass::half_t, Flash_kernel_traits<64, 64, 256, 4, cutlass::half_t> >, 8, 4, true>(pytorch_flash::Flash_fwd_params)",
+          "ms_per_token": 0.06767833333333327
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1})",
+          "ms_per_token": 0.06035499999999995
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.05380933333333335
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul>)",
+          "ms_per_token": 0.046496666666666686
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.04379966666666668
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.041284666666666706
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.04055733333333335
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul> >(int, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul>)",
+          "ms_per_token": 0.040389333333333326
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.040389000000000015
+        },
+        {
+          "phase": "other",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.03941033333333333
+        }
+      ],
+      "unattributed": [],
+      "caveat": "Instrumented trace; host/GPU times overlap and must not be added. Gaps are not proof of CPU causality.",
+      "n": 2048,
+      "mode": "sdpa",
+      "repeat": 0,
+      "trace": "/mnt/c/Users/PC/flashattn-cuda-main/docs/decoding/profile_decode_final_traces/n2048_sdpa_0.json.gz",
+      "calls": {
+        "decode": 0,
+        "prefill": 0,
+        "fallback": 0
+      },
+      "telemetry": "name, utilization.gpu [%], temperature.gpu, clocks.current.sm [MHz], clocks.current.memory [MHz], power.draw [W], power.limit [W], memory.used [MiB]\nNVIDIA GeForce RTX 4060 Ti, 3 %, 47, 2820 MHz, 8751 MHz, 79.69 W, 160.00 W, 3655 MiB",
+      "top_cpu_self_ms_per_token": [
+        {
+          "op": "cudaLaunchKernel",
+          "ms": 11.316097333333436,
+          "calls": 927.0
+        },
+        {
+          "op": "decode.window",
+          "ms": 3.157860333333374,
+          "calls": 0.3333333333333333
+        },
+        {
+          "op": "phase::rmsnorm",
+          "ms": 2.376613999999971,
+          "calls": 45.0
+        },
+        {
+          "op": "aten::mm",
+          "ms": 2.197036333333258,
+          "calls": 155.0
+        },
+        {
+          "op": "phase::rope",
+          "ms": 1.603914333333291,
+          "calls": 23.0
+        },
+        {
+          "op": "phase::qkvo_projection",
+          "ms": 1.4859446666666027,
+          "calls": 88.0
+        },
+        {
+          "op": "aten::mul",
+          "ms": 1.3231056666666694,
+          "calls": 202.0
+        },
+        {
+          "op": "phase::mlp",
+          "ms": 0.9916879999999848,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::add",
+          "ms": 0.8911156666666723,
+          "calls": 133.0
+        },
+        {
+          "op": "aten::cat",
+          "ms": 0.6035143333333596,
+          "calls": 90.0
+        },
+        {
+          "op": "phase::attention",
+          "ms": 0.5677239999999993,
+          "calls": 22.0
+        },
+        {
+          "op": "phase::kv_cache",
+          "ms": 0.49894966666667334,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::copy_",
+          "ms": 0.47457633333333904,
+          "calls": 94.0
+        },
+        {
+          "op": "aten::matmul",
+          "ms": 0.42925466666672357,
+          "calls": 156.0
+        },
+        {
+          "op": "aten::empty_strided",
+          "ms": 0.40604200000004076,
+          "calls": 116.0
+        }
+      ]
+    },
+    {
+      "steps": 3,
+      "trace_wall_ms_per_token": 39.464304,
+      "gpu_active_union_ms_per_token": 9.1775146484375,
+      "gpu_activity_sum_ms_per_token": 9.177543666666658,
+      "gpu_span_ms_per_token": 39.28630794270833,
+      "gaps_between_gpu_activities_ms_per_token": 30.108793294270832,
+      "gpu_active_fraction_of_trace_window": 0.23255229962848198,
+      "gpu_ms_per_token": {
+        "mlp": 5.788801666666663,
+        "qkvo_projection": 1.6926603333333317,
+        "lm_head": 0.4809493333333333,
+        "rmsnorm": 0.431149666666665,
+        "rope": 0.3140449999999996,
+        "kv_cache": 0.2633706666666666,
+        "attention": 0.14961833333333338,
+        "other": 0.040086999999999984,
+        "sampling": 0.007301666666666666,
+        "mask_build": 0.005211666666666666,
+        "token_input": 0.0024939999999999997,
+        "embedding": 0.0018543333333333335
+      },
+      "gpu_activity_fraction": {
+        "mlp": 0.6307571913486947,
+        "qkvo_projection": 0.18443500731913343,
+        "lm_head": 0.052405017159457126,
+        "rmsnorm": 0.04697876494258744,
+        "rope": 0.03421885107892521,
+        "kv_cache": 0.028697293767529896,
+        "attention": 0.016302655565318132,
+        "other": 0.004367944349379471,
+        "sampling": 0.000795601408379752,
+        "mask_build": 0.0005678716283961388,
+        "token_input": 0.0002717502733392971,
+        "embedding": 0.0002020511588594641
+      },
+      "gpu_calls_per_token": {
+        "rmsnorm": 360.0,
+        "rope": 229.0,
+        "mlp": 110.0,
+        "qkvo_projection": 88.0,
+        "other": 45.0,
+        "kv_cache": 44.0,
+        "attention": 44.0,
+        "mask_build": 3.0,
+        "token_input": 2.0,
+        "embedding": 1.0,
+        "lm_head": 1.0,
+        "sampling": 1.0
+      },
+      "host_phase_ms_per_token": {
+        "rmsnorm": 12.296775333333331,
+        "rope": 8.352965,
+        "qkvo_projection": 5.628385333333337,
+        "mlp": 4.335665333333334,
+        "kv_cache": 1.605152333333333,
+        "attention": 1.5966179999999994,
+        "mask_build": 0.2476843333333333,
+        "token_input": 0.23902966666666664,
+        "final_sync": 0.14762033333333333,
+        "embedding": 0.080272,
+        "lm_head": 0.059885666666666656,
+        "sampling": 0.047927333333333336
+      },
+      "cuda_api_ms_per_token": {
+        "cudaLaunchKernel": 14.895449666666682,
+        "cudaDeviceSynchronize": 0.13383633333333333,
+        "cudaStreamSynchronize": 0.08361633333333332,
+        "cudaMemcpyAsync": 0.032107666666666666
+      },
+      "cuda_api_calls_per_token": {
+        "cudaLaunchKernel": 927.0,
+        "cudaMemcpyAsync": 1.0,
+        "cudaStreamSynchronize": 1.0,
+        "cudaDeviceSynchronize": 0.3333333333333333
+      },
+      "sync_sites_ms_per_token": {
+        "final_sync:cudaDeviceSynchronize": 0.13383633333333333,
+        "mask_build:cudaStreamSynchronize": 0.08361633333333332,
+        "mask_build:cudaMemcpyAsync": 0.032107666666666666
+      },
+      "top_gpu_activities": [
+        {
+          "phase": "mlp",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 5.739736
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 1.4530386666666657
+        },
+        {
+          "phase": "lm_head",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.4809493333333333
+        },
+        {
+          "phase": "kv_cache",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 3, 128, 1, 16, 8>(char*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.2633706666666666
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 7, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.23962166666666673
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.1250323333333334
+        },
+        {
+          "phase": "attention",
+          "kernel": "void (anonymous namespace)::decode_grouped_mma<64, false, false>(__half const*, __half const*, __half const*, float*, __half*, float*, (anonymous namespace)::Strides, (anonymous namespace)::Strides, (anonymous namespace)::Strides, int, int, int, int, int, float)",
+          "ms_per_token": 0.11967699999999998
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4> >(at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>)",
+          "ms_per_token": 0.09083600000000008
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 4, 64, 64>(at::native::(anonymous namespace)::OpaqueType<2u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 64, 64>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.07736333333333334
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "ms_per_token": 0.07622199999999994
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1})",
+          "ms_per_token": 0.06022433333333331
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.053399000000000016
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul>)",
+          "ms_per_token": 0.04610166666666666
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.04381733333333335
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.04100100000000003
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.040567000000000006
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.04027766666666665
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul> >(int, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul>)",
+          "ms_per_token": 0.03992899999999999
+        },
+        {
+          "phase": "other",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.039297666666666654
+        },
+        {
+          "phase": "attention",
+          "kernel": "void (anonymous namespace)::decode_merge_parallel<64, false>(float const*, __half*, float*, int)",
+          "ms_per_token": 0.02994133333333336
+        }
+      ],
+      "unattributed": [],
+      "caveat": "Instrumented trace; host/GPU times overlap and must not be added. Gaps are not proof of CPU causality.",
+      "n": 2048,
+      "mode": "scratch_decode",
+      "repeat": 0,
+      "trace": "/mnt/c/Users/PC/flashattn-cuda-main/docs/decoding/profile_decode_final_traces/n2048_scratch_decode_0.json.gz",
+      "calls": {
+        "decode": 66,
+        "prefill": 0,
+        "fallback": 0
+      },
+      "telemetry": "name, utilization.gpu [%], temperature.gpu, clocks.current.sm [MHz], clocks.current.memory [MHz], power.draw [W], power.limit [W], memory.used [MiB]\nNVIDIA GeForce RTX 4060 Ti, 3 %, 47, 2820 MHz, 8751 MHz, 55.42 W, 160.00 W, 3655 MiB",
+      "top_cpu_self_ms_per_token": [
+        {
+          "op": "cudaLaunchKernel",
+          "ms": 14.895449666666716,
+          "calls": 927.0
+        },
+        {
+          "op": "decode.window",
+          "ms": 3.6118233333332657,
+          "calls": 0.3333333333333333
+        },
+        {
+          "op": "phase::rmsnorm",
+          "ms": 2.851409000000036,
+          "calls": 45.0
+        },
+        {
+          "op": "aten::mm",
+          "ms": 2.47384166666659,
+          "calls": 155.0
+        },
+        {
+          "op": "phase::rope",
+          "ms": 2.063819,
+          "calls": 23.0
+        },
+        {
+          "op": "phase::qkvo_projection",
+          "ms": 1.699301333333312,
+          "calls": 88.0
+        },
+        {
+          "op": "aten::mul",
+          "ms": 1.693794000000129,
+          "calls": 202.0
+        },
+        {
+          "op": "phase::mlp",
+          "ms": 1.1214609999999632,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::add",
+          "ms": 1.0758466666667124,
+          "calls": 133.0
+        },
+        {
+          "op": "phase::attention",
+          "ms": 0.7997466666667234,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::cat",
+          "ms": 0.7534749999999626,
+          "calls": 90.0
+        },
+        {
+          "op": "phase::kv_cache",
+          "ms": 0.6261260000000111,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::copy_",
+          "ms": 0.5626563333333237,
+          "calls": 94.0
+        },
+        {
+          "op": "aten::matmul",
+          "ms": 0.5280050000000487,
+          "calls": 156.0
+        },
+        {
+          "op": "aten::mean",
+          "ms": 0.4940050000000086,
+          "calls": 45.0
+        }
+      ]
+    },
+    {
+      "steps": 3,
+      "trace_wall_ms_per_token": 32.757069333333334,
+      "gpu_active_union_ms_per_token": 9.3141318359375,
+      "gpu_activity_sum_ms_per_token": 9.314167666666664,
+      "gpu_span_ms_per_token": 32.5518330078125,
+      "gaps_between_gpu_activities_ms_per_token": 23.237701171875,
+      "gpu_active_fraction_of_trace_window": 0.2843395952537034,
+      "gpu_ms_per_token": {
+        "mlp": 5.790411,
+        "qkvo_projection": 1.6901369999999993,
+        "lm_head": 0.618152,
+        "rmsnorm": 0.4297856666666651,
+        "rope": 0.3131629999999995,
+        "kv_cache": 0.2661243333333333,
+        "attention": 0.1496503333333334,
+        "other": 0.03994699999999998,
+        "sampling": 0.0072369999999999995,
+        "mask_build": 0.00518,
+        "token_input": 0.002483333333333333,
+        "embedding": 0.0018969999999999998
+      },
+      "gpu_activity_fraction": {
+        "mlp": 0.6216777716727813,
+        "qkvo_projection": 0.1814587261563504,
+        "lm_head": 0.06636685339176668,
+        "rmsnorm": 0.04614321773536163,
+        "rope": 0.03362222060063835,
+        "kv_cache": 0.028571992995759906,
+        "attention": 0.0160669572085221,
+        "other": 0.004288842699596381,
+        "sampling": 0.0007769883750213788,
+        "mask_build": 0.0005561420177712785,
+        "token_input": 0.0002666189210036052,
+        "embedding": 0.0002036682254270493
+      },
+      "gpu_calls_per_token": {
+        "rmsnorm": 360.0,
+        "rope": 229.0,
+        "mlp": 110.0,
+        "qkvo_projection": 88.0,
+        "other": 45.0,
+        "kv_cache": 44.0,
+        "attention": 44.0,
+        "mask_build": 3.0,
+        "token_input": 2.0,
+        "embedding": 1.0,
+        "lm_head": 1.0,
+        "sampling": 1.0
+      },
+      "host_phase_ms_per_token": {
+        "rmsnorm": 9.934181333333331,
+        "rope": 6.055119333333335,
+        "qkvo_projection": 4.917118666666667,
+        "mlp": 4.073703333333333,
+        "attention": 1.3154399999999995,
+        "kv_cache": 1.281089,
+        "mask_build": 0.43284533333333336,
+        "token_input": 0.24417333333333333,
+        "final_sync": 0.14053966666666667,
+        "lm_head": 0.058754999999999995,
+        "embedding": 0.049713999999999994,
+        "sampling": 0.04690433333333333
+      },
+      "cuda_api_ms_per_token": {
+        "cudaLaunchKernel": 11.402098666666681,
+        "cudaStreamSynchronize": 0.29089733333333334,
+        "cudaDeviceSynchronize": 0.12795166666666666,
+        "cudaMemcpyAsync": 0.02018633333333333
+      },
+      "cuda_api_calls_per_token": {
+        "cudaLaunchKernel": 927.0,
+        "cudaMemcpyAsync": 1.0,
+        "cudaStreamSynchronize": 1.0,
+        "cudaDeviceSynchronize": 0.3333333333333333
+      },
+      "sync_sites_ms_per_token": {
+        "mask_build:cudaStreamSynchronize": 0.29089733333333334,
+        "final_sync:cudaDeviceSynchronize": 0.12795166666666666,
+        "mask_build:cudaMemcpyAsync": 0.02018633333333333
+      },
+      "top_gpu_activities": [
+        {
+          "phase": "mlp",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 5.741586000000005
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 1.4502316666666666
+        },
+        {
+          "phase": "lm_head",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.618152
+        },
+        {
+          "phase": "kv_cache",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 3, 128, 1, 16, 8>(char*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.2661243333333333
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 7, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.2399053333333333
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.1244340000000001
+        },
+        {
+          "phase": "attention",
+          "kernel": "void (anonymous namespace)::decode_grouped_mma<64, false, false>(__half const*, __half const*, __half const*, float*, __half*, float*, (anonymous namespace)::Strides, (anonymous namespace)::Strides, (anonymous namespace)::Strides, int, int, int, int, int, float)",
+          "ms_per_token": 0.11964833333333331
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4> >(at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>)",
+          "ms_per_token": 0.09043566666666675
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 4, 64, 64>(at::native::(anonymous namespace)::OpaqueType<2u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 64, 64>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.07724233333333332
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "ms_per_token": 0.07601133333333333
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1})",
+          "ms_per_token": 0.060017666666666636
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.053227666666666736
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul>)",
+          "ms_per_token": 0.04600166666666664
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.043707333333333355
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.041066333333333364
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.04042533333333333
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.04015033333333333
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul> >(int, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul>)",
+          "ms_per_token": 0.03982633333333332
+        },
+        {
+          "phase": "other",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.03913666666666665
+        },
+        {
+          "phase": "attention",
+          "kernel": "void (anonymous namespace)::decode_merge_parallel<64, false>(float const*, __half*, float*, int)",
+          "ms_per_token": 0.03000200000000002
+        }
+      ],
+      "unattributed": [],
+      "caveat": "Instrumented trace; host/GPU times overlap and must not be added. Gaps are not proof of CPU causality.",
+      "n": 2048,
+      "mode": "scratch_decode",
+      "repeat": 1,
+      "trace": "/mnt/c/Users/PC/flashattn-cuda-main/docs/decoding/profile_decode_final_traces/n2048_scratch_decode_1.json.gz",
+      "calls": {
+        "decode": 66,
+        "prefill": 0,
+        "fallback": 0
+      },
+      "telemetry": "name, utilization.gpu [%], temperature.gpu, clocks.current.sm [MHz], clocks.current.memory [MHz], power.draw [W], power.limit [W], memory.used [MiB]\nNVIDIA GeForce RTX 4060 Ti, 3 %, 59, 2820 MHz, 8751 MHz, 55.23 W, 160.00 W, 3655 MiB",
+      "top_cpu_self_ms_per_token": [
+        {
+          "op": "cudaLaunchKernel",
+          "ms": 11.402098666666639,
+          "calls": 927.0
+        },
+        {
+          "op": "decode.window",
+          "ms": 3.211249666666714,
+          "calls": 0.3333333333333333
+        },
+        {
+          "op": "phase::rmsnorm",
+          "ms": 2.4395963333332995,
+          "calls": 45.0
+        },
+        {
+          "op": "aten::mm",
+          "ms": 2.2630960000000093,
+          "calls": 155.0
+        },
+        {
+          "op": "phase::rope",
+          "ms": 1.594582000000003,
+          "calls": 23.0
+        },
+        {
+          "op": "phase::qkvo_projection",
+          "ms": 1.502399000000018,
+          "calls": 88.0
+        },
+        {
+          "op": "aten::mul",
+          "ms": 1.328594666666661,
+          "calls": 202.0
+        },
+        {
+          "op": "phase::mlp",
+          "ms": 1.0629696666666872,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::add",
+          "ms": 0.8685239999999869,
+          "calls": 133.0
+        },
+        {
+          "op": "phase::attention",
+          "ms": 0.6565989999999859,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::cat",
+          "ms": 0.601193666666651,
+          "calls": 90.0
+        },
+        {
+          "op": "phase::kv_cache",
+          "ms": 0.5057863333333439,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::copy_",
+          "ms": 0.5011743333333364,
+          "calls": 94.0
+        },
+        {
+          "op": "aten::matmul",
+          "ms": 0.48027466666667207,
+          "calls": 156.0
+        },
+        {
+          "op": "aten::mean",
+          "ms": 0.4124663333333114,
+          "calls": 45.0
+        }
+      ]
+    },
+    {
+      "steps": 3,
+      "trace_wall_ms_per_token": 42.922421,
+      "gpu_active_union_ms_per_token": 9.303214518229167,
+      "gpu_activity_sum_ms_per_token": 9.30324633333333,
+      "gpu_span_ms_per_token": 42.7190693359375,
+      "gaps_between_gpu_activities_ms_per_token": 33.41585481770833,
+      "gpu_active_fraction_of_trace_window": 0.21674486903311363,
+      "gpu_ms_per_token": {
+        "mlp": 5.755649999999993,
+        "qkvo_projection": 1.689377000000001,
+        "lm_head": 0.4769783333333333,
+        "rmsnorm": 0.432581666666669,
+        "rope": 0.3143266666666675,
+        "attention": 0.31393966666666684,
+        "kv_cache": 0.26333766666666664,
+        "other": 0.04016733333333334,
+        "sampling": 0.007228666666666666,
+        "mask_build": 0.005349666666666667,
+        "token_input": 0.002484,
+        "embedding": 0.0018256666666666666
+      },
+      "gpu_activity_fraction": {
+        "mlp": 0.6186711384151599,
+        "qkvo_projection": 0.18159005356517324,
+        "lm_head": 0.051270096076498614,
+        "rmsnorm": 0.046497926763127646,
+        "rope": 0.03378677242377662,
+        "attention": 0.03374517404121912,
+        "kv_cache": 0.02830599741545416,
+        "other": 0.00431756097754981,
+        "sampling": 0.0007770047580882074,
+        "mask_build": 0.0005750322494954182,
+        "token_input": 0.0002670035717639639,
+        "embedding": 0.00019623974269340183
+      },
+      "gpu_calls_per_token": {
+        "rmsnorm": 360.0,
+        "rope": 229.0,
+        "mlp": 110.0,
+        "qkvo_projection": 88.0,
+        "other": 45.0,
+        "kv_cache": 44.0,
+        "attention": 44.0,
+        "mask_build": 3.0,
+        "token_input": 2.0,
+        "embedding": 1.0,
+        "lm_head": 1.0,
+        "sampling": 1.0
+      },
+      "host_phase_ms_per_token": {
+        "rmsnorm": 13.463258666666668,
+        "rope": 8.882801333333333,
+        "qkvo_projection": 5.761762666666664,
+        "mlp": 4.406475666666665,
+        "attention": 2.508230666666668,
+        "kv_cache": 1.737467333333334,
+        "mask_build": 0.289229,
+        "token_input": 0.24674366666666667,
+        "final_sync": 0.144342,
+        "lm_head": 0.06178033333333333,
+        "embedding": 0.05983333333333333,
+        "sampling": 0.046297
+      },
+      "cuda_api_ms_per_token": {
+        "cudaLaunchKernel": 14.114000333333326,
+        "cudaStreamSynchronize": 0.13166699999999998,
+        "cudaDeviceSynchronize": 0.13055033333333332,
+        "cudaFuncSetAttribute": 0.026475999999999993,
+        "cudaMemcpyAsync": 0.022551999999999996
+      },
+      "cuda_api_calls_per_token": {
+        "cudaLaunchKernel": 927.0,
+        "cudaFuncSetAttribute": 22.0,
+        "cudaMemcpyAsync": 1.0,
+        "cudaStreamSynchronize": 1.0,
+        "cudaDeviceSynchronize": 0.3333333333333333
+      },
+      "sync_sites_ms_per_token": {
+        "mask_build:cudaStreamSynchronize": 0.13166699999999998,
+        "final_sync:cudaDeviceSynchronize": 0.13055033333333332,
+        "mask_build:cudaMemcpyAsync": 0.022551999999999996
+      },
+      "top_gpu_activities": [
+        {
+          "phase": "mlp",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 5.706140999999998
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 1.4488073333333338
+        },
+        {
+          "phase": "lm_head",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 6, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.4769783333333333
+        },
+        {
+          "phase": "kv_cache",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy_vectorized<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 3, 128, 1, 16, 8>(char*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.26333766666666664
+        },
+        {
+          "phase": "attention",
+          "kernel": "void pytorch_flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<64, 64, 256, 4, false, false, cutlass::half_t, Flash_kernel_traits<64, 64, 256, 4, cutlass::half_t> >, false, false, false, false, true, false, true, false>(pytorch_flash::Flash_fwd_params)",
+          "ms_per_token": 0.24640799999999993
+        },
+        {
+          "phase": "qkvo_projection",
+          "kernel": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __half, __half, __half, float, false, true, true, false, 7, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half const>, cublasGemvTensorStridedBatched<__half>, float>)",
+          "ms_per_token": 0.24056966666666657
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.12529600000000016
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4> >(at::native::ReduceOp<float, at::native::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>)",
+          "ms_per_token": 0.09043400000000003
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 4, 64, 64>(at::native::(anonymous namespace)::OpaqueType<2u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<2u>, unsigned int, 64, 64>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+          "ms_per_token": 0.0773893333333334
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+          "ms_per_token": 0.07662833333333324
+        },
+        {
+          "phase": "attention",
+          "kernel": "void pytorch_flash::flash_fwd_splitkv_combine_kernel<Flash_fwd_kernel_traits<64, 64, 256, 4, false, false, cutlass::half_t, Flash_kernel_traits<64, 64, 256, 4, cutlass::half_t> >, 8, 4, true>(pytorch_flash::Flash_fwd_params)",
+          "ms_per_token": 0.0675316666666666
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1}>(at::TensorIteratorBase&, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#8}::operator()() const::{lambda(c10::Half)#1} const&)::{lambda(int)#1})",
+          "ms_per_token": 0.06021566666666664
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+          "ms_per_token": 0.05390333333333329
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<c10::Half, c10::Half, c10::Half, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul>)",
+          "ms_per_token": 0.04650366666666672
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#2}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.043816666666666636
+        },
+        {
+          "phase": "rope",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.04103500000000003
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::(anonymous namespace)::pow_tensor_scalar_kernel_impl<float, float>(at::TensorIteratorBase&, float)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.04055900000000002
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul> >(int, at::native::float16_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda(float)#1}, std::array<char*, 2ul>)",
+          "ms_per_token": 0.040412333333333356
+        },
+        {
+          "phase": "rmsnorm",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul> >(int, at::native::CUDAFunctorOnSelf_add<float>, std::array<char*, 2ul>)",
+          "ms_per_token": 0.040324333333333344
+        },
+        {
+          "phase": "other",
+          "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::Half>, std::array<char*, 3ul>)",
+          "ms_per_token": 0.039371
+        }
+      ],
+      "unattributed": [],
+      "caveat": "Instrumented trace; host/GPU times overlap and must not be added. Gaps are not proof of CPU causality.",
+      "n": 2048,
+      "mode": "sdpa",
+      "repeat": 1,
+      "trace": "/mnt/c/Users/PC/flashattn-cuda-main/docs/decoding/profile_decode_final_traces/n2048_sdpa_1.json.gz",
+      "calls": {
+        "decode": 0,
+        "prefill": 0,
+        "fallback": 0
+      },
+      "telemetry": "name, utilization.gpu [%], temperature.gpu, clocks.current.sm [MHz], clocks.current.memory [MHz], power.draw [W], power.limit [W], memory.used [MiB]\nNVIDIA GeForce RTX 4060 Ti, 3 %, 49, 2820 MHz, 8751 MHz, 55.26 W, 160.00 W, 3655 MiB",
+      "top_cpu_self_ms_per_token": [
+        {
+          "op": "cudaLaunchKernel",
+          "ms": 14.1140003333334,
+          "calls": 927.0
+        },
+        {
+          "op": "decode.window",
+          "ms": 4.12649666666664,
+          "calls": 0.3333333333333333
+        },
+        {
+          "op": "phase::rmsnorm",
+          "ms": 3.3556639999999667,
+          "calls": 45.0
+        },
+        {
+          "op": "aten::mm",
+          "ms": 2.644465333333349,
+          "calls": 155.0
+        },
+        {
+          "op": "phase::rope",
+          "ms": 2.4369826666667227,
+          "calls": 23.0
+        },
+        {
+          "op": "aten::mul",
+          "ms": 1.9975749999999752,
+          "calls": 202.0
+        },
+        {
+          "op": "phase::qkvo_projection",
+          "ms": 1.828757666666644,
+          "calls": 88.0
+        },
+        {
+          "op": "aten::add",
+          "ms": 1.3838726666666117,
+          "calls": 133.0
+        },
+        {
+          "op": "phase::mlp",
+          "ms": 1.1582266666666736,
+          "calls": 22.0
+        },
+        {
+          "op": "phase::kv_cache",
+          "ms": 0.7566180000000128,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::cat",
+          "ms": 0.7476649999999949,
+          "calls": 90.0
+        },
+        {
+          "op": "aten::mean",
+          "ms": 0.7230723333333117,
+          "calls": 45.0
+        },
+        {
+          "op": "aten::empty_strided",
+          "ms": 0.6606946666666456,
+          "calls": 116.0
+        },
+        {
+          "op": "phase::attention",
+          "ms": 0.6416163333333383,
+          "calls": 22.0
+        },
+        {
+          "op": "aten::copy_",
+          "ms": 0.6247290000000509,
+          "calls": 94.0
+        }
+      ]
+    }
+  ],
+  "complete": true,
+  "ignored_readonly_pip_jobs": [],
+  "notes": [
+    "No CUDA kernel changes. Both modes use SDPA prefill.",
+    "Unprofiled controls include synchronization at the end, not per operation.",
+    "Profiled wall time is not a latency/speedup benchmark."
+  ],
+  "telemetry_after": "name, utilization.gpu [%], temperature.gpu, clocks.current.sm [MHz], clocks.current.memory [MHz], power.draw [W], power.limit [W], memory.used [MiB]\nNVIDIA GeForce RTX 4060 Ti, 3 %, 46, 2820 MHz, 8751 MHz, 39.30 W, 160.00 W, 3655 MiB"
+}

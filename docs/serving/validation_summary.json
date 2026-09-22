@@ -1,0 +1,59 @@
+{
+  "smoke": [
+    {
+      "mode": "eager",
+      "matching_tokens": 96,
+      "native_layers": 22,
+      "selected_logprob_max_diff": 0.009295165538787842
+    },
+    {
+      "mode": "graphs",
+      "matching_tokens": 96,
+      "native_layers": 22,
+      "selected_logprob_max_diff": 0.007059812545776367
+    }
+  ],
+  "pilot": [
+    {
+      "run": 0,
+      "requested_input_len": 512,
+      "benchmark_reported_input_len": 511,
+      "matching_generated_texts": 16,
+      "flash_tpot_median_ms": 8.641759354838262,
+      "custom_tpot_median_ms": 8.348036806452338,
+      "median_reduction_pct": 3.3988744227351986,
+      "flash_tpot_mean_ms": 8.542678485887272,
+      "custom_tpot_mean_ms": 8.503450879032009,
+      "mean_reduction_pct": 0.45919563659182483,
+      "flash_ttft_median_ms": 34.82424049997235,
+      "custom_ttft_median_ms": 35.144154500017066
+    },
+    {
+      "run": 1,
+      "requested_input_len": 512,
+      "benchmark_reported_input_len": 511,
+      "matching_generated_texts": 16,
+      "flash_tpot_median_ms": 8.640701887097821,
+      "custom_tpot_median_ms": 8.279182241936619,
+      "median_reduction_pct": 4.183915263886351,
+      "flash_tpot_mean_ms": 8.53077877419349,
+      "custom_tpot_mean_ms": 8.328593270161468,
+      "mean_reduction_pct": 2.370070885481801,
+      "flash_ttft_median_ms": 34.608089500011374,
+      "custom_ttft_median_ms": 33.87649699999429
+    }
+  ],
+  "sanitizers": {
+    "memcheck": "ERROR SUMMARY: 0 errors",
+    "racecheck": "RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)"
+  },
+  "max_sampled_gpu_temperature_c": 58.0,
+  "observed_other_python_jobs": 0,
+  "source_sha256": "89db4293f401deede3cb833ff7d7eb0647c1aabf480ee57b37df78e15208d146",
+  "caveats": [
+    "Two server runs per backend; 16 requests per run; exploratory only.",
+    "No controlled clock lock; no proof of zero Windows graphics load.",
+    "Prefill uses vLLM FlashAttention in both modes.",
+    "Python call counters exclude CUDA Graph replays."
+  ]
+}

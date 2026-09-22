@@ -16,6 +16,13 @@ setup(
                 ],
             },
         ),
+        CUDAExtension(
+            name="attention_decode_cuda",
+            sources=["cuda/attention_decode.cu"],
+            extra_compile_args={
+                "nvcc": ["-O3", "--use_fast_math", "-gencode=arch=compute_89,code=sm_89"],
+            },
+        ),
     ],
     cmdclass={"build_ext": BuildExtension},
 )

@@ -1,0 +1,126 @@
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+{"source": "/mnt/c/Users/PC/flashattn-cuda-main/cuda/attention_forward.cu", "sha256": "17e49362ed66ff1853e2cbd2356bbf8e776c63e06a1ef68c5db238f2158d7b19", "so": "/root/.cache/torch_extensions/py312_cu128/prefill_layout_17e49362ed66/prefill_layout_17e49362ed66.so", "so_sha256": "20d06bbb4625a053220f9822caa589500ea4cb843fad3e2ec89f0837d6745889", "flags": ["-O3", "--use_fast_math", "-gencode=arch=compute_89,code=sm_89"]}
+====================================================================================================
+Custom CUDA correctness test
+====================================================================================================
+[PASS] B=1, H=1, N=   64, D=64 [   full,  dense]  |  O_diff=2.799e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N=  128, D=64 [   full,  dense]  |  O_diff=1.901e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N=  512, D=64 [   full,  dense]  |  O_diff=1.745e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 1024, D=64 [   full,  dense]  |  O_diff=8.447e-05  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 2048, D=64 [   full,  dense]  |  O_diff=6.746e-05  L_diff=1.907e-06  o_only_match=True
+[PASS] B=1, H=1, N= 4096, D=64 [   full,  dense]  |  O_diff=4.414e-05  L_diff=1.907e-06  o_only_match=True
+[PASS] B=1, H=1, N=    1, D=64 [guarded,  dense]  |  O_diff=0.000e+00  L_diff=1.192e-07  o_only_match=True
+[PASS] B=1, H=1, N=    2, D=64 [guarded,  dense]  |  O_diff=3.897e-04  L_diff=2.384e-07  o_only_match=True
+[PASS] B=1, H=1, N=    7, D=64 [guarded,  dense]  |  O_diff=4.458e-04  L_diff=2.384e-07  o_only_match=True
+[PASS] B=1, H=1, N=   31, D=64 [guarded,  dense]  |  O_diff=5.083e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N=   33, D=64 [guarded,  dense]  |  O_diff=3.200e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=1, H=1, N=   63, D=64 [guarded,  dense]  |  O_diff=2.983e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=1, H=1, N=  127, D=64 [guarded,  dense]  |  O_diff=2.667e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 4095, D=64 [guarded,  dense]  |  O_diff=5.036e-05  L_diff=1.907e-06  o_only_match=True
+[PASS] B=2, H=4, N=  256, D=64 [   full,  dense]  |  O_diff=1.936e-04  L_diff=9.537e-07  o_only_match=True
+----------------------------------------------------------------------------------------------------
+[PASS] B=1, H=1, N=   64, D=64 [   full, causal]  |  O_diff=5.289e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=1, H=1, N=  128, D=64 [   full, causal]  |  O_diff=5.291e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=2, H=8, N=  512, D=64 [   full, causal]  |  O_diff=9.556e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 1024, D=64 [   full, causal]  |  O_diff=5.288e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 2048, D=64 [   full, causal]  |  O_diff=5.289e-04  L_diff=1.907e-06  o_only_match=True
+[PASS] B=1, H=1, N= 4096, D=64 [   full, causal]  |  O_diff=9.511e-04  L_diff=1.907e-06  o_only_match=True
+[PASS] B=1, H=1, N=    1, D=64 [guarded, causal]  |  O_diff=0.000e+00  L_diff=1.192e-07  o_only_match=True
+[PASS] B=1, H=1, N=    2, D=64 [guarded, causal]  |  O_diff=3.409e-04  L_diff=2.272e-07  o_only_match=True
+[PASS] B=1, H=1, N=    7, D=64 [guarded, causal]  |  O_diff=4.872e-04  L_diff=2.384e-07  o_only_match=True
+[PASS] B=1, H=1, N=   31, D=64 [guarded, causal]  |  O_diff=5.291e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=1, H=1, N=   33, D=64 [guarded, causal]  |  O_diff=5.291e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=1, H=1, N=   63, D=64 [guarded, causal]  |  O_diff=5.291e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=1, H=1, N=  127, D=64 [guarded, causal]  |  O_diff=5.291e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 4095, D=64 [guarded, causal]  |  O_diff=9.511e-04  L_diff=1.907e-06  o_only_match=True
+[PASS] B=2, H=4, N=  256, D=64 [   full, causal]  |  O_diff=6.589e-04  L_diff=9.537e-07  o_only_match=True
+----------------------------------------------------------------------------------------------------
+[PASS] B=1, H=1, N= 1024, D=64 [   full,  dense] dtype=float16  |  O_diff=8.447e-05  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N=  127, D=64 [guarded,  dense] dtype=float16  |  O_diff=2.667e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 2048, D=64 [   full,  dense] amp=16  |  O_diff=1.621e-02  L_diff=6.104e-04  o_only_match=True
+[PASS] B=1, H=1, N= 4095, D=64 [guarded,  dense] amp=16  |  O_diff=1.826e-02  L_diff=7.324e-04  o_only_match=True
+[PASS] B=1, H=1, N= 1024, D=64 [   full, causal] dtype=float16  |  O_diff=5.288e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 4095, D=64 [guarded, causal] amp=16  |  O_diff=2.060e-02  L_diff=7.324e-04  o_only_match=True
+[PASS] B=1, H=1, N=   65, D=64 [guarded, causal]  |  O_diff=5.289e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=1, H=8, N= 1024, D=64 [   full,  dense] H_kv=1  |  O_diff=1.057e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=8, N= 1024, D=64 [   full,  dense] H_kv=2  |  O_diff=1.146e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N= 2048, D=64 [   full, causal] H_kv=4  |  O_diff=9.954e-04  L_diff=1.431e-06  o_only_match=True
+[PASS] B=1, H=4, N= 4095, D=64 [guarded, causal] H_kv=2  |  O_diff=6.911e-04  L_diff=1.907e-06  o_only_match=True
+[PASS] B=1, H=8, N=  127, D=64 [guarded,  dense]  |  O_diff=2.962e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N= 1024, D=128 [   full,  dense]  |  O_diff=1.197e-04  L_diff=1.431e-06  o_only_match=True
+[PASS] B=1, H=4, N= 1024, D=128 [   full, causal]  |  O_diff=8.922e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N=  127, D=128 [guarded, causal]  |  O_diff=6.061e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=8, N=  512, D=128 [   full, causal] H_kv=2  |  O_diff=1.105e-03  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=2, N= 2048, D=128 [   full,  dense] amp=16  |  O_diff=1.858e-02  L_diff=1.160e-03  o_only_match=True
+[PASS] B=2, H=8, N=  512, D=64 [   full, causal] dtype=float16 H_kv=2 layout=token_major  |  O_diff=9.458e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N=  127, D=64 [guarded,  dense] dtype=float16 H_kv=2 layout=token_major  |  O_diff=4.796e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N= 1024, D=64 [   full, causal] dtype=float16 H_kv=2 layout=packed_qkv  |  O_diff=9.127e-04  L_diff=1.431e-06  o_only_match=True
+[PASS] B=1, H=6, N= 1000, D=128 [guarded, causal] dtype=float16 H_kv=3 layout=packed_qkv  |  O_diff=1.267e-03  L_diff=1.431e-06  o_only_match=True
+[PASS] B=1, H=4, N=  257, D=64 [guarded, causal] dtype=float16 layout=odd_offset  |  O_diff=6.294e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N=  257, D=64 [guarded, causal] dtype=float16 layout=kv_shift_2  |  O_diff=6.294e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N=  257, D=64 [guarded, causal] dtype=float16 layout=kv_shift_4  |  O_diff=6.294e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N=  257, D=64 [guarded, causal] dtype=float16 layout=padded_rows  |  O_diff=6.294e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N=  257, D=64 [guarded, causal] dtype=float16 layout=kv_shift_8  |  O_diff=6.294e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N=  512, D=64 [   full, causal] dtype=float16 H_kv=2 layout=token_major out=  |  O_diff=9.458e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N=  127, D=128 [guarded,  dense] dtype=float16 layout=packed_qkv out=  |  O_diff=2.623e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N=  512, D=64 [   full, causal] scale=0.2  |  O_diff=9.413e-04  L_diff=1.431e-06  o_only_match=True
+[PASS] B=1, H=4, N=  127, D=128 [guarded,  dense] scale=0.05  |  O_diff=1.597e-04  L_diff=9.537e-07  o_only_match=True
+----------------------------------------------------------------------------------------------------
+[PASS] rejected: out is K
+[PASS] rejected: out rows share memory (expand)
+[PASS] rejected: out starts off the 4-byte boundary
+[PASS] rejected: out rows 65 elements apart
+[PASS] rejected: out is fp32
+[PASS] rejected: out has another shape
+====================================================================================================
+Result: 66/66 passed
+====================================================================================================
+N_q < N_kv and paged K/V
+====================================================================================================
+[PASS] chunk B=1 H=4/4 N_q=  64 N_kv=  128 D= 64 [   full, causal]  |  O_diff=4.539e-04  L_diff=9.537e-07
+[PASS] chunk B=1 H=4/4 N_q=  64 N_kv=   96 D= 64 [   full, causal]  |  O_diff=5.031e-04  L_diff=9.537e-07
+[PASS] chunk B=2 H=8/2 N_q= 512 N_kv= 2560 D= 64 [   full, causal]  |  O_diff=7.585e-05  L_diff=1.907e-06
+[PASS] chunk B=1 H=8/2 N_q=2048 N_kv= 4096 D= 64 [   full, causal]  |  O_diff=7.510e-05  L_diff=1.907e-06
+[PASS] chunk B=1 H=4/4 N_q=   1 N_kv= 1000 D= 64 [guarded, causal]  |  O_diff=5.470e-05  L_diff=9.537e-07
+[PASS] chunk B=1 H=4/2 N_q=   5 N_kv=  517 D= 64 [guarded, causal]  |  O_diff=8.766e-05  L_diff=4.768e-07
+[PASS] chunk B=1 H=4/4 N_q=  63 N_kv=   64 D= 64 [guarded, causal]  |  O_diff=6.481e-04  L_diff=4.768e-07
+[PASS] chunk B=1 H=4/4 N_q=  65 N_kv=  129 D= 64 [guarded, causal]  |  O_diff=4.539e-04  L_diff=9.537e-07
+[PASS] chunk B=2 H=8/2 N_q= 100 N_kv= 1000 D= 64 [guarded, causal]  |  O_diff=1.269e-04  L_diff=9.537e-07
+[PASS] chunk B=1 H=14/2 N_q=2048 N_kv= 3000 D= 64 [guarded, causal]  |  O_diff=8.920e-05  L_diff=1.907e-06
+[PASS] chunk B=1 H=4/2 N_q= 200 N_kv= 1000 D=128 [guarded, causal]  |  O_diff=1.008e-04  L_diff=9.537e-07
+[PASS] chunk B=1 H=4/4 N_q= 128 N_kv= 1024 D=128 [   full, causal]  |  O_diff=9.033e-05  L_diff=9.537e-07
+[PASS] chunk B=1 H=4/4 N_q=  64 N_kv=  128 D= 64 [   full,  dense]  |  O_diff=2.510e-04  L_diff=9.537e-07
+[PASS] chunk B=2 H=8/2 N_q= 100 N_kv=  300 D= 64 [guarded,  dense]  |  O_diff=2.306e-04  L_diff=9.537e-07
+[PASS] chunk B=1 H=4/2 N_q=  50 N_kv=   20 D= 64 [guarded,  dense]  |  O_diff=5.181e-04  L_diff=9.537e-07
+[PASS] chunk B=1 H=4/2 N_q= 200 N_kv= 1000 D=128 [guarded,  dense]  |  O_diff=9.049e-05  L_diff=9.537e-07
+[PASS] chunk B=2 H=8/2 N_q= 100 N_kv= 1000 D= 64 [guarded, causal] token_major  |  O_diff=1.269e-04  L_diff=9.537e-07
+----------------------------------------------------------------------------------------------------
+[PASS] paged H=8/2 N_q= 512 N_kv=  512 D= 64 page= 16 NHD [   full]  |  O_diff=9.489e-04  bits equal dense source=True
+[PASS] paged H=8/2 N_q=1000 N_kv= 1000 D= 64 page= 16 NHD [guarded]  |  O_diff=9.427e-04  bits equal dense source=True
+[PASS] paged H=8/2 N_q= 512 N_kv= 2560 D= 64 page= 16 NHD [   full]  |  O_diff=6.923e-05  bits equal dense source=True
+[PASS] paged H=8/2 N_q=2048 N_kv= 4096 D= 64 page= 16 NHD [   full]  |  O_diff=7.224e-05  bits equal dense source=True
+[PASS] paged H=14/2 N_q=2048 N_kv= 8192 D= 64 page= 16 NHD [   full]  |  O_diff=4.562e-05  bits equal dense source=True
+[PASS] paged H=8/2 N_q= 100 N_kv= 1000 D= 64 page= 16 NHD [guarded]  |  O_diff=8.838e-05  bits equal dense source=True
+[PASS] paged H=4/4 N_q=   1 N_kv=  777 D= 64 page= 16 NHD [guarded]  |  O_diff=5.809e-05  bits equal dense source=True
+[PASS] paged H=4/2 N_q=   5 N_kv=  517 D= 64 page= 16 NHD [guarded]  |  O_diff=9.358e-05  bits equal dense source=True
+[PASS] paged H=8/2 N_q= 300 N_kv= 1500 D= 64 page= 32 NHD [guarded]  |  O_diff=1.071e-04  bits equal dense source=True
+[PASS] paged H=8/2 N_q= 300 N_kv= 1500 D= 64 page= 64 NHD [guarded]  |  O_diff=1.071e-04  bits equal dense source=True
+[PASS] paged H=8/2 N_q= 300 N_kv= 1500 D= 64 page=128 NHD [guarded]  |  O_diff=1.071e-04  bits equal dense source=True
+[PASS] paged H=4/2 N_q= 200 N_kv= 1000 D=128 page= 16 NHD [guarded]  |  O_diff=1.166e-04  bits equal dense source=True
+[PASS] paged H=4/4 N_q= 128 N_kv= 1024 D=128 page= 32 NHD [   full]  |  O_diff=8.969e-05  bits equal dense source=True
+[PASS] paged H=8/2 N_q= 300 N_kv= 1500 D= 64 page= 16 HND [guarded]  |  O_diff=1.071e-04  bits equal dense source=True
+[PASS] paged H=4/2 N_q= 200 N_kv= 1000 D=128 page= 32 HND [guarded]  |  O_diff=1.166e-04  bits equal dense source=True
+[PASS] paged H=8/2 N_q= 300 N_kv= 1500 D= 64 page= 16 NHD [guarded] out=  |  O_diff=1.071e-04  bits equal dense source=True
+----------------------------------------------------------------------------------------------------
+[PASS] rejected: block table shorter than N_kv needs
+[PASS] rejected: block table is int64
+[PASS] rejected: two sequences in Q
+[PASS] rejected: value cache strided differently
+[PASS] rejected: page size not a power of two
+[PASS] rejected: N_kv smaller than N_q
+[PASS] rejected: dense causal with N_kv < N_q
+====================================================================================================
+Result: 40/40 passed
+Layout dispatch: 20/20 passed
+Empty batch/head rejection: 2/2 passed

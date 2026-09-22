@@ -1,0 +1,561 @@
+{
+  "backend": "SDPA_MATH",
+  "prefill_backend": "FLASH_ATTN",
+  "graphs": false,
+  "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+  "torch": "2.10.0+cu128",
+  "gpu": "NVIDIA GeForce RTX 4060 Ti",
+  "source_sha256": "89db4293f401deede3cb833ff7d7eb0647c1aabf480ee57b37df78e15208d146",
+  "routing": [
+    [
+      {
+        "name": "model.layers.0.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.1.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.2.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.3.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.4.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.5.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.6.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.7.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.8.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.9.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.10.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.11.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.12.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.13.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.14.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.15.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.16.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.17.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.18.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.19.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.20.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.21.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_MATH",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_attention_math",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      }
+    ]
+  ],
+  "outputs": [
+    {
+      "prompt": "Explain what a GPU memory bank conflict is.",
+      "token_ids": [
+        2,
+        29871,
+        13,
+        29966,
+        29989,
+        465,
+        22137,
+        29989,
+        29958,
+        13,
+        29909,
+        22796,
+        3370,
+        9124,
+        14529,
+        338,
+        263,
+        6434,
+        988,
+        1023,
+        470,
+        901,
+        22796,
+        29879,
+        526,
+        1811,
+        304,
+        2130,
+        278,
+        1021,
+        3370,
+        9124
+      ],
+      "text": " \n<|assistant|>\nA GPU memory bank conflict is a situation where two or more GPUs are trying to access the same memory bank",
+      "selected_logprobs": [
+        -1.0687098503112793,
+        -8.046303264563903e-05,
+        -7.986990567587782e-06,
+        -0.0025059746112674475,
+        -0.00015758226800244302,
+        -0.00014709345123264939,
+        -0.0005779979983344674,
+        -1.07287787614041e-05,
+        -6.318072337307967e-06,
+        -2.2291887944447808e-05,
+        -0.4206068515777588,
+        -0.018210364505648613,
+        -0.02280905470252037,
+        -0.004459199029952288,
+        -0.0003181189822498709,
+        -0.4026171863079071,
+        -0.14738057553768158,
+        -0.4010022282600403,
+        -0.20032700896263123,
+        -1.2849109172821045,
+        -0.24751903116703033,
+        -0.0010954099707305431,
+        -0.3874872922897339,
+        -0.19934606552124023,
+        -0.9796911478042603,
+        -0.9381835460662842,
+        -0.0012385324807837605,
+        -0.26498889923095703,
+        -0.10803083330392838,
+        -0.0035574266221374273,
+        -0.38084909319877625,
+        -0.6549447774887085
+      ]
+    },
+    {
+      "prompt": "Write a short Python function that adds two integers.",
+      "token_ids": [
+        450,
+        740,
+        881,
+        9508,
+        278,
+        1404,
+        304,
+        3896,
+        1023,
+        11920,
+        322,
+        736,
+        1009,
+        2533,
+        29889,
+        450,
+        740,
+        881,
+        367,
+        1532,
+        29899,
+        3225,
+        287,
+        411,
+        2821,
+        322,
+        3022,
+        895,
+        6589,
+        29889,
+        4803,
+        8210
+      ],
+      "text": " The function should prompt the user to enter two integers and return their sum. The function should be well-documented with clear and concise comments. Use appropriate",
+      "selected_logprobs": [
+        -0.33482688665390015,
+        -0.022382263094186783,
+        -0.020917294546961784,
+        -1.0794978141784668,
+        -0.0023532812483608723,
+        -0.0003203832311555743,
+        -0.16676530241966248,
+        -0.26179075241088867,
+        -0.2608090937137604,
+        -0.267452597618103,
+        -0.7533068656921387,
+        -0.6407133936882019,
+        -0.6033791303634644,
+        -0.02918464131653309,
+        -0.08156947791576385,
+        -0.6061604619026184,
+        -0.1706724315881729,
+        -0.012665901333093643,
+        -1.126941442489624,
+        -0.9785804152488708,
+        -0.04790371656417847,
+        -0.16881296038627625,
+        -3.957670196541585e-05,
+        -0.787472128868103,
+        -0.38513338565826416,
+        -0.9260684251785278,
+        -0.09244051575660706,
+        -0.0015486401971429586,
+        -0.29280886054039,
+        -0.7701010704040527,
+        -1.800193190574646,
+        -1.1760722398757935
+      ]
+    },
+    {
+      "prompt": "The capital of France is",
+      "token_ids": [
+        3681,
+        29889,
+        13,
+        13,
+        29906,
+        29889,
+        350,
+        29889,
+        450,
+        7483,
+        310,
+        9556,
+        338,
+        5115,
+        29889,
+        13,
+        13,
+        29941,
+        29889,
+        315,
+        29889,
+        450,
+        7483,
+        310,
+        278,
+        3303,
+        3900,
+        338,
+        7660,
+        29892,
+        360,
+        29889
+      ],
+      "text": " Paris.\n\n2. B. The capital of Germany is Berlin.\n\n3. C. The capital of the United States is Washington, D.",
+      "selected_logprobs": [
+        -0.6752644181251526,
+        -0.8677992224693298,
+        -1.671971321105957,
+        -0.9497170448303223,
+        -1.7403000593185425,
+        -0.11540216207504272,
+        -2.466862201690674,
+        -1.7012219429016113,
+        -2.082620859146118,
+        -0.8021337389945984,
+        -0.03633623942732811,
+        -1.9745351076126099,
+        -0.004558884538710117,
+        -0.018293121829628944,
+        -0.010493814945220947,
+        -0.024297667667269707,
+        -0.010639727115631104,
+        -0.10357046127319336,
+        -0.00023505308490712196,
+        -0.16738301515579224,
+        -0.0032683785539120436,
+        -0.049903254956007004,
+        -0.052814237773418427,
+        -0.005675866734236479,
+        -1.8215363025665283,
+        -0.13868752121925354,
+        -0.5659884810447693,
+        -0.012728873640298843,
+        -0.010972048155963421,
+        -0.47451290488243103,
+        -0.06656850874423981,
+        -4.100715523236431e-05
+      ]
+    }
+  ]
+}

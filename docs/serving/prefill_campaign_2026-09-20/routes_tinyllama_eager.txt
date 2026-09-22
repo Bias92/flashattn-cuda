@@ -1,0 +1,18 @@
+FLASH_ATTN (eager)
+SCRATCH_FULL (eager)
+
+SCRATCH_FULL against FLASH_ATTN, TinyLlama/TinyLlama-1.1B-Chat-v1.0, eager, step budget 512
+  fresh    calls {'prefill_dense': 22, 'prefill_paged': 0, 'decode_in_mixed': 0, 'decode_only': 154, 'flash_fallback': 0}
+           tokens {'prefill_dense': 6754, 'prefill_paged': 0, 'decode_in_mixed': 0, 'decode_only': 154, 'flash_fallback': 0}
+           {"requests": 1, "prompt_positions": 306, "prompt_logprob_gap_max": 0.012126922607421875, "prompt_logprob_gap_mean": 0.002751660502814, "first_logprob_gap_max": 0.001218557357788086, "first_token_equal": 1, "all_tokens_equal": 1}
+  chunked  calls {'prefill_dense': 22, 'prefill_paged': 66, 'decode_in_mixed': 0, 'decode_only': 154, 'flash_fallback': 0}
+           tokens {'prefill_dense': 11264, 'prefill_paged': 28160, 'decode_in_mixed': 0, 'decode_only': 154, 'flash_fallback': 0}
+           {"requests": 1, "prompt_positions": 1791, "prompt_logprob_gap_max": 0.018453598022460938, "prompt_logprob_gap_mean": 0.0026329241272858707, "first_logprob_gap_max": 0.005094289779663086, "first_token_equal": 1, "all_tokens_equal": 1}
+  mixed    calls {'prefill_dense': 132, 'prefill_paged': 66, 'decode_in_mixed': 66, 'decode_only': 506, 'flash_fallback': 0}
+           tokens {'prefill_dense': 37136, 'prefill_paged': 5038, 'decode_in_mixed': 176, 'decode_only': 2860, 'flash_fallback': 0}
+           {"requests": 6, "prompt_positions": 1911, "prompt_logprob_gap_max": 0.019496917724609375, "prompt_logprob_gap_mean": 0.0027306385529346955, "first_logprob_gap_max": 0.010150432586669922, "first_token_equal": 6, "all_tokens_equal": 6}
+  prefix   calls {'prefill_dense': 0, 'prefill_paged': 22, 'decode_in_mixed': 0, 'decode_only': 154, 'flash_fallback': 0}
+           tokens {'prefill_dense': 0, 'prefill_paged': 3366, 'decode_in_mixed': 0, 'decode_only': 154, 'flash_fallback': 0}
+           {"requests": 1, "prompt_positions": 0, "prompt_logprob_gap_max": null, "prompt_logprob_gap_mean": null, "first_logprob_gap_max": 0.003998994827270508, "first_token_equal": 1, "all_tokens_equal": 1}
+
+all routes as required, all gaps within the limit

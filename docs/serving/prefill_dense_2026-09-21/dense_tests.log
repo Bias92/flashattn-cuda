@@ -1,0 +1,40 @@
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/dist-packages/torch/utils/cpp_extension.py", line 2693, in _run_ninja_build
+    subprocess.run(
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['ninja', '-v', '-j', '1']' returned non-zero exit status 1.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/c/Users/PC/flashattn-cuda-main/bench/bench_prefill_layout.py", line 307, in <module>
+    main()
+  File "/mnt/c/Users/PC/flashattn-cuda-main/bench/bench_prefill_layout.py", line 281, in main
+    candidate, candidate_record = extension(args.candidate)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/Users/PC/flashattn-cuda-main/bench/bench_prefill_layout.py", line 41, in extension
+    module = load(name=name, sources=[str(source)], extra_cuda_cflags=FLAGS, verbose=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/utils/cpp_extension.py", line 1767, in load
+    return _jit_compile(
+           ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/torch/utils/cpp_extension.py", line 2207, in _jit_compile
+    _write_ninja_file_and_build_library(
+  File "/usr/local/lib/python3.12/dist-packages/torch/utils/cpp_extension.py", line 2362, in _write_ninja_file_and_build_library
+    _run_ninja_build(
+  File "/usr/local/lib/python3.12/dist-packages/torch/utils/cpp_extension.py", line 2710, in _run_ninja_build
+    raise RuntimeError(message) from e
+RuntimeError: Error building extension 'prefill_layout_ab0d2af6b88d': [1/2] /usr/local/cuda-12.8/bin/nvcc --generate-dependencies-with-compile --dependency-output attention_forward_dense.cuda.o.d -DTORCH_EXTENSION_NAME=prefill_layout_ab0d2af6b88d -DTORCH_API_INCLUDE_EXTENSION_H -isystem /usr/local/lib/python3.12/dist-packages/torch/include -isystem /usr/local/lib/python3.12/dist-packages/torch/include/torch/csrc/api/include -isystem /usr/local/cuda-12.8/include -isystem /usr/include/python3.12 -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__ --expt-relaxed-constexpr --compiler-options '-fPIC' -O3 --use_fast_math -gencode=arch=compute_89,code=sm_89 -std=c++17 -c /mnt/c/Users/PC/flashattn-cuda-main/docs/serving/prefill_dense_2026-09-21/attention_forward_dense.cu -o attention_forward_dense.cuda.o 
+FAILED: [code=1] attention_forward_dense.cuda.o 
+/usr/local/cuda-12.8/bin/nvcc --generate-dependencies-with-compile --dependency-output attention_forward_dense.cuda.o.d -DTORCH_EXTENSION_NAME=prefill_layout_ab0d2af6b88d -DTORCH_API_INCLUDE_EXTENSION_H -isystem /usr/local/lib/python3.12/dist-packages/torch/include -isystem /usr/local/lib/python3.12/dist-packages/torch/include/torch/csrc/api/include -isystem /usr/local/cuda-12.8/include -isystem /usr/include/python3.12 -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__ --expt-relaxed-constexpr --compiler-options '-fPIC' -O3 --use_fast_math -gencode=arch=compute_89,code=sm_89 -std=c++17 -c /mnt/c/Users/PC/flashattn-cuda-main/docs/serving/prefill_dense_2026-09-21/attention_forward_dense.cu -o attention_forward_dense.cuda.o 
+/mnt/c/Users/PC/flashattn-cuda-main/docs/serving/prefill_dense_2026-09-21/attention_forward_dense.cu: In instantiation of ‘launch_forward<DenseKV, true, const __half*, const __half*, Strides, Strides>(const at::Tensor&, const at::Tensor&, float*, int, int, bool, float, const __half*, const __half*, Strides, Strides)::<lambda(auto:35)> [with auto:35 = std::integral_constant<int, 64>]’:
+/mnt/c/Users/PC/flashattn-cuda-main/docs/serving/prefill_dense_2026-09-21/attention_forward_dense.cu:902:22:   required from ‘void launch_forward(const at::Tensor&, const at::Tensor&, float*, int, int, bool, float, KVFields ...) [with KV = DenseKV; bool ALL_MODES = true; KVFields = {const __half*, const __half*, Strides, Strides}]’
+/mnt/c/Users/PC/flashattn-cuda-main/docs/serving/prefill_dense_2026-09-21/attention_forward_dense.cu:947:32:   required from here
+/mnt/c/Users/PC/flashattn-cuda-main/docs/serving/prefill_dense_2026-09-21/attention_forward_dense.cu:891:90: error: invalid initialization of reference of type ‘std::integral_constant<int, 64>&’ from expression of type ‘launch_forward<DenseKV, true, const __half*, const __half*, Strides, Strides>(const at::Tensor&, const at::Tensor&, float*, int, int, bool, float, const __half*, const __half*, Strides, Strides)::<lambda(auto:34, int, bool)>’
+  891 |                     KernelChoice<HDIM, AddressLayout::ContiguousRows, KV, decltype(launch), KVFields...> rows{launch};
+      |                                                                                          ^~~~
+ninja: build stopped: subcommand failed.
+

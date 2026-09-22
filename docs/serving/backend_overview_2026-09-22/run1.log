@@ -1,0 +1,52 @@
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+{"source": "/mnt/c/Users/PC/flashattn-cuda-main/cuda/attention_forward.cu", "sha256": "6fc64206c542c7aa86c2ce609b4fe15222f0080d73c3fdceaf30ce0f1eff0ae0", "so": "/root/.cache/torch_extensions/py312_cu128/prefill_layout_6fc64206c542/prefill_layout_6fc64206c542.so", "so_sha256": "c7617b2600b79139478e22db74ba7cda4c136527e0de0e60d5c0b5efd71ca3ab", "flags": ["-O3", "--use_fast_math", "-gencode=arch=compute_89,code=sm_89"]}
+/usr/local/lib/python3.12/dist-packages/torch/profiler/profiler.py:217: UserWarning: Warning: Profiler clears events at the end of each cycle.Only events from the current cycle will be reported.To keep events across cycles, set acc_events=True.
+  _warn_once(
+readme (1, 8, 8, 1024, 64) causal=False: O/flash=1.0379 O/cudnn=1.0790
+readme (1, 8, 8, 1024, 64) causal=True: O/flash=1.0185 O/cudnn=1.0311
+readme (1, 8, 8, 2048, 64) causal=False: O/flash=0.9936 O/cudnn=1.0304
+readme (1, 8, 8, 2048, 64) causal=True: O/flash=0.9049 O/cudnn=0.9662
+readme (1, 8, 8, 4096, 64) causal=False: O/flash=0.9905 O/cudnn=1.0040
+readme (1, 8, 8, 4096, 64) causal=True: O/flash=0.9437 O/cudnn=0.9609
+readme (1, 32, 8, 2048, 64) causal=False: O/flash=0.9475 O/cudnn=0.9846
+readme (1, 32, 8, 2048, 64) causal=True: O/flash=0.9235 O/cudnn=0.9502
+readme (1, 32, 8, 4096, 64) causal=False: O/flash=0.9711 O/cudnn=1.0011
+readme (1, 32, 8, 4096, 64) causal=True: O/flash=0.9584 O/cudnn=0.9296
+readme (1, 32, 8, 2048, 128) causal=False: O/flash=1.0373 O/cudnn=1.0974
+readme (1, 32, 8, 2048, 128) causal=True: O/flash=1.1243 O/cudnn=1.1411
+readme (1, 32, 8, 4096, 128) causal=False: O/flash=1.0669 O/cudnn=1.0947
+readme (1, 32, 8, 4096, 128) causal=True: O/flash=1.1263 O/cudnn=1.1413
+holdout (4, 12, 12, 1536, 64) causal=False: O/flash=0.9849 O/cudnn=1.0152
+holdout (4, 12, 12, 1536, 64) causal=True: O/flash=0.9124 O/cudnn=0.9490
+holdout (2, 16, 4, 3072, 64) causal=False: O/flash=0.9988 O/cudnn=1.0691
+holdout (2, 16, 4, 3072, 64) causal=True: O/flash=0.9662 O/cudnn=0.9361
+holdout (1, 8, 8, 8192, 64) causal=False: O/flash=0.9863 O/cudnn=1.0033
+holdout (1, 8, 8, 8192, 64) causal=True: O/flash=0.9576 O/cudnn=0.9897
+holdout (8, 8, 8, 512, 64) causal=False: O/flash=1.0030 O/cudnn=1.0452
+holdout (8, 8, 8, 512, 64) causal=True: O/flash=0.9168 O/cudnn=0.9074
+holdout (1, 32, 8, 1000, 64) causal=False: O/flash=0.9649 O/cudnn=1.0272
+holdout (1, 32, 8, 1000, 64) causal=True: O/flash=0.9102 O/cudnn=0.9427
+holdout (3, 14, 2, 2500, 64) causal=False: O/flash=0.9668 O/cudnn=1.0299
+holdout (3, 14, 2, 2500, 64) causal=True: O/flash=0.9677 O/cudnn=0.9622
+holdout (2, 16, 8, 1536, 128) causal=False: O/flash=1.0432 O/cudnn=1.1072
+holdout (2, 16, 8, 1536, 128) causal=True: O/flash=1.1366 O/cudnn=1.1566
+holdout (1, 28, 4, 3000, 128) causal=False: O/flash=0.9781 O/cudnn=1.0440
+holdout (1, 28, 4, 3000, 128) causal=True: O/flash=1.0698 O/cudnn=1.0747
+holdout2 (2, 24, 8, 2304, 64) causal=False: O/flash=0.9433 O/cudnn=1.0048
+holdout2 (2, 24, 8, 2304, 64) causal=True: O/flash=0.9171 O/cudnn=0.9548
+holdout2 (1, 16, 16, 5000, 64) causal=False: O/flash=0.9855 O/cudnn=1.0675
+holdout2 (1, 16, 16, 5000, 64) causal=True: O/flash=0.9247 O/cudnn=0.9386
+holdout2 (6, 10, 2, 768, 64) causal=False: O/flash=0.9703 O/cudnn=1.0271
+holdout2 (6, 10, 2, 768, 64) causal=True: O/flash=0.9204 O/cudnn=0.9263
+holdout2 (1, 40, 8, 1700, 64) causal=False: O/flash=0.8966 O/cudnn=0.9471
+holdout2 (1, 40, 8, 1700, 64) causal=True: O/flash=0.8662 O/cudnn=0.8997
+holdout2 (2, 20, 4, 6144, 64) causal=False: O/flash=1.0448 O/cudnn=1.0710
+holdout2 (2, 20, 4, 6144, 64) causal=True: O/flash=1.0174 O/cudnn=0.9849
+holdout2 (5, 9, 3, 1111, 64) causal=False: O/flash=0.9302 O/cudnn=1.0127
+holdout2 (5, 9, 3, 1111, 64) causal=True: O/flash=0.9390 O/cudnn=0.9362
+holdout2 (1, 24, 8, 2560, 128) causal=False: O/flash=1.0159 O/cudnn=1.0701
+holdout2 (1, 24, 8, 2560, 128) causal=True: O/flash=1.1133 O/cudnn=1.1273
+holdout2 (3, 12, 6, 1900, 128) causal=False: O/flash=1.0203 O/cudnn=1.0599
+holdout2 (3, 12, 6, 1900, 128) causal=True: O/flash=1.0433 O/cudnn=1.0887
+DONE

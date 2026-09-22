@@ -1,0 +1,40 @@
+{
+  "SCRATCH_FULL": {
+    "fresh": {
+      "requests": 1,
+      "prompt_positions": 306,
+      "prompt_logprob_gap_max": 0.012126922607421875,
+      "prompt_logprob_gap_mean": 0.002751660502814,
+      "first_logprob_gap_max": 0.001218557357788086,
+      "first_token_equal": 1,
+      "all_tokens_equal": 1
+    },
+    "chunked": {
+      "requests": 1,
+      "prompt_positions": 1791,
+      "prompt_logprob_gap_max": 0.018453598022460938,
+      "prompt_logprob_gap_mean": 0.0026329241272858707,
+      "first_logprob_gap_max": 0.005094289779663086,
+      "first_token_equal": 1,
+      "all_tokens_equal": 1
+    },
+    "mixed": {
+      "requests": 6,
+      "prompt_positions": 1911,
+      "prompt_logprob_gap_max": 0.019496917724609375,
+      "prompt_logprob_gap_mean": 0.0027306385529346955,
+      "first_logprob_gap_max": 0.010150432586669922,
+      "first_token_equal": 6,
+      "all_tokens_equal": 6
+    },
+    "prefix": {
+      "requests": 1,
+      "prompt_positions": 0,
+      "prompt_logprob_gap_max": null,
+      "prompt_logprob_gap_mean": null,
+      "first_logprob_gap_max": 0.003998994827270508,
+      "first_token_equal": 1,
+      "all_tokens_equal": 1
+    }
+  }
+}

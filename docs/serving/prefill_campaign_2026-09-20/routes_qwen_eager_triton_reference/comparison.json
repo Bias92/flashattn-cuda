@@ -1,0 +1,40 @@
+{
+  "TRITON_ATTN": {
+    "fresh": {
+      "requests": 1,
+      "prompt_positions": 1227,
+      "prompt_logprob_gap_max": 0.03796958923339844,
+      "prompt_logprob_gap_mean": 0.004222506901648536,
+      "first_logprob_gap_max": 0.016017913818359375,
+      "first_token_equal": 1,
+      "all_tokens_equal": 1
+    },
+    "chunked": {
+      "requests": 1,
+      "prompt_positions": 7167,
+      "prompt_logprob_gap_max": 0.04082965850830078,
+      "prompt_logprob_gap_mean": 0.0037644753416861652,
+      "first_logprob_gap_max": 0.010701656341552734,
+      "first_token_equal": 1,
+      "all_tokens_equal": 1
+    },
+    "mixed": {
+      "requests": 6,
+      "prompt_positions": 7673,
+      "prompt_logprob_gap_max": 0.04781532287597656,
+      "prompt_logprob_gap_mean": 0.004195255949213532,
+      "first_logprob_gap_max": 0.009922504425048828,
+      "first_token_equal": 5,
+      "all_tokens_equal": 4
+    },
+    "prefix": {
+      "requests": 1,
+      "prompt_positions": 0,
+      "prompt_logprob_gap_max": null,
+      "prompt_logprob_gap_mean": null,
+      "first_logprob_gap_max": 0.0010132789611816406,
+      "first_token_equal": 1,
+      "all_tokens_equal": 1
+    }
+  }
+}

@@ -1,0 +1,12 @@
+2026-09-20 15:03:03 waiting for an idle GPU
+2026-09-20 15:04:02 GPU idle, starting
+2026-09-20 15:04:27 tests done rc=0
+2026-09-20 15:05:12 readme_1 done rc=0
+2026-09-20 15:05:57 readme_2 done rc=0
+2026-09-20 15:06:42 readme_3 done rc=0
+2026-09-20 15:07:32 holdout_1 done rc=0
+2026-09-20 15:08:20 holdout_2 done rc=0
+2026-09-20 15:09:10 holdout_3 done rc=0
+2026-09-20 15:10:01 holdout2_1 done rc=0
+2026-09-20 15:10:52 holdout2_2 done rc=0
+2026-09-20 15:11:43 holdout2_3 done rc=0

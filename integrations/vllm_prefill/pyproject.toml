@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=77,<81"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scratch-vllm-prefill"
+version = "0.1.0"
+description = "Research-only vLLM 0.19 backend: scratch prefill kernel on top of the scratch paged decode backend"
+requires-python = ">=3.12"
+dependencies = ["vllm==0.19.0", "scratch-vllm-attention"]
+
+[project.entry-points."vllm.general_plugins"]
+scratch_prefill = "scratch_vllm_prefill:register"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["scratch_vllm_prefill*"]

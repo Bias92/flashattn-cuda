@@ -1,0 +1,24 @@
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+{"source": "/mnt/c/Users/PC/flashattn-cuda-main/docs/serving/prefill_layout_2026-09-21/attention_forward_packed.cu", "sha256": "e45ae14dbe75fee7ff29f5788825f896878ca1e6cb183c8cceb9ab952f126036", "so": "/root/.cache/torch_extensions/py312_cu128/prefill_layout_e45ae14dbe75/prefill_layout_e45ae14dbe75.so", "so_sha256": "3a9d43c9f051ac1d0fff9c213b79004fc84d169e3713480efe61c981679baab6", "flags": ["-O3", "--use_fast_math", "-gencode=arch=compute_89,code=sm_89"]}
+{"source": "/mnt/c/Users/PC/flashattn-cuda-main/bench/results/raw_2026-09-20_v5/attention_forward_v7.cu", "sha256": "5f1d9815423d9fe133575609f7cc96e1c83bf5ff8f733f042d64c92a0cd1ed24", "so": "/root/.cache/torch_extensions/py312_cu128/prefill_layout_5f1d9815423d/prefill_layout_5f1d9815423d.so", "so_sha256": "ff4b65c7d402626ab7318251e1217aeca29b1ba019fd0e222d8ea12555fa3dd0", "flags": ["-O3", "--use_fast_math", "-gencode=arch=compute_89,code=sm_89"]}
+{"source": "/mnt/c/Users/PC/flashattn-cuda-main/bench/results/raw_2026-09-20_v5/attention_forward_HEAD_32056b7.cu", "sha256": "215471067d4b750961314f220017a96c75cfc313ce7cfb4adbb560cf86afaa3c", "so": "/root/.cache/torch_extensions/py312_cu128/prefill_layout_215471067d4b/prefill_layout_215471067d4b.so", "so_sha256": "1d2257527c500a15bc921c5c3d7d9b2eb6e644e9fafcd966a045124eff63d198", "flags": ["-O3", "--use_fast_math", "-gencode=arch=compute_89,code=sm_89"]}
+�� �ý��ۿ��� ��ũ��Ʈ�� ������ �� �����Ƿ� C:\Users\PC\flashattn-cuda-main\bench\gpu_busy.ps1 ������ �ε��� �� ������
+��. �ڼ��� ������ about_Execution_Policies(https://go.microsoft.com/fwlink/?LinkID=135170)�� �����Ͻʽÿ�.
+    + CategoryInfo          : ���� ����: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : UnauthorizedAccess
+Traceback (most recent call last):
+  File "/mnt/c/Users/PC/flashattn-cuda-main/bench/bench_prefill_layout.py", line 216, in <module>
+    main()
+  File "/mnt/c/Users/PC/flashattn-cuda-main/bench/bench_prefill_layout.py", line 206, in main
+    gpu_before=gpu_state(), guard_before=guard(), set=args.set,
+                                         ^^^^^^^
+  File "/mnt/c/Users/PC/flashattn-cuda-main/bench/bench_prefill_layout.py", line 57, in guard
+    status = subprocess.check_output(["powershell.exe", "-NoProfile", "-File", script],
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['powershell.exe', '-NoProfile', '-File', 'C:\\Users\\PC\\flashattn-cuda-main\\bench\\gpu_busy.ps1']' returned non-zero exit status 1.

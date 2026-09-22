@@ -1,0 +1,30 @@
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+{"source": "/mnt/c/Users/PC/flashattn-cuda-main/docs/serving/prefill_dense_2026-09-21/attention_forward_rows.cu", "sha256": "1fd63294fccb2480a19accfb195a7e625b3df052d2ed0fa2d298e3c41cb6fe69", "so": "/root/.cache/torch_extensions/py312_cu128/prefill_layout_1fd63294fccb/prefill_layout_1fd63294fccb.so", "so_sha256": "b171071074c024fa990f2715a95aecd3f48f990f5d923402f94c5f4b939b4af5", "flags": ["-O3", "--use_fast_math", "-gencode=arch=compute_89,code=sm_89"]}
+{"source": "/mnt/c/Users/PC/flashattn-cuda-main/docs/serving/prefill_dense_2026-09-21/attention_forward_before.cu", "sha256": "17e49362ed66ff1853e2cbd2356bbf8e776c63e06a1ef68c5db238f2158d7b19", "so": "/root/.cache/torch_extensions/py312_cu128/prefill_layout_17e49362ed66/prefill_layout_17e49362ed66.so", "so_sha256": "cfd9e9eb63124d2eb6676ab0eed0e7d231b738329ada9feab9372b6c72309819", "flags": ["-O3", "--use_fast_math", "-gencode=arch=compute_89,code=sm_89"]}
+{"source": "/mnt/c/Users/PC/flashattn-cuda-main/bench/results/raw_2026-09-20_v5/attention_forward_HEAD_32056b7.cu", "sha256": "215471067d4b750961314f220017a96c75cfc313ce7cfb4adbb560cf86afaa3c", "so": "/root/.cache/torch_extensions/py312_cu128/prefill_layout_215471067d4b/prefill_layout_215471067d4b.so", "so_sha256": "1d2257527c500a15bc921c5c3d7d9b2eb6e644e9fafcd966a045124eff63d198", "flags": ["-O3", "--use_fast_math", "-gencode=arch=compute_89,code=sm_89"]}
+(1, 32, 8, 2048, 64, False) forward: {'candidate': 1.0147, 'head': 1.0056}
+(1, 32, 8, 2048, 64, False) forward_only: {'candidate': 0.9667, 'head': 0.9669}
+(1, 8, 8, 4096, 64, False) forward: {'candidate': 0.992, 'head': 0.9982}
+(1, 8, 8, 4096, 64, False) forward_only: {'candidate': 0.9966, 'head': 0.9998}
+(2, 12, 4, 1536, 64, False) forward: {'candidate': 1.0064, 'head': 0.9996}
+(2, 12, 4, 1536, 64, False) forward_only: {'candidate': 0.9692, 'head': 0.97}
+(1, 32, 8, 1024, 64, False) forward: {'candidate': 1.0037, 'head': 0.9987}
+(1, 32, 8, 1024, 64, False) forward_only: {'candidate': 0.9672, 'head': 0.9689}
+(2, 16, 8, 1536, 128, False) forward: {'candidate': 1.039, 'head': 1.0324}
+(2, 16, 8, 1536, 128, False) forward_only: {'candidate': 0.9919, 'head': 0.994}
+(1, 8, 8, 4096, 128, False) forward: {'candidate': 1.0342, 'head': 1.0072}
+(1, 8, 8, 4096, 128, False) forward_only: {'candidate': 1.0354, 'head': 1.0299}
+(1, 28, 4, 3008, 128, False) forward: {'candidate': 1.0353, 'head': 1.0376}
+(1, 28, 4, 3008, 128, False) forward_only: {'candidate': 0.9887, 'head': 0.9918}
+(1, 28, 4, 3000, 128, False) forward: {'candidate': 0.9957, 'head': 1.0854}
+(1, 28, 4, 3000, 128, False) forward_only: {'candidate': 0.998, 'head': 1.0848}
+(1, 32, 8, 1000, 64, True) forward: {'candidate': 1.0005, 'head': 1.0001}
+(1, 32, 8, 1000, 64, True) forward_only: {'candidate': 1.0002, 'head': 0.9974}
+(1, 28, 4, 3000, 128, True) forward: {'candidate': 1.0002, 'head': 0.9987}
+(1, 28, 4, 3000, 128, True) forward_only: {'candidate': 0.9991, 'head': 0.9992}
+(1, 8, 8, 4096, 64, True) forward: {'candidate': 1.001, 'head': 1.0237}
+(1, 8, 8, 4096, 64, True) forward_only: {'candidate': 0.9983, 'head': 1.0306}
+(1, 28, 4, 3008, 128, True) forward: {'candidate': 0.9945, 'head': 1.0655}
+(1, 28, 4, 3008, 128, True) forward_only: {'candidate': 0.9991, 'head': 0.9983}
+DONE

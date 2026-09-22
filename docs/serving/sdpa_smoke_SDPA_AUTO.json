@@ -1,0 +1,561 @@
+{
+  "backend": "SDPA_AUTO",
+  "prefill_backend": "FLASH_ATTN",
+  "graphs": false,
+  "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+  "torch": "2.10.0+cu128",
+  "gpu": "NVIDIA GeForce RTX 4060 Ti",
+  "source_sha256": "89db4293f401deede3cb833ff7d7eb0647c1aabf480ee57b37df78e15208d146",
+  "routing": [
+    [
+      {
+        "name": "model.layers.0.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.1.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.2.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.3.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.4.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.5.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.6.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.7.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.8.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.9.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.10.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.11.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.12.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.13.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.14.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.15.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.16.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.17.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.18.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.19.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.20.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      },
+      {
+        "name": "model.layers.21.self_attn.attn",
+        "implementation": "DenseComparisonImpl",
+        "scratch_calls": 31,
+        "prefill_calls": 4,
+        "last_route": {
+          "backend": "SDPA_AUTO",
+          "paged_to_dense": true,
+          "eager": true,
+          "initial_executed_operators": [
+            "aten::_scaled_dot_product_flash_attention",
+            "aten::scaled_dot_product_attention"
+          ]
+        }
+      }
+    ]
+  ],
+  "outputs": [
+    {
+      "prompt": "Explain what a GPU memory bank conflict is.",
+      "token_ids": [
+        2,
+        29871,
+        13,
+        29966,
+        29989,
+        465,
+        22137,
+        29989,
+        29958,
+        13,
+        29909,
+        22796,
+        3370,
+        9124,
+        14529,
+        338,
+        263,
+        6434,
+        988,
+        1023,
+        470,
+        901,
+        22796,
+        29879,
+        526,
+        1811,
+        304,
+        2130,
+        278,
+        1021,
+        3370,
+        9124
+      ],
+      "text": " \n<|assistant|>\nA GPU memory bank conflict is a situation where two or more GPUs are trying to access the same memory bank",
+      "selected_logprobs": [
+        -1.0687098503112793,
+        -8.046303264563903e-05,
+        -7.986990567587782e-06,
+        -0.002543193055316806,
+        -0.0001597276859683916,
+        -0.00014709345123264939,
+        -0.0005766874528490007,
+        -1.0847986231965479e-05,
+        -6.318072337307967e-06,
+        -2.2291887944447808e-05,
+        -0.42059385776519775,
+        -0.018218442797660828,
+        -0.022652670741081238,
+        -0.004467981401830912,
+        -0.0003133521240670234,
+        -0.39930611848831177,
+        -0.14782282710075378,
+        -0.4005541205406189,
+        -0.20032086968421936,
+        -1.284509301185608,
+        -0.2460917979478836,
+        -0.0011129144113510847,
+        -0.3878287672996521,
+        -0.19944089651107788,
+        -0.983533501625061,
+        -0.9382910132408142,
+        -0.0012401993153616786,
+        -0.2649898827075958,
+        -0.10640372335910797,
+        -0.003562771948054433,
+        -0.3798617124557495,
+        -0.6566631197929382
+      ]
+    },
+    {
+      "prompt": "Write a short Python function that adds two integers.",
+      "token_ids": [
+        450,
+        740,
+        881,
+        9508,
+        278,
+        1404,
+        304,
+        3896,
+        1023,
+        11920,
+        322,
+        736,
+        1009,
+        2533,
+        29889,
+        450,
+        740,
+        881,
+        367,
+        1532,
+        29899,
+        3225,
+        287,
+        411,
+        2821,
+        322,
+        3022,
+        895,
+        6589,
+        29889,
+        4803,
+        8210
+      ],
+      "text": " The function should prompt the user to enter two integers and return their sum. The function should be well-documented with clear and concise comments. Use appropriate",
+      "selected_logprobs": [
+        -0.33482688665390015,
+        -0.022365126758813858,
+        -0.02092675119638443,
+        -1.0797333717346191,
+        -0.002354232594370842,
+        -0.00032050241134129465,
+        -0.16676127910614014,
+        -0.26179057359695435,
+        -0.26071494817733765,
+        -0.2664794623851776,
+        -0.749843955039978,
+        -0.6408048272132874,
+        -0.6036437153816223,
+        -0.02924785576760769,
+        -0.081559918820858,
+        -0.6058141589164734,
+        -0.17068016529083252,
+        -0.01267190370708704,
+        -1.1225440502166748,
+        -0.9784015417098999,
+        -0.04730343818664551,
+        -0.1666964888572693,
+        -3.957670196541585e-05,
+        -0.7873807549476624,
+        -0.3850514590740204,
+        -0.9260157942771912,
+        -0.09242258220911026,
+        -0.0015730400336906314,
+        -0.29279372096061707,
+        -0.7699190378189087,
+        -1.8000524044036865,
+        -1.1713683605194092
+      ]
+    },
+    {
+      "prompt": "The capital of France is",
+      "token_ids": [
+        3681,
+        29889,
+        13,
+        13,
+        29906,
+        29889,
+        350,
+        29889,
+        450,
+        7483,
+        310,
+        9556,
+        338,
+        5115,
+        29889,
+        13,
+        13,
+        29941,
+        29889,
+        315,
+        29889,
+        450,
+        7483,
+        310,
+        278,
+        3303,
+        3900,
+        338,
+        7660,
+        29892,
+        360,
+        29889
+      ],
+      "text": " Paris.\n\n2. B. The capital of Germany is Berlin.\n\n3. C. The capital of the United States is Washington, D.",
+      "selected_logprobs": [
+        -0.6752644181251526,
+        -0.8680099248886108,
+        -1.6705436706542969,
+        -0.9486488103866577,
+        -1.740959882736206,
+        -0.11626967787742615,
+        -2.46693754196167,
+        -1.6952569484710693,
+        -2.078474283218384,
+        -0.8026856184005737,
+        -0.0363788865506649,
+        -1.9740161895751953,
+        -0.004544288385659456,
+        -0.018565690144896507,
+        -0.01052224449813366,
+        -0.024299876764416695,
+        -0.010642911307513714,
+        -0.10349662601947784,
+        -0.00023576818057335913,
+        -0.16830867528915405,
+        -0.003215264528989792,
+        -0.04984087869524956,
+        -0.052522797137498856,
+        -0.0057625118643045425,
+        -1.8191585540771484,
+        -0.1386137455701828,
+        -0.5726171135902405,
+        -0.012814203277230263,
+        -0.010980655439198017,
+        -0.47489750385284424,
+        -0.06655802577733994,
+        -4.088794958079234e-05
+      ]
+    }
+  ]
+}

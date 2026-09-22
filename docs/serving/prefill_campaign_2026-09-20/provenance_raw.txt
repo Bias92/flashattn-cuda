@@ -1,0 +1,37 @@
+== sources
+8e4de5d2344918ea09adeeab1ac4ccc2482fbff766e52857f00097c8299559bd  cuda/attention_forward.cu
+89db4293f401deede3cb833ff7d7eb0647c1aabf480ee57b37df78e15208d146  cuda/attention_decode_paged.cu
+a5adecb438504b19aedad01bd9078ffd8a7fb8ed7a9fdafb015525e9cc8d2956  cuda/attention_decode_paged_generic.cu
+193317b19424a0dd59b713a967dff43a24e34f807e01f18add08af8d0fff6a47  cuda/attention_decode_mma.cuh
+ead06750333bd3c4ed874f7e8c992130636594564a7d2568231172abc2a7729c  integrations/vllm/scratch_vllm/backend.py
+728f995e06c86761d727a105ca18cf771f9c36122c6e76f91348076e2cc272b3  integrations/vllm/scratch_vllm/loader.py
+0bf98f2a0e2816ce4f0a1cd2df6291e1aa4f3a91310179f462c7ef489c733068  integrations/vllm_prefill/scratch_vllm_prefill/backend.py
+d50ba1fbd24a3ae2aee059f049d89a5ebf115d4e196a2e35567f51edd2e3546e  integrations/vllm_prefill/scratch_vllm_prefill/loader.py
+== what the serving loaders build
+integrations/vllm/scratch_vllm/loader.py:10:SOURCE = ROOT / "cuda" / "attention_decode_paged.cu"
+integrations/vllm/scratch_vllm/loader.py:26:        name=f"attention_decode_paged_{digest[:12]}",
+integrations/vllm/scratch_vllm/loader.py:28:        extra_cuda_cflags=["-O3", "--use_fast_math", "-lineinfo", "-Xptxas=-v"],
+integrations/vllm_prefill/scratch_vllm_prefill/loader.py:13:SOURCE = ROOT / "cuda" / "attention_forward.cu"
+integrations/vllm_prefill/scratch_vllm_prefill/loader.py:14:FLAGS = ["-O3", "--use_fast_math", "-gencode=arch=compute_89,code=sm_89"]
+integrations/vllm_prefill/scratch_vllm_prefill/loader.py:25:    module = load(name=f"attention_forward_{digest[:12]}", sources=[str(SOURCE)],
+integrations/vllm_prefill/scratch_vllm_prefill/loader.py:26:                  extra_cuda_cflags=FLAGS,
+== cached .so for those sources
+drwxr-xr-x  2 root root 4096 2026-09-20 03:09 attention_decode_paged_89db4293f401
+drwxr-xr-x  2 root root 4096 2026-09-20 03:08 attention_forward_8e4de5d23449
+drwxr-xr-x  2 root root 4096 2026-09-20 02:35 attention_forward_a74ab570d17f
+drwxr-xr-x  2 root root 4096 2026-09-14 21:12 attention_forward_causal
+drwxr-xr-x  2 root root 4096 2026-09-19 22:58 attention_forward_cc41d1dad9da
+drwxr-xr-x  2 root root 4096 2026-09-20 03:03 attention_forward_cuda
+== env
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+3.12.3 2.10.0+cu128 0.19.0 4.57.6 12.8
+NVIDIA GeForce RTX 4060 Ti, 595.97
+Cuda compilation tools, release 12.8, V12.8.93
+6.6.87.2-microsoft-standard-WSL2+
+models--Qwen--Qwen2.5-0.5B-Instruct
+models--Qwen--Qwen3-0.6B
+models--Qwen--Qwen3-32B
+models--Qwen--Qwen3-8B
+models--TinyLlama--TinyLlama-1.1B-Chat-v1.0
+models--TinyLlama--TinyLlama-1.1B-intermediate-step-1431k-3T

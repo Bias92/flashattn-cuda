@@ -1,0 +1,451 @@
+{
+  "backend": "CUSTOM",
+  "prefill_backend": "FLASH_ATTN",
+  "graphs": true,
+  "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+  "torch": "2.10.0+cu128",
+  "gpu": "NVIDIA GeForce RTX 4060 Ti",
+  "source_sha256": "89db4293f401deede3cb833ff7d7eb0647c1aabf480ee57b37df78e15208d146",
+  "routing": [
+    [
+      {
+        "name": "model.layers.0.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.1.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.2.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.3.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.4.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.5.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.6.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.7.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.8.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.9.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.10.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.11.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.12.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.13.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.14.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.15.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.16.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.17.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.18.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.19.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.20.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      },
+      {
+        "name": "model.layers.21.self_attn.attn",
+        "implementation": "ScratchImpl",
+        "scratch_calls": 12,
+        "prefill_calls": 16,
+        "last_route": {
+          "max_query_len": 11,
+          "use_cascade": false
+        }
+      }
+    ]
+  ],
+  "outputs": [
+    {
+      "prompt": "Explain what a GPU memory bank conflict is.",
+      "token_ids": [
+        2,
+        29871,
+        13,
+        29966,
+        29989,
+        465,
+        22137,
+        29989,
+        29958,
+        13,
+        29909,
+        22796,
+        3370,
+        9124,
+        14529,
+        338,
+        263,
+        6434,
+        988,
+        1023,
+        470,
+        901,
+        22796,
+        29879,
+        526,
+        1811,
+        304,
+        2130,
+        278,
+        1021,
+        3370,
+        9124
+      ],
+      "text": " \n<|assistant|>\nA GPU memory bank conflict is a situation where two or more GPUs are trying to access the same memory bank",
+      "selected_logprobs": [
+        -1.0650734901428223,
+        -7.962863310240209e-05,
+        -7.986990567587782e-06,
+        -0.002391575602814555,
+        -0.0001597276859683916,
+        -0.00014709345123264939,
+        -0.0005880056996829808,
+        -1.0967194612021558e-05,
+        -6.318072337307967e-06,
+        -2.2053474822314456e-05,
+        -0.42054784297943115,
+        -0.018023287877440453,
+        -0.02296646125614643,
+        -0.0044478061608970165,
+        -0.0003121604095213115,
+        -0.39953166246414185,
+        -0.14777563512325287,
+        -0.3981494903564453,
+        -0.2003246694803238,
+        -1.2867416143417358,
+        -0.24753810465335846,
+        -0.001095529063604772,
+        -0.3874308168888092,
+        -0.20038340985774994,
+        -0.9801857471466064,
+        -0.9378684759140015,
+        -0.0012480573495849967,
+        -0.264999121427536,
+        -0.1077645793557167,
+        -0.0035580205731093884,
+        -0.3786354959011078,
+        -0.6523746848106384
+      ]
+    },
+    {
+      "prompt": "Write a short Python function that adds two integers.",
+      "token_ids": [
+        450,
+        740,
+        881,
+        9508,
+        278,
+        1404,
+        304,
+        3896,
+        1023,
+        11920,
+        322,
+        736,
+        1009,
+        2533,
+        29889,
+        450,
+        740,
+        881,
+        367,
+        1532,
+        29899,
+        3225,
+        287,
+        411,
+        2821,
+        322,
+        3022,
+        895,
+        6589,
+        29889,
+        4803,
+        8210
+      ],
+      "text": " The function should prompt the user to enter two integers and return their sum. The function should be well-documented with clear and concise comments. Use appropriate",
+      "selected_logprobs": [
+        -0.33468759059906006,
+        -0.022357666864991188,
+        -0.020820628851652145,
+        -1.0847673416137695,
+        -0.002355540869757533,
+        -0.0003209791029803455,
+        -0.1667594611644745,
+        -0.2617928683757782,
+        -0.26080504059791565,
+        -0.2669590711593628,
+        -0.7488679885864258,
+        -0.6431721448898315,
+        -0.6033788919448853,
+        -0.02926475927233696,
+        -0.08157090097665787,
+        -0.6053125858306885,
+        -0.1707785576581955,
+        -0.012634236365556717,
+        -1.1230233907699585,
+        -0.9794600605964661,
+        -0.047300368547439575,
+        -0.16884972155094147,
+        -3.9457496313843876e-05,
+        -0.7855360507965088,
+        -0.3854731619358063,
+        -0.9232731461524963,
+        -0.09242790192365646,
+        -0.0015485212206840515,
+        -0.2927289605140686,
+        -0.7699375152587891,
+        -1.799284815788269,
+        -1.1720011234283447
+      ]
+    },
+    {
+      "prompt": "The capital of France is",
+      "token_ids": [
+        3681,
+        29889,
+        13,
+        13,
+        29906,
+        29889,
+        350,
+        29889,
+        450,
+        7483,
+        310,
+        9556,
+        338,
+        5115,
+        29889,
+        13,
+        13,
+        29941,
+        29889,
+        315,
+        29889,
+        450,
+        7483,
+        310,
+        278,
+        3303,
+        3900,
+        338,
+        7660,
+        29892,
+        360,
+        29889
+      ],
+      "text": " Paris.\n\n2. B. The capital of Germany is Berlin.\n\n3. C. The capital of the United States is Washington, D.",
+      "selected_logprobs": [
+        -0.673768937587738,
+        -0.8672558069229126,
+        -1.6716986894607544,
+        -0.9495949149131775,
+        -1.7349649667739868,
+        -0.11620918661355972,
+        -2.4592511653900146,
+        -1.692655086517334,
+        -2.0841457843780518,
+        -0.8029268383979797,
+        -0.036536358296871185,
+        -1.9737422466278076,
+        -0.0045374054461717606,
+        -0.01858523115515709,
+        -0.010489686392247677,
+        -0.02435060404241085,
+        -0.010478361509740353,
+        -0.10340406745672226,
+        -0.00023588736075907946,
+        -0.1673705130815506,
+        -0.0032654081005603075,
+        -0.049802884459495544,
+        -0.052771154791116714,
+        -0.005675985477864742,
+        -1.8213014602661133,
+        -0.13825035095214844,
+        -0.5724765658378601,
+        -0.012733934447169304,
+        -0.011195695959031582,
+        -0.47489720582962036,
+        -0.06655958294868469,
+        -4.100715523236431e-05
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=77,<81"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scratch-vllm-attention"
+version = "0.1.0"
+description = "Research-only native paged decode attention backend for vLLM 0.19"
+requires-python = ">=3.12"
+dependencies = ["vllm==0.19.0"]
+
+[project.entry-points."vllm.general_plugins"]
+scratch_attention = "scratch_vllm:register"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["scratch_vllm*"]

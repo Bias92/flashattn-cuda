@@ -1,0 +1,4 @@
+# Preserve measured source bytes so published SHA256 provenance survives checkout.
+cuda/*.cu -text
+cuda/*.cuh -text
+docs/serving/prefill_campaign_2026-09-20/attention_forward_v7.cu.txt -text

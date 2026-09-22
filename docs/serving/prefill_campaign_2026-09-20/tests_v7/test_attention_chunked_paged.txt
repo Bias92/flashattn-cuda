@@ -1,0 +1,49 @@
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+====================================================================================================
+N_q < N_kv and paged K/V
+====================================================================================================
+[PASS] chunk B=1 H=4/4 N_q=  64 N_kv=  128 D= 64 [   full, causal]  |  O_diff=4.539e-04  L_diff=9.537e-07
+[PASS] chunk B=1 H=4/4 N_q=  64 N_kv=   96 D= 64 [   full, causal]  |  O_diff=5.031e-04  L_diff=9.537e-07
+[PASS] chunk B=2 H=8/2 N_q= 512 N_kv= 2560 D= 64 [   full, causal]  |  O_diff=7.585e-05  L_diff=1.907e-06
+[PASS] chunk B=1 H=8/2 N_q=2048 N_kv= 4096 D= 64 [   full, causal]  |  O_diff=7.510e-05  L_diff=1.907e-06
+[PASS] chunk B=1 H=4/4 N_q=   1 N_kv= 1000 D= 64 [guarded, causal]  |  O_diff=5.470e-05  L_diff=9.537e-07
+[PASS] chunk B=1 H=4/2 N_q=   5 N_kv=  517 D= 64 [guarded, causal]  |  O_diff=8.766e-05  L_diff=4.768e-07
+[PASS] chunk B=1 H=4/4 N_q=  63 N_kv=   64 D= 64 [guarded, causal]  |  O_diff=6.481e-04  L_diff=4.768e-07
+[PASS] chunk B=1 H=4/4 N_q=  65 N_kv=  129 D= 64 [guarded, causal]  |  O_diff=4.539e-04  L_diff=9.537e-07
+[PASS] chunk B=2 H=8/2 N_q= 100 N_kv= 1000 D= 64 [guarded, causal]  |  O_diff=1.269e-04  L_diff=9.537e-07
+[PASS] chunk B=1 H=14/2 N_q=2048 N_kv= 3000 D= 64 [guarded, causal]  |  O_diff=8.920e-05  L_diff=1.907e-06
+[PASS] chunk B=1 H=4/2 N_q= 200 N_kv= 1000 D=128 [guarded, causal]  |  O_diff=1.008e-04  L_diff=9.537e-07
+[PASS] chunk B=1 H=4/4 N_q= 128 N_kv= 1024 D=128 [   full, causal]  |  O_diff=9.033e-05  L_diff=9.537e-07
+[PASS] chunk B=1 H=4/4 N_q=  64 N_kv=  128 D= 64 [   full,  dense]  |  O_diff=2.510e-04  L_diff=9.537e-07
+[PASS] chunk B=2 H=8/2 N_q= 100 N_kv=  300 D= 64 [guarded,  dense]  |  O_diff=2.306e-04  L_diff=9.537e-07
+[PASS] chunk B=1 H=4/2 N_q=  50 N_kv=   20 D= 64 [guarded,  dense]  |  O_diff=5.181e-04  L_diff=9.537e-07
+[PASS] chunk B=1 H=4/2 N_q= 200 N_kv= 1000 D=128 [guarded,  dense]  |  O_diff=9.049e-05  L_diff=9.537e-07
+[PASS] chunk B=2 H=8/2 N_q= 100 N_kv= 1000 D= 64 [guarded, causal] token_major  |  O_diff=1.269e-04  L_diff=9.537e-07
+----------------------------------------------------------------------------------------------------
+[PASS] paged H=8/2 N_q= 512 N_kv=  512 D= 64 page= 16 NHD [   full]  |  O_diff=9.489e-04  bits equal dense source=True
+[PASS] paged H=8/2 N_q=1000 N_kv= 1000 D= 64 page= 16 NHD [guarded]  |  O_diff=9.427e-04  bits equal dense source=True
+[PASS] paged H=8/2 N_q= 512 N_kv= 2560 D= 64 page= 16 NHD [   full]  |  O_diff=6.923e-05  bits equal dense source=True
+[PASS] paged H=8/2 N_q=2048 N_kv= 4096 D= 64 page= 16 NHD [   full]  |  O_diff=7.224e-05  bits equal dense source=True
+[PASS] paged H=14/2 N_q=2048 N_kv= 8192 D= 64 page= 16 NHD [   full]  |  O_diff=4.562e-05  bits equal dense source=True
+[PASS] paged H=8/2 N_q= 100 N_kv= 1000 D= 64 page= 16 NHD [guarded]  |  O_diff=8.838e-05  bits equal dense source=True
+[PASS] paged H=4/4 N_q=   1 N_kv=  777 D= 64 page= 16 NHD [guarded]  |  O_diff=5.809e-05  bits equal dense source=True
+[PASS] paged H=4/2 N_q=   5 N_kv=  517 D= 64 page= 16 NHD [guarded]  |  O_diff=9.358e-05  bits equal dense source=True
+[PASS] paged H=8/2 N_q= 300 N_kv= 1500 D= 64 page= 32 NHD [guarded]  |  O_diff=1.071e-04  bits equal dense source=True
+[PASS] paged H=8/2 N_q= 300 N_kv= 1500 D= 64 page= 64 NHD [guarded]  |  O_diff=1.071e-04  bits equal dense source=True
+[PASS] paged H=8/2 N_q= 300 N_kv= 1500 D= 64 page=128 NHD [guarded]  |  O_diff=1.071e-04  bits equal dense source=True
+[PASS] paged H=4/2 N_q= 200 N_kv= 1000 D=128 page= 16 NHD [guarded]  |  O_diff=1.166e-04  bits equal dense source=True
+[PASS] paged H=4/4 N_q= 128 N_kv= 1024 D=128 page= 32 NHD [   full]  |  O_diff=8.969e-05  bits equal dense source=True
+[PASS] paged H=8/2 N_q= 300 N_kv= 1500 D= 64 page= 16 HND [guarded]  |  O_diff=1.071e-04  bits equal dense source=True
+[PASS] paged H=4/2 N_q= 200 N_kv= 1000 D=128 page= 32 HND [guarded]  |  O_diff=1.166e-04  bits equal dense source=True
+[PASS] paged H=8/2 N_q= 300 N_kv= 1500 D= 64 page= 16 NHD [guarded] out=  |  O_diff=1.071e-04  bits equal dense source=True
+----------------------------------------------------------------------------------------------------
+[PASS] rejected: block table shorter than N_kv needs
+[PASS] rejected: block table is int64
+[PASS] rejected: two sequences in Q
+[PASS] rejected: value cache strided differently
+[PASS] rejected: page size not a power of two
+[PASS] rejected: N_kv smaller than N_q
+[PASS] rejected: dense causal with N_kv < N_q
+====================================================================================================
+Result: 40/40 passed

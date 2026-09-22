@@ -1,0 +1,17 @@
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+{"source": "/mnt/c/Users/PC/flashattn-cuda-main/docs/serving/prefill_layout_2026-09-21/attention_forward_guarded.cu", "sha256": "b5a8bb5620105af913bf5567a6f2c42e9582fd460f4a0516787eca46e29e3c41", "so": "/root/.cache/torch_extensions/py312_cu128/prefill_layout_b5a8bb562010/prefill_layout_b5a8bb562010.so", "so_sha256": "026addc84b3096cedaef41980d923f7ad78e676349bf0c6331c2b7338eeb045b", "flags": ["-O3", "--use_fast_math", "-gencode=arch=compute_89,code=sm_89"]}
+{"source": "/mnt/c/Users/PC/flashattn-cuda-main/bench/results/raw_2026-09-20_v5/attention_forward_v7.cu", "sha256": "5f1d9815423d9fe133575609f7cc96e1c83bf5ff8f733f042d64c92a0cd1ed24", "so": "/root/.cache/torch_extensions/py312_cu128/prefill_layout_5f1d9815423d/prefill_layout_5f1d9815423d.so", "so_sha256": "ff4b65c7d402626ab7318251e1217aeca29b1ba019fd0e222d8ea12555fa3dd0", "flags": ["-O3", "--use_fast_math", "-gencode=arch=compute_89,code=sm_89"]}
+(2, 6, 2, 1537, 64, True) forward: {'candidate': 0.9925}
+(2, 6, 2, 1537, 64, True) forward_only: {'candidate': 0.9928}
+(1, 12, 3, 2305, 128, True) forward: {'candidate': 0.9757}
+(1, 12, 3, 2305, 128, True) forward_only: {'candidate': 0.9824}
+(2, 12, 4, 960, 64, False) forward: {'candidate': 0.9969}
+(2, 12, 4, 960, 64, False) forward_only: {'candidate': 0.9985}
+(1, 20, 5, 3584, 128, False) forward: {'candidate': 1.0006}
+(1, 20, 5, 3584, 128, False) forward_only: {'candidate': 0.9986}
+(1, 6, 2, 3073, 64, False) forward: {'candidate': 1.001}
+(1, 6, 2, 3073, 64, False) forward_only: {'candidate': 1.0002}
+(3, 4, 2, 192, 128, True) forward: {'candidate': 1.0021}
+(3, 4, 2, 192, 128, True) forward_only: {'candidate': 0.9977}
+DONE

@@ -1,0 +1,38 @@
+so: /root/.cache/torch_extensions/py312_cu128/attention_forward_cuda/attention_forward_cuda.so
+====================================================================================================
+Custom CUDA (+L) vs PyTorch SDPA backends — shape set 'holdout', 10 paired reps, FP16
+GPU: NVIDIA GeForce RTX 4060 Ti  torch 2.10.0+cu128
+====================================================================================================
+B=4 H=12/12 N= 1536 D= 64 dense : ours 0.6949ms (41.7 TF)  flash 0.7018ms (41.3 TF)  cudnn 0.6531ms (44.4 TF)
+        paired gap vs flash +0.41% [-1.16, +3.68]  vs cudnn +6.94% [+1.78, +8.83]  (positive = ours slower)  maxdiff vs flash 2.4e-04
+B=4 H=12/12 N= 1536 D= 64 causal: ours 0.3953ms (36.7 TF)  flash 0.4199ms (34.5 TF)  cudnn 0.3985ms (36.4 TF)
+        paired gap vs flash -4.98% [-8.17, -2.73]  vs cudnn -1.19% [-4.05, -0.39]  (positive = ours slower)  maxdiff vs flash 9.8e-04
+B=2 H=16/4 N= 3072 D= 64 dense : ours 1.8234ms (42.4 TF)  flash 1.8413ms (42.0 TF)  cudnn 1.7208ms (44.9 TF)
+        paired gap vs flash -0.83% [-1.36, +1.59]  vs cudnn +5.56% [+2.42, +6.18]  (positive = ours slower)  maxdiff vs flash 1.2e-04
+B=2 H=16/4 N= 3072 D= 64 causal: ours 0.9655ms (40.0 TF)  flash 1.0022ms (38.6 TF)  cudnn 0.9841ms (39.3 TF)
+        paired gap vs flash -3.58% [-3.99, -3.04]  vs cudnn -1.69% [-3.90, -0.67]  (positive = ours slower)  maxdiff vs flash 4.9e-04
+B=1 H=8/8 N= 8192 D= 64 dense : ours 3.2664ms (42.1 TF)  flash 3.3804ms (40.7 TF)  cudnn 3.1770ms (43.3 TF)
+        paired gap vs flash -3.43% [-3.73, -2.20]  vs cudnn +2.62% [+0.18, +3.10]  (positive = ours slower)  maxdiff vs flash 6.1e-05
+B=1 H=8/8 N= 8192 D= 64 causal: ours 1.7128ms (40.1 TF)  flash 1.7899ms (38.4 TF)  cudnn 1.7317ms (39.7 TF)
+        paired gap vs flash -4.25% [-6.16, -1.89]  vs cudnn -1.59% [-3.67, -0.46]  (positive = ours slower)  maxdiff vs flash 4.9e-04
+B=8 H=8/8 N=  512 D= 64 dense : ours 0.1137ms (37.8 TF)  flash 0.1121ms (38.3 TF)  cudnn 0.1076ms (39.9 TF)
+        paired gap vs flash +1.40% [+0.85, +5.24]  vs cudnn +5.53% [+3.72, +6.58]  (positive = ours slower)  maxdiff vs flash 2.4e-04
+B=8 H=8/8 N=  512 D= 64 causal: ours 0.0722ms (29.7 TF)  flash 0.0796ms (27.0 TF)  cudnn 0.0773ms (27.8 TF)
+        paired gap vs flash -9.18% [-9.51, -9.11]  vs cudnn -6.68% [-8.34, -6.38]  (positive = ours slower)  maxdiff vs flash 4.9e-04
+B=1 H=32/8 N= 1000 D= 64 dense : ours 0.2210ms (37.1 TF)  flash 0.2254ms (36.3 TF)  cudnn 0.2058ms (39.8 TF)
+        paired gap vs flash -1.97% [-2.46, -0.94]  vs cudnn +5.96% [+3.86, +7.61]  (positive = ours slower)  maxdiff vs flash 2.4e-04
+B=1 H=32/8 N= 1000 D= 64 causal: ours 0.1300ms (31.5 TF)  flash 0.1424ms (28.8 TF)  cudnn 0.1378ms (29.7 TF)
+        paired gap vs flash -8.70% [-9.16, -7.04]  vs cudnn -5.94% [-6.64, -4.41]  (positive = ours slower)  maxdiff vs flash 4.9e-04
+B=3 H=14/2 N= 2500 D= 64 dense : ours 1.6669ms (40.3 TF)  flash 1.6953ms (39.6 TF)  cudnn 1.5665ms (42.9 TF)
+        paired gap vs flash -1.66% [-2.82, -0.40]  vs cudnn +5.22% [+2.47, +6.60]  (positive = ours slower)  maxdiff vs flash 1.2e-04
+B=3 H=14/2 N= 2500 D= 64 causal: ours 0.8976ms (37.4 TF)  flash 0.9338ms (36.0 TF)  cudnn 0.8929ms (37.6 TF)
+        paired gap vs flash -3.77% [-5.95, +0.10]  vs cudnn +0.45% [-2.96, +1.20]  (positive = ours slower)  maxdiff vs flash 4.9e-04
+B=2 H=16/8 N= 1536 D=128 dense : ours 0.9602ms (40.3 TF)  flash 0.9647ms (40.1 TF)  cudnn 0.8813ms (43.9 TF)
+        paired gap vs flash -0.79% [-1.50, +0.90]  vs cudnn +8.91% [+7.66, +9.47]  (positive = ours slower)  maxdiff vs flash 1.2e-04
+B=2 H=16/8 N= 1536 D=128 causal: ours 0.5670ms (34.1 TF)  flash 0.5081ms (38.0 TF)  cudnn 0.4953ms (39.0 TF)
+        paired gap vs flash +11.80% [+10.97, +12.46]  vs cudnn +14.98% [+13.71, +16.26]  (positive = ours slower)  maxdiff vs flash 4.9e-04
+B=1 H=28/4 N= 3000 D=128 dense : ours 3.1343ms (41.2 TF)  flash 3.0891ms (41.8 TF)  cudnn 2.8790ms (44.8 TF)
+        paired gap vs flash +1.85% [+0.26, +3.12]  vs cudnn +8.85% [+7.97, +9.44]  (positive = ours slower)  maxdiff vs flash 1.2e-04
+B=1 H=28/4 N= 3000 D=128 causal: ours 1.7400ms (37.1 TF)  flash 1.5965ms (40.4 TF)  cudnn 1.5434ms (41.8 TF)
+        paired gap vs flash +8.85% [+8.27, +9.72]  vs cudnn +12.73% [+11.56, +13.13]  (positive = ours slower)  maxdiff vs flash 4.9e-04
+====================================================================================================

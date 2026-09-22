@@ -1,0 +1,332 @@
+{
+  "torch": "2.10.0+cu128",
+  "cudnn": 91002,
+  "gpu": "NVIDIA GeForce RTX 4060 Ti",
+  "results": [
+    {
+      "mode": "SDPA_AUTO",
+      "cases": [
+        {
+          "d": 64,
+          "n": 1,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 0.0
+        },
+        {
+          "d": 64,
+          "n": 17,
+          "page_size": 16,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 0.0005050897598266602
+        },
+        {
+          "d": 64,
+          "n": 511,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 8.688867092132568e-05
+        },
+        {
+          "d": 64,
+          "n": 512,
+          "page_size": 32,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 0.00010189414024353027
+        },
+        {
+          "d": 64,
+          "n": 543,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 9.065866470336914e-05
+        },
+        {
+          "d": 64,
+          "n": 2048,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 5.53131103515625e-05
+        },
+        {
+          "d": 128,
+          "n": 127,
+          "page_size": 16,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 0.00021970272064208984
+        }
+      ],
+      "executed_operators": [
+        "aten::_scaled_dot_product_flash_attention",
+        "aten::scaled_dot_product_attention"
+      ]
+    },
+    {
+      "mode": "SDPA_FLASH",
+      "cases": [
+        {
+          "d": 64,
+          "n": 1,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 0.0
+        },
+        {
+          "d": 64,
+          "n": 17,
+          "page_size": 16,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 0.0005089044570922852
+        },
+        {
+          "d": 64,
+          "n": 511,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 8.669495582580566e-05
+        },
+        {
+          "d": 64,
+          "n": 512,
+          "page_size": 32,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 0.00011342763900756836
+        },
+        {
+          "d": 64,
+          "n": 543,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 8.182227611541748e-05
+        },
+        {
+          "d": 64,
+          "n": 2048,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 4.3392181396484375e-05
+        },
+        {
+          "d": 128,
+          "n": 127,
+          "page_size": 16,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 0.00018155574798583984
+        }
+      ],
+      "executed_operators": [
+        "aten::_scaled_dot_product_flash_attention",
+        "aten::scaled_dot_product_attention"
+      ]
+    },
+    {
+      "mode": "SDPA_CUDNN",
+      "cases": [
+        {
+          "d": 64,
+          "n": 1,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "unsupported",
+          "reason": "cuDNN SDPA rejects KV length 1"
+        },
+        {
+          "d": 64,
+          "n": 17,
+          "page_size": 16,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 0.0005664825439453125
+        },
+        {
+          "d": 64,
+          "n": 511,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 0.00011768937110900879
+        },
+        {
+          "d": 64,
+          "n": 512,
+          "page_size": 32,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 8.752942085266113e-05
+        },
+        {
+          "d": 64,
+          "n": 543,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 7.638335227966309e-05
+        },
+        {
+          "d": 64,
+          "n": 2048,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 6.0498714447021484e-05
+        },
+        {
+          "d": 128,
+          "n": 127,
+          "page_size": 16,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 0.00016960501670837402
+        }
+      ],
+      "executed_operators": [
+        "aten::_scaled_dot_product_cudnn_attention",
+        "aten::scaled_dot_product_attention"
+      ]
+    },
+    {
+      "mode": "SDPA_EFFICIENT",
+      "cases": [
+        {
+          "d": 64,
+          "n": 1,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 0.0
+        },
+        {
+          "d": 64,
+          "n": 17,
+          "page_size": 16,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 0.0005364418029785156
+        },
+        {
+          "d": 64,
+          "n": 511,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 0.0001277923583984375
+        },
+        {
+          "d": 64,
+          "n": 512,
+          "page_size": 32,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 8.480250835418701e-05
+        },
+        {
+          "d": 64,
+          "n": 543,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 9.530782699584961e-05
+        },
+        {
+          "d": 64,
+          "n": 2048,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 4.6446919441223145e-05
+        },
+        {
+          "d": 128,
+          "n": 127,
+          "page_size": 16,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 0.00019627809524536133
+        }
+      ],
+      "executed_operators": [
+        "aten::_scaled_dot_product_efficient_attention",
+        "aten::scaled_dot_product_attention"
+      ]
+    },
+    {
+      "mode": "SDPA_MATH",
+      "cases": [
+        {
+          "d": 64,
+          "n": 1,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 0.0
+        },
+        {
+          "d": 64,
+          "n": 17,
+          "page_size": 16,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 0.0004794597625732422
+        },
+        {
+          "d": 64,
+          "n": 511,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 0.0001195073127746582
+        },
+        {
+          "d": 64,
+          "n": 512,
+          "page_size": 32,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 0.0001163482666015625
+        },
+        {
+          "d": 64,
+          "n": 543,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 6.1005353927612305e-05
+        },
+        {
+          "d": 64,
+          "n": 2048,
+          "page_size": 16,
+          "layout": "NHD",
+          "status": "passed",
+          "max_abs_error": 4.35560941696167e-05
+        },
+        {
+          "d": 128,
+          "n": 127,
+          "page_size": 16,
+          "layout": "HND",
+          "status": "passed",
+          "max_abs_error": 0.00012123584747314453
+        }
+      ],
+      "executed_operators": [
+        "aten::_scaled_dot_product_attention_math",
+        "aten::scaled_dot_product_attention"
+      ]
+    }
+  ]
+}

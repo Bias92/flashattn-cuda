@@ -1,0 +1,78 @@
+========= COMPUTE-SANITIZER
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+====================================================================================================
+Custom CUDA correctness test
+====================================================================================================
+[PASS] B=1, H=1, N=   64, D=64 [   full,  dense]  |  O_diff=2.799e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N=  128, D=64 [   full,  dense]  |  O_diff=1.901e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N=  512, D=64 [   full,  dense]  |  O_diff=1.745e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 1024, D=64 [   full,  dense]  |  O_diff=8.447e-05  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 2048, D=64 [   full,  dense]  |  O_diff=6.746e-05  L_diff=1.907e-06  o_only_match=True
+[PASS] B=1, H=1, N= 4096, D=64 [   full,  dense]  |  O_diff=4.414e-05  L_diff=1.907e-06  o_only_match=True
+[PASS] B=1, H=1, N=    1, D=64 [guarded,  dense]  |  O_diff=0.000e+00  L_diff=1.192e-07  o_only_match=True
+[PASS] B=1, H=1, N=    2, D=64 [guarded,  dense]  |  O_diff=3.897e-04  L_diff=2.384e-07  o_only_match=True
+[PASS] B=1, H=1, N=    7, D=64 [guarded,  dense]  |  O_diff=4.458e-04  L_diff=2.384e-07  o_only_match=True
+[PASS] B=1, H=1, N=   31, D=64 [guarded,  dense]  |  O_diff=5.083e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N=   33, D=64 [guarded,  dense]  |  O_diff=3.200e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=1, H=1, N=   63, D=64 [guarded,  dense]  |  O_diff=2.983e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=1, H=1, N=  127, D=64 [guarded,  dense]  |  O_diff=2.667e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 4095, D=64 [guarded,  dense]  |  O_diff=5.036e-05  L_diff=1.907e-06  o_only_match=True
+[PASS] B=2, H=4, N=  256, D=64 [   full,  dense]  |  O_diff=1.936e-04  L_diff=9.537e-07  o_only_match=True
+----------------------------------------------------------------------------------------------------
+[PASS] B=1, H=1, N=   64, D=64 [   full, causal]  |  O_diff=5.289e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=1, H=1, N=  128, D=64 [   full, causal]  |  O_diff=5.291e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=2, H=8, N=  512, D=64 [   full, causal]  |  O_diff=9.556e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 1024, D=64 [   full, causal]  |  O_diff=5.288e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 2048, D=64 [   full, causal]  |  O_diff=5.289e-04  L_diff=1.907e-06  o_only_match=True
+[PASS] B=1, H=1, N= 4096, D=64 [   full, causal]  |  O_diff=9.511e-04  L_diff=1.907e-06  o_only_match=True
+[PASS] B=1, H=1, N=    1, D=64 [guarded, causal]  |  O_diff=0.000e+00  L_diff=1.192e-07  o_only_match=True
+[PASS] B=1, H=1, N=    2, D=64 [guarded, causal]  |  O_diff=3.409e-04  L_diff=2.272e-07  o_only_match=True
+[PASS] B=1, H=1, N=    7, D=64 [guarded, causal]  |  O_diff=4.872e-04  L_diff=2.384e-07  o_only_match=True
+[PASS] B=1, H=1, N=   31, D=64 [guarded, causal]  |  O_diff=5.291e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=1, H=1, N=   33, D=64 [guarded, causal]  |  O_diff=5.291e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=1, H=1, N=   63, D=64 [guarded, causal]  |  O_diff=5.291e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=1, H=1, N=  127, D=64 [guarded, causal]  |  O_diff=5.291e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 4095, D=64 [guarded, causal]  |  O_diff=9.511e-04  L_diff=1.907e-06  o_only_match=True
+[PASS] B=2, H=4, N=  256, D=64 [   full, causal]  |  O_diff=6.589e-04  L_diff=9.537e-07  o_only_match=True
+----------------------------------------------------------------------------------------------------
+[PASS] B=1, H=1, N= 1024, D=64 [   full,  dense] dtype=float16  |  O_diff=8.447e-05  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N=  127, D=64 [guarded,  dense] dtype=float16  |  O_diff=2.667e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 2048, D=64 [   full,  dense] amp=16  |  O_diff=1.621e-02  L_diff=6.104e-04  o_only_match=True
+[PASS] B=1, H=1, N= 4095, D=64 [guarded,  dense] amp=16  |  O_diff=1.826e-02  L_diff=7.324e-04  o_only_match=True
+[PASS] B=1, H=1, N= 1024, D=64 [   full, causal] dtype=float16  |  O_diff=5.288e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=1, N= 4095, D=64 [guarded, causal] amp=16  |  O_diff=2.060e-02  L_diff=7.324e-04  o_only_match=True
+[PASS] B=1, H=1, N=   65, D=64 [guarded, causal]  |  O_diff=5.289e-04  L_diff=4.768e-07  o_only_match=True
+[PASS] B=1, H=8, N= 1024, D=64 [   full,  dense] H_kv=1  |  O_diff=1.057e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=8, N= 1024, D=64 [   full,  dense] H_kv=2  |  O_diff=1.146e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N= 2048, D=64 [   full, causal] H_kv=4  |  O_diff=9.954e-04  L_diff=1.431e-06  o_only_match=True
+[PASS] B=1, H=4, N= 4095, D=64 [guarded, causal] H_kv=2  |  O_diff=6.911e-04  L_diff=1.907e-06  o_only_match=True
+[PASS] B=1, H=8, N=  127, D=64 [guarded,  dense]  |  O_diff=2.962e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N= 1024, D=128 [   full,  dense]  |  O_diff=1.197e-04  L_diff=1.431e-06  o_only_match=True
+[PASS] B=1, H=4, N= 1024, D=128 [   full, causal]  |  O_diff=8.922e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N=  127, D=128 [guarded, causal]  |  O_diff=6.061e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=8, N=  512, D=128 [   full, causal] H_kv=2  |  O_diff=1.105e-03  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=2, N= 2048, D=128 [   full,  dense] amp=16  |  O_diff=1.858e-02  L_diff=1.160e-03  o_only_match=True
+[PASS] B=2, H=8, N=  512, D=64 [   full, causal] dtype=float16 H_kv=2 layout=token_major  |  O_diff=9.458e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N=  127, D=64 [guarded,  dense] dtype=float16 H_kv=2 layout=token_major  |  O_diff=4.796e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N= 1024, D=64 [   full, causal] dtype=float16 H_kv=2 layout=packed_qkv  |  O_diff=9.127e-04  L_diff=1.431e-06  o_only_match=True
+[PASS] B=1, H=6, N= 1000, D=128 [guarded, causal] dtype=float16 H_kv=3 layout=packed_qkv  |  O_diff=1.267e-03  L_diff=1.431e-06  o_only_match=True
+[PASS] B=1, H=4, N=  257, D=64 [guarded, causal] dtype=float16 layout=odd_offset  |  O_diff=6.294e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N=  257, D=64 [guarded, causal] dtype=float16 layout=kv_shift_2  |  O_diff=6.294e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N=  257, D=64 [guarded, causal] dtype=float16 layout=kv_shift_4  |  O_diff=6.294e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N=  257, D=64 [guarded, causal] dtype=float16 layout=padded_rows  |  O_diff=6.294e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N=  257, D=64 [guarded, causal] dtype=float16 layout=kv_shift_8  |  O_diff=6.294e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N=  512, D=64 [   full, causal] dtype=float16 H_kv=2 layout=token_major out=  |  O_diff=9.458e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N=  127, D=128 [guarded,  dense] dtype=float16 layout=packed_qkv out=  |  O_diff=2.623e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=1, H=4, N=  512, D=64 [   full, causal] scale=0.2  |  O_diff=9.413e-04  L_diff=1.431e-06  o_only_match=True
+[PASS] B=1, H=4, N=  127, D=128 [guarded,  dense] scale=0.05  |  O_diff=1.597e-04  L_diff=9.537e-07  o_only_match=True
+----------------------------------------------------------------------------------------------------
+[PASS] rejected: out is K
+[PASS] rejected: out rows share memory (expand)
+[PASS] rejected: out starts off the 4-byte boundary
+[PASS] rejected: out rows 65 elements apart
+[PASS] rejected: out is fp32
+[PASS] rejected: out has another shape
+====================================================================================================
+Result: 66/66 passed
+========= ERROR SUMMARY: 0 errors

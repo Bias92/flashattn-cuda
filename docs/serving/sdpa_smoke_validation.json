@@ -1,0 +1,38 @@
+[
+  {
+    "backend": "CUSTOM",
+    "matching_tokens": 96,
+    "routed_layers": 22,
+    "selected_logprob_max_diff": 0.009295165538787842
+  },
+  {
+    "backend": "SDPA_AUTO",
+    "matching_tokens": 96,
+    "routed_layers": 22,
+    "selected_logprob_max_diff": 0.005663871765136719
+  },
+  {
+    "backend": "SDPA_FLASH",
+    "matching_tokens": 96,
+    "routed_layers": 22,
+    "selected_logprob_max_diff": 0.005663871765136719
+  },
+  {
+    "backend": "SDPA_CUDNN",
+    "matching_tokens": 96,
+    "routed_layers": 22,
+    "selected_logprob_max_diff": 0.006041288375854492
+  },
+  {
+    "backend": "SDPA_EFFICIENT",
+    "matching_tokens": 96,
+    "routed_layers": 22,
+    "selected_logprob_max_diff": 0.007610976696014404
+  },
+  {
+    "backend": "SDPA_MATH",
+    "matching_tokens": 96,
+    "routed_layers": 22,
+    "selected_logprob_max_diff": 0.007452547550201416
+  }
+]

@@ -1,0 +1,49 @@
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7fc46ada7920>, trust_remote_code=False, seed=44, num_prompts=256, dataset_name='random', no_stream=False, dataset_path=None, no_oversample=False, skip_chat_template=False, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, spec_bench_output_len=256, spec_bench_category=None, sonnet_input_len=550, sonnet_output_len=150, sonnet_prefix_len=200, sharegpt_output_len=None, blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=512, random_output_len=128, random_range_ratio=0.0, random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, label=None, backend='openai', base_url=None, host='127.0.0.1', port=43763, endpoint='/v1/completions', header=None, max_concurrency=32, model='TinyLlama/TinyLlama-1.1B-Chat-v1.0', input_len=None, output_len=None, tokenizer='/root/.cache/huggingface/hub/models--TinyLlama--TinyLlama-1.1B-Chat-v1.0/snapshots/fe8a4ea1ffedaf415f4da2f062534de366a451e6', tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, disable_tqdm=False, num_warmups=0, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/mnt/c/Users/PC/flashattn-cuda-main/docs/serving/prefill_campaign_2026-09-20/serving/graphs/sessions/throughput_FLASH_ATTN_r2_a0/n512_c32', result_filename='client.json', ignore_eos=True, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,95,99', goodput=None, request_id_prefix='bench-2a121d63-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, extra_body=None, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds=[25.0, 50.0], plot_dataset_stats=False)
+INFO 09-20 22:48:31 [datasets.py:700] Sampling input_len from [511, 511] and output_len from [128, 128]
+Starting initial single prompt test run...
+Skipping endpoint ready check.
+Starting main benchmark run...
+Traffic request rate: inf
+Burstiness factor: 1.0 (Poisson process)
+Maximum request concurrency: 32
+  0%|          | 0/256 [00:00<?, ?it/s]  0%|          | 1/256 [00:02<10:18,  2.43s/it]  5%|▌         | 13/256 [00:02<00:35,  6.83it/s]  8%|▊         | 21/256 [00:02<00:19, 11.90it/s] 11%|█         | 27/256 [00:02<00:14, 16.18it/s] 13%|█▎        | 33/256 [00:04<00:30,  7.33it/s] 16%|█▌        | 40/256 [00:04<00:20, 10.34it/s] 20%|██        | 52/256 [00:04<00:11, 17.79it/s] 23%|██▎       | 59/256 [00:04<00:08, 22.27it/s] 26%|██▌       | 66/256 [00:06<00:19,  9.56it/s] 28%|██▊       | 72/256 [00:06<00:15, 11.91it/s] 31%|███       | 79/256 [00:06<00:11, 15.84it/s] 34%|███▍      | 87/256 [00:07<00:07, 21.53it/s] 36%|███▋      | 93/256 [00:07<00:06, 25.70it/s] 39%|███▊      | 99/256 [00:08<00:16,  9.55it/s] 41%|████      | 104/256 [00:09<00:13, 11.57it/s] 42%|████▏     | 108/256 [00:09<00:10, 13.69it/s] 46%|████▌     | 118/256 [00:09<00:06, 20.28it/s] 49%|████▉     | 126/256 [00:09<00:04, 26.48it/s] 52%|█████▏    | 132/256 [00:11<00:12, 10.23it/s] 53%|█████▎    | 136/256 [00:11<00:10, 11.67it/s] 55%|█████▌    | 141/256 [00:11<00:07, 14.63it/s] 57%|█████▋    | 145/256 [00:11<00:07, 15.74it/s] 60%|█████▉    | 153/256 [00:11<00:04, 23.13it/s] 63%|██████▎   | 161/256 [00:13<00:09, 10.00it/s] 66%|██████▌   | 168/256 [00:13<00:06, 13.07it/s] 67%|██████▋   | 172/256 [00:13<00:05, 15.14it/s] 69%|██████▉   | 176/256 [00:13<00:04, 17.55it/s] 71%|███████   | 181/256 [00:13<00:03, 19.37it/s] 74%|███████▍  | 189/256 [00:13<00:02, 26.58it/s] 76%|███████▌  | 194/256 [00:15<00:06,  9.41it/s] 78%|███████▊  | 200/256 [00:15<00:04, 12.34it/s] 80%|███████▉  | 204/256 [00:15<00:03, 14.63it/s] 81%|████████▏ | 208/256 [00:15<00:02, 17.29it/s] 83%|████████▎ | 213/256 [00:15<00:02, 19.27it/s] 86%|████████▌ | 220/256 [00:16<00:01, 25.43it/s] 88%|████████▊ | 225/256 [00:17<00:03,  9.02it/s] 94%|█████████▍| 241/256 [00:17<00:00, 19.03it/s]100%|██████████| 256/256 [00:17<00:00, 14.49it/s]
+tip: install termplotlib and gnuplot to plot the metrics
+============ Serving Benchmark Result ============
+Successful requests:                     256       
+Failed requests:                         0         
+Maximum request concurrency:             32        
+Benchmark duration (s):                  17.67     
+Total input tokens:                      130816    
+Total generated tokens:                  32768     
+Request throughput (req/s):              14.49     
+Output token throughput (tok/s):         1854.75   
+Peak output token throughput (tok/s):    3136.00   
+Peak concurrent requests:                64.00     
+Total token throughput (tok/s):          9259.24   
+---------------Time to First Token----------------
+Mean TTFT (ms):                          355.84    
+Median TTFT (ms):                        314.75    
+P50 TTFT (ms):                           314.75    
+P95 TTFT (ms):                           910.27    
+P99 TTFT (ms):                           1218.91   
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          14.52     
+Median TPOT (ms):                        14.72     
+P50 TPOT (ms):                           14.72     
+P95 TPOT (ms):                           16.02     
+P99 TPOT (ms):                           16.49     
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           14.52     
+Median ITL (ms):                         10.16     
+P50 ITL (ms):                            10.16     
+P95 ITL (ms):                            38.60     
+P99 ITL (ms):                            109.82    
+----------------End-to-end Latency----------------
+Mean E2EL (ms):                          2200.22   
+Median E2EL (ms):                        2172.96   
+P50 E2EL (ms):                           2172.96   
+P95 E2EL (ms):                           2593.60   
+P99 E2EL (ms):                           2912.85   
+==================================================

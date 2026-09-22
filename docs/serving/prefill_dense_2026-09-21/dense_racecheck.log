@@ -1,0 +1,23 @@
+========= COMPUTE-SANITIZER
+/usr/local/lib/python3.12/dist-packages/torch/cuda/__init__.py:65: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+{"source": "/mnt/c/Users/PC/flashattn-cuda-main/docs/serving/prefill_dense_2026-09-21/attention_forward_dense.cu", "sha256": "8126e61f7c96f4d4b2162598207fdcea44524d0a890340915fbaff4d112db0bf", "so": "/root/.cache/torch_extensions/py312_cu128/prefill_layout_8126e61f7c96/prefill_layout_8126e61f7c96.so", "so_sha256": "cead2181ad3db60f2a75f196768956f188743e6e29f983890e67bca1e8544505", "flags": ["-O3", "--use_fast_math", "-gencode=arch=compute_89,code=sm_89"]}
+[PASS] B=1, H=4, N=   33, D=64 [guarded, causal] dtype=float16  |  O_diff=8.831e-04  L_diff=7.153e-07  o_only_match=True
+[PASS] B=1, H=4, N=   65, D=64 [guarded, causal] dtype=float16  |  O_diff=8.836e-04  L_diff=7.153e-07  o_only_match=True
+[PASS] B=1, H=4, N=  129, D=64 [guarded, causal] dtype=float16  |  O_diff=5.943e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N=   33, D=64 [guarded, causal] dtype=float16 H_kv=2  |  O_diff=1.085e-03  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N=   65, D=64 [guarded, causal] dtype=float16 H_kv=2  |  O_diff=1.046e-03  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N=  129, D=64 [guarded, causal] dtype=float16 H_kv=2  |  O_diff=1.021e-03  L_diff=9.537e-07  o_only_match=True
+[PASS] paged H=4/2 N_q=  65 N_kv=  257 D= 64 page= 16 NHD [guarded] out=  |  O_diff=2.547e-04  bits equal dense source=True
+[PASS] B=1, H=4, N=   33, D=128 [guarded, causal] dtype=float16  |  O_diff=9.840e-04  L_diff=1.192e-06  o_only_match=True
+[PASS] B=1, H=4, N=   65, D=128 [guarded, causal] dtype=float16  |  O_diff=8.349e-04  L_diff=1.192e-06  o_only_match=True
+[PASS] B=1, H=4, N=  129, D=128 [guarded, causal] dtype=float16  |  O_diff=8.795e-04  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N=   33, D=128 [guarded, causal] dtype=float16 H_kv=2  |  O_diff=1.048e-03  L_diff=9.537e-07  o_only_match=True
+[PASS] B=2, H=8, N=   65, D=128 [guarded, causal] dtype=float16 H_kv=2  |  O_diff=9.577e-04  L_diff=1.431e-06  o_only_match=True
+[PASS] B=2, H=8, N=  129, D=128 [guarded, causal] dtype=float16 H_kv=2  |  O_diff=1.134e-03  L_diff=1.431e-06  o_only_match=True
+[PASS] paged H=4/2 N_q=  65 N_kv=  257 D=128 page= 16 NHD [guarded] out=  |  O_diff=2.196e-04  bits equal dense source=True
+Sanitizer boundary smoke: 14/14 passed
+Layout dispatch: 20/20 passed
+Dense row layout: 24/24 passed
+Empty batch/head rejection: 2/2 passed
+========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)
