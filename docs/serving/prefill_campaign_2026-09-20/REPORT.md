@@ -279,7 +279,7 @@ run in brackets.
   between runs and moves TTFT more than the kernel does. Not investigated further; the tables
   print every run so the spread is visible.
 - **Output tok/s** tracks TPOT and is not independent evidence.
-- One GPU, one architecture (sm_89), two small models on a 16 GB consumer card. Nothing here
+- One GPU, one architecture (sm_89), two small models on an 8 GB consumer card. Nothing here
   generalizes to other hardware, and no claim is made that it does.
 
 ## 6. Summary
