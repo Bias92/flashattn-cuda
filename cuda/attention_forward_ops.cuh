@@ -4,9 +4,6 @@
 #include <cuda_fp16.h>
 #include <cstdint>
 
-// ============================================================
-// PTX wrappers
-// ============================================================
 // All shared-memory addresses below are byte addresses from smem_u32.
 __device__ __forceinline__ uint32_t smem_u32(const void* p) {
     return static_cast<uint32_t>(__cvta_generic_to_shared(p));

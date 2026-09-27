@@ -8,14 +8,8 @@ struct Strides {
     int64_t b, h, n;
 };
 
-// ------------------------------------------------------------
-// Where K and V rows live. A source hands out a Head, the rows of one (batch, K/V head),
-// and a Head turns a row index into the two row pointers.
-//
-// A source crosses the kernel launch as its members, one argument each in declaration
-// order, and the kernel puts it together again. Handed over as one struct it costs the
-// dense path with L about 3% (measured, with and without __restrict__ on the members).
-// ------------------------------------------------------------
+// head() selects a batch/KV head; rows() resolves its K/V row pointers.
+// Source fields are separate kernel arguments, in declaration order.
 
 // Ordinary [B, H_kv, N_kv, D] tensors: row r sits at base + r * row stride.
 struct DenseKV {
@@ -66,13 +60,8 @@ struct PagedKV {
     }
 };
 
-// ============================================================
-// Step 1: K/V block staging (global -> smem via cp.async)
-//
-// One stage holds a kBlockN-row K block followed by a kBlockN-row V block. A thread owns one
-// 16-byte column chunk in every ROWSTEP-th row of the block, the same rows in K and V.
-// The smem offsets depend only on tid, so they are computed once.
-// ============================================================
+// Each stage stores kBlockN K rows followed by kBlockN V rows.
+// Each thread copies a 16-byte column chunk every ROWSTEP rows of K and V.
 template <int D, bool FULL_TILES, typename KVHead>
 struct KVStager {
     using Kernel_traits = Flash_fwd_kernel_traits<D>;
@@ -94,17 +83,13 @@ struct KVStager {
         k0_off = (uint32_t)(r0 * Kernel_traits::LDS + cc) * sizeof(half);
     }
 
-    // Issue the copies for K/V rows [kv, kv + kBlockN) into the stage at sbase: column chunk
-    // `cc` of rows kv + r0, kv + r0 + ROWSTEP, ...
+    // Copy rows [kv, kv + kBlockN) into the stage at byte address sbase.
     __device__ __forceinline__ void issue(uint32_t sbase, int kv) const {
         constexpr uint32_t ROWSTEP_OFF = (uint32_t)(ROWSTEP * Kernel_traits::LDS) * sizeof(half);
         constexpr uint32_t VBLOCK_OFF  = (uint32_t)(kBlockN * Kernel_traits::LDS) * sizeof(half);
         const int row0 = kv + r0;
         if constexpr (FULL_TILES && KVHead::LINEAR) {
-            // Every row exists and addresses are linear: locate the first row with one
-            // multiply per tensor and step to the others. (Measured: this form with a pointer
-            // select for rows past N_kv costs 2-3% on causal inputs, so the guarded path
-            // below clamps the row index instead.)
+            // Full linear tiles use fixed offsets from the first row pointer.
             const half* k = src.K + row0 * src.k_row + cc;
             const half* v = src.V + row0 * src.v_row + cc;
             #pragma unroll
@@ -131,9 +116,7 @@ struct KVStager {
     }
 };
 
-// ============================================================
-// Step 2: Q -> smem -> per-warp A fragments tSrQ (kept in registers for the whole loop)
-// ============================================================
+// Stage Q in shared memory before loading the per-warp register fragments.
 template <int D, bool FULL_TILES>
 __device__ __forceinline__ void stage_q_to_smem(
     half* sQ_raw, const half* __restrict__ Q_bh, int64_t q_row, int q_block, int N, int tid)

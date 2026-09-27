@@ -3,12 +3,7 @@
 #include "flash_fwd_memory.h"
 #include "softmax.h"
 
-// attention_fwd_kernel below assembles the helpers into one fused GPU launch.
-// ============================================================
-// Step 3: acc_s = (Q K^T) * softmax_scale * log2(e)
-//
-// The log2(e) factor is folded into the scale so softmax can use exp2.
-// ============================================================
+// acc_s = Q K^T * softmax_scale * log2(e), for the exp2-based softmax.
 template <int D>
 __device__ __forceinline__ void compute_qk(
     float (&acc_s)[Flash_fwd_kernel_traits<D>::NTILES_S][4],
@@ -33,9 +28,6 @@ __device__ __forceinline__ void compute_qk(
     }
 }
 
-// ============================================================
-// Step 4: mask columns past N in the last (partial) K/V block
-// ============================================================
 template <int NT>
 __device__ __forceinline__ void apply_mask(float (&acc_s)[NT][4], int kv, int N, int lane)
 {
@@ -47,14 +39,7 @@ __device__ __forceinline__ void apply_mask(float (&acc_s)[NT][4], int kv, int N,
     }
 }
 
-// ============================================================
-// Step 4b: causal mask -- drop keys that come after the query
-//
-// row_lo is the first of the two rows this lane owns, row_hi = row_lo + 8.
-// A tile only reaches here when some of its columns can exceed a row of this
-// warp. Tiles fully below the diagonal skip the call, and tiles fully above it
-// are never issued because the main loop stops at the diagonal.
-// ============================================================
+// Each lane owns rows row_lo and row_lo + 8. Mask tiles crossing the diagonal.
 template <int NT>
 __device__ __forceinline__ void apply_causal_mask(float (&acc_s)[NT][4], int kv, int row_lo, int lane)
 {
@@ -69,12 +54,8 @@ __device__ __forceinline__ void apply_causal_mask(float (&acc_s)[NT][4], int kv,
     }
 }
 
-// ============================================================
-// Step 6: acc_o += P V
-//
-// P (fp32 accumulator layout in acc_s) is repacked in registers into the
-// fp16 A-fragment layout tOrP of the next mma; V is read transposed from smem.
-// ============================================================
+// Repack P from FP32 C fragments into FP16 A fragments for PV.
+// V uses transposed ldmatrix loads.
 template <int D>
 __device__ __forceinline__ void accumulate_pv(
     float (&acc_o)[Flash_fwd_kernel_traits<D>::NTILES_O][4],
@@ -105,10 +86,7 @@ __device__ __forceinline__ void accumulate_pv(
     }
 }
 
-// ============================================================
-// Step 7: epilogue -- FA2's normalize_softmax_lse (the single division by
-//         row_sum, lse = row_max*ln2 + log(row_sum)) fused with the O / L stores.
-// ============================================================
+// Normalize O once; convert the base-2 row maximum to natural-log LSE.
 template <int D, bool WRITE_L, bool FULL_TILES>
 __device__ __forceinline__ void epilogue(
     const float (&acc_o)[Flash_fwd_kernel_traits<D>::NTILES_O][4],
@@ -143,9 +121,6 @@ __device__ __forceinline__ void epilogue(
     }
 }
 
-// ============================================================
-// Forward kernel
-// ============================================================
 enum class AddressLayout { Strided, ContiguousRows, ContiguousHeads };
 
 template <int D, AddressLayout LAYOUT, bool WRITE_L, bool CAUSAL, bool SQUARE, bool FULL_TILES, bool GQA,
@@ -157,16 +132,13 @@ attention_fwd_kernel(
     float* __restrict__ L,    // contiguous [B, H_q, N_q]; may be nullptr when WRITE_L == false
     Strides sQ, Strides sO,
     int N_q,
-    int N_kv_launch,          // keys per sequence, >= N_q under a causal mask, which is
-                              // aligned to the bottom right; not read when SQUARE
+    int N_kv_launch,          // K/V length; ignored when SQUARE
     int H_q,                  // query heads; also used by contiguous GQA addressing
     int kv_group,             // query heads per key/value head; only read when GQA
     float softmax_scale,
     KVFields... kv_fields)    // the members of KV (DenseKV or PagedKV)
 {
     using Kernel_traits = Flash_fwd_kernel_traits<D>;
-    // A square launch (N_q == N_kv) carries one length: a second one kept alive through the
-    // block loop costs guarded causal inputs 3-5% at D=128 (measured).
     const int N_kv = SQUARE ? N_q : N_kv_launch;
     KV kv_source{kv_fields...};
     constexpr bool FLAT_HEADS = LAYOUT == AddressLayout::ContiguousHeads;
@@ -182,11 +154,9 @@ attention_fwd_kernel(
     const int b = FLAT_HEADS ? bh / H_q : blockIdx.z;
     const int h = FLAT_HEADS ? bh % H_q : blockIdx.y;
     const int q_block = blockIdx.x * kBlockM;
-    // Key column that the first Q row of this warp may see last: its own index, shifted by
-    // the keys that precede the query (N_kv - N_q of them).
+    // Bottom-right causal alignment offsets each query by N_kv - N_q.
     const int causal_row0 = q_block + warp * 16 + (N_kv - N_q);
 
-    // Under GQA several query heads share one key/value head.
     int h_kv = h;
     if constexpr (GQA) {
         h_kv = h / kv_group;
@@ -212,9 +182,7 @@ attention_fwd_kernel(
         L_bh = L + l_head * N_q;
     }
 
-    // Dynamic shared memory: a static __shared__ array is capped at 48 KB per
-    // block, which is not enough for the larger head dims. The host asks for
-    // Kernel_traits::SMEM_BYTES and raises the opt-in limit when it is above 48 KB.
+    // The launcher opts into dynamic shared-memory allocations above 48 KB.
     extern __shared__ __align__(16) char smem_raw[];
     half* smem = reinterpret_cast<half*>(smem_raw);
     const uint32_t smem_base = smem_u32(smem);
@@ -224,7 +192,6 @@ attention_fwd_kernel(
     KVStager<D, FULL_TILES, typename KV::Head> kv_stager(kv_head, N_kv, tid);
     uint32_t tSrQ[Kernel_traits::KSLICES][4];
 
-    // ---- Prologue: stage Q and pull it into registers ----
     if constexpr (kStages == 2) {
         // Q borrows the second stage, so block 0 of K/V can already be in flight.
         kv_stager.issue(cur_base, 0);
@@ -254,9 +221,7 @@ attention_fwd_kernel(
     Softmax softmax;
     const float softmax_scale_log2 = softmax_scale * LOG2Ef;
 
-    // ---- Main loop over K/V blocks ----
-    // Causal blocks stop at the diagonal: no key past the one the last query row of the
-    // block may see.
+    // Skip K/V tiles beyond the last query row's causal boundary.
     const int causal_end = q_block + kBlockM + (N_kv - N_q);
     const int kv_end  = (CAUSAL && causal_end < N_kv) ? causal_end : N_kv;
     const int nblocks = (kv_end + kBlockN - 1) / kBlockN;
@@ -264,8 +229,7 @@ attention_fwd_kernel(
         const int kv = i * kBlockN;
         const bool has_next = (i + 1) < nblocks;
 
-        // With two stages the next block is already on its way while this one
-        // is used; with one stage the copies have to land before any math.
+        // Wait for the current stage; the next stage may remain in flight.
         if constexpr (kStages == 2) {
             if (has_next) {
                 kv_stager.issue(next_base, kv + kBlockN);
@@ -288,7 +252,7 @@ attention_fwd_kernel(
         }
         softmax_rescale_o(acc_s, acc_o, softmax);   // acc_s becomes P, acc_o *= scores_scale
         accumulate_pv<D>(acc_o, acc_s, cur_base + pv_lane_base);
-        __syncthreads();                            // everyone done reading this stage
+        __syncthreads();                            // finish reads before reusing the stage
 
         if constexpr (kStages == 2) {
             uint32_t tmp = cur_base; cur_base = next_base; next_base = tmp;

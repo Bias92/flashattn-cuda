@@ -13,8 +13,7 @@ static Strides strides_of(const torch::Tensor& t) {
 template <bool... B>
 using Flags = std::integer_sequence<bool, B...>;
 
-// Turns run-time flags into template arguments, one instantiation per combination:
-// with_flags(f, Flags<>{}, a, b) ends in f.template run<a, b>().
+// Expand runtime flags into f.run<flags...>().
 template <typename F, bool... Known>
 static void with_flags(F& f, Flags<Known...>) {
     f.template run<Known...>();
@@ -27,7 +26,6 @@ static void with_flags(F& f, Flags<Known...>, bool flag, Rest... rest) {
 }
 
 // Flag order: WRITE_L, CAUSAL, SQUARE, FULL_TILES, GQA.
-// run<flags...>() hands the kernel instantiation with those flags to `launch`.
 template <int D, AddressLayout LAYOUT, typename KV, typename Launch, typename... KVFields>
 struct KernelChoice {
     Launch& launch;
@@ -72,11 +70,7 @@ static void choose_layout(Launch& launch, bool packed_rows, bool contiguous_rows
     }
 }
 
-// Picks the kernel instantiation for the run-time flags and launches it over
-// (Q blocks, query heads, batch). ALL_MODES = false keeps only what inference needs (causal,
-// no L, two lengths), so a K/V source used that way does not pay for the other instantiations.
-// Specializations, all decided here: D; L wanted; causal; square (N_q == N_kv); full tiles
-// (N_q a multiple of kBlockM and N_kv of kBlockN, so no row or column needs a guard); GQA.
+// ALL_MODES=false instantiates only causal, O-only kernels with separate Q/KV lengths.
 template <typename KV, bool ALL_MODES, typename... KVFields>
 static void launch_forward(const torch::Tensor& Q_h, const torch::Tensor& O_h, float* L_ptr,
                            int N_kv, int kv_group, bool causal, float scale, KVFields... kv_fields)
@@ -90,8 +84,7 @@ static void launch_forward(const torch::Tensor& Q_h, const torch::Tensor& O_h, f
     bool contiguous_rows = false;
     if constexpr (ALL_MODES) {
         const KV source{kv_fields...};
-        // D=64 output-only full tiles benefit from constant copy strides. Keep
-        // the general path for D=128 and +L, where this layout raises latency.
+        // Fixed-row-stride specialization: D64, dense, O-only, full tiles.
         contiguous_rows = D == 64 && !want_L && !causal && full_tiles
                        && Q_h.stride(2) == D && O_h.stride(2) == D
                        && source.sK.n == D && source.sV.n == D;
@@ -102,8 +95,7 @@ static void launch_forward(const torch::Tensor& Q_h, const torch::Tensor& O_h, f
         const bool v_contiguous = source.sV.n == D
             && (H_kv == 1 || source.sV.h == (int64_t)N_kv * D)
             && (B == 1 || source.sV.b == (int64_t)H_kv * N_kv * D);
-        // Contiguous addressing helps masked causal copies. Full tiles already hoist
-        // their row addresses; keep their existing code generation and residency.
+        // Flatten batch/head indexing for contiguous, partial-tile causal inputs.
         packed_rows = causal && square && !full_tiles
                    && Q_h.is_contiguous() && O_h.is_contiguous()
                    && k_contiguous && v_contiguous && (int64_t)B * H <= 65535;

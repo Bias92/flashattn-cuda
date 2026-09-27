@@ -15,9 +15,7 @@
 
 #include "flash_fwd_launch_template.h"
 
-// Row alignment the device code needs, in bytes (measured: anything less faults with
-// "misaligned address"). Q and O are touched two halves at a time, K and V by the
-// 16-byte cp.async copies.
+// Byte alignment required by half2 loads/stores (Q/O) and cp.async copies (K/V).
 constexpr int64_t QO_ROW_ALIGN = 4;
 constexpr int64_t KV_ROW_ALIGN = 16;
 
@@ -31,8 +29,7 @@ static bool rows_aligned(const torch::Tensor& t, int64_t align) {
     return ok;
 }
 
-// No two elements of t share memory. Sufficient, not necessary: walking the dimensions from
-// the smallest stride up, each stride has to clear everything the smaller ones span.
+// Sufficient overlap check: each stride must clear all smaller-stride dimensions.
 static bool no_internal_overlap(const torch::Tensor& t) {
     std::vector<int> dims;
     for (int d = 0; d < t.dim(); d++) {
@@ -73,8 +70,6 @@ static torch::Tensor as_half_rows(const torch::Tensor& t, int64_t align) {
         ? h : h.clone(at::MemoryFormat::Contiguous);
 }
 
-// The output tensor: the caller's `out` after checking it, or a fresh one shaped like Q.
-// `inputs` are the tensors the kernel reads while blocks are already writing.
 static torch::Tensor output_for(const torch::Tensor& Q_h, const std::optional<torch::Tensor>& out,
                                 std::initializer_list<torch::Tensor> inputs) {
     if (!out.has_value()) {
@@ -86,8 +81,7 @@ static torch::Tensor output_for(const torch::Tensor& Q_h, const std::optional<to
     TORCH_CHECK(O_h.sizes() == Q_h.sizes() && O_h.stride(3) == 1 && rows_aligned(O_h, QO_ROW_ALIGN),
                 "out must have the shape of Q, a contiguous last dimension and rows "
                 "that start on a ", QO_ROW_ALIGN, "-byte boundary");
-    // Blocks write their rows while other blocks are still reading, so out may neither
-    // fold onto itself nor share memory with an input.
+    // Reject aliasing: blocks read inputs and write output concurrently.
     TORCH_CHECK(no_internal_overlap(O_h), "out has elements that share memory");
     for (const auto& t : inputs) {
         TORCH_CHECK(!spans_overlap(O_h, t), "the address range of out must not overlap an input");
@@ -95,7 +89,7 @@ static torch::Tensor output_for(const torch::Tensor& Q_h, const std::optional<to
     return O_h;
 }
 
-// Checks shared by both entry points; returns the number of query heads per K/V head.
+// Return the number of query heads per K/V head.
 static int check_query(const torch::Tensor& Q, int64_t H_kv, int64_t N_kv, bool causal) {
     TORCH_CHECK(Q.is_cuda() && Q.dim() == 4, "Q must be a 4D CUDA tensor [B, H, N_q, D]");
     const int64_t H = Q.size(1), N_q = Q.size(2), D = Q.size(3);
@@ -156,9 +150,8 @@ torch::Tensor attention_forward_only(torch::Tensor Q, torch::Tensor K, torch::Te
     return O;
 }
 
-// Causal attention of one sequence whose keys and values sit in a paged cache: Q holds the
-// last N_q of its N_kv tokens, `block_table` lists its pages in order. The page ids are
-// trusted; checking them would need a device sync.
+// Q contains the last N_q tokens of one sequence; block_table lists its cache pages.
+// The caller must supply valid page IDs; values are not checked on the host.
 torch::Tensor attention_forward_paged(torch::Tensor Q, torch::Tensor key_cache,
                                       torch::Tensor value_cache, torch::Tensor block_table,
                                       int64_t N_kv, std::optional<double> softmax_scale,

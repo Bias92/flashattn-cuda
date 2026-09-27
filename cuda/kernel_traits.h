@@ -9,9 +9,7 @@
 #ifndef ATTN_BC
 #define ATTN_BC 32
 #endif
-// One K/V stage instead of two. Halves shared memory, which buys residency at
-// larger tiles, and gives up the overlap of the next tile's copies with this
-// tile's math.
+// Disable double buffering to use a single K/V stage without copy/compute overlap.
 #ifndef ATTN_DOUBLE_BUFFER
 #define ATTN_DOUBLE_BUFFER 1
 #endif
@@ -25,9 +23,6 @@ constexpr int kNWarps = kBlockM / 16; // one warp per 16 Q rows
 #define LN2f 0.69314718056f
 #define LOG2Ef 1.44269504089f
 
-// ------------------------------------------------------------
-// Compile-time tile geometry
-// ------------------------------------------------------------
 template <int D>
 struct Flash_fwd_kernel_traits {
     static constexpr int LDS        = D + kSmemPad;    // smem row stride (halves)
@@ -39,11 +34,8 @@ struct Flash_fwd_kernel_traits {
     static constexpr uint32_t STAGE_BYTES = STAGE * sizeof(half);
     static constexpr uint32_t ROW_BYTES   = LDS * sizeof(half);
 
-    // Q is staged in shared memory before the loop starts. With two stages it
-    // borrows the second one, so that stage has to hold a whole Q block; with
-    // one stage it reuses the single K/V buffer, which is sized for whichever
-    // is larger. Getting this wrong overruns shared memory at run time, so it
-    // is checked at compile time instead.
+    // Q must fit in the second K/V stage when double-buffered.
+    // A single buffer must hold either Q or one K/V stage.
     static_assert(kStages == 1 || kBlockM * LDS <= STAGE,
                   "with two stages BR must be <= 2*BC: Q is staged in one K/V stage");
     static constexpr int SMEM_HALVES = (kStages == 2)
