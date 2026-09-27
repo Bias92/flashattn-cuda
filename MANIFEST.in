@@ -1,0 +1,4 @@
+include cuda/kernel_traits.h
+include cuda/attention_forward_ops.cuh
+include cuda/flash_fwd_kernel.h
+include cuda/flash_fwd_launch_template.h
