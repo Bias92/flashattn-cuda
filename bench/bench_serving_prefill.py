@@ -81,6 +81,8 @@ SOURCES = ["cuda/attention_forward.cu", "cuda/attention_decode_paged.cu",
            "integrations/vllm_prefill/scratch_vllm_prefill/loader.py",
            "integrations/vllm_prefill/scratch_vllm_prefill/audit.py",
            "bench/bench_serving_prefill.py", "bench/gpu_busy.ps1"]
+SOURCES += sorted(p.relative_to(ROOT).as_posix()
+                  for pattern in ("*.h", "*.cuh") for p in (ROOT / "cuda").glob(pattern))
 
 
 class Rejected(Exception):
@@ -89,6 +91,11 @@ class Rejected(Exception):
 
 def sha256(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def source_hashes():
+    """Snapshot the implementation, including the headers compiled into prefill."""
+    return {source: sha256(ROOT / source) for source in SOURCES}
 
 
 def utc():
@@ -246,7 +253,7 @@ class Campaign:
         record = dict(at=utc(), mode=self.args.mode, python=platform.python_version(),
                       torch=torch.__version__, vllm=vllm.__version__,
                       transformers=transformers.__version__, gpu_and_driver=smi,
-                      command=sys.argv, sources={s: sha256(ROOT / s) for s in SOURCES})
+                      command=sys.argv, sources=source_hashes())
         with (self.root / "provenance.jsonl").open("a") as f:
             f.write(json.dumps(record) + "\n")
         return record["sources"]
@@ -344,7 +351,7 @@ class Campaign:
                         if proc.poll() is not None:
                             break
                         continue
-                    if sources != {s: sha256(ROOT / s) for s in SOURCES}:
+                    if sources != source_hashes():
                         raise RuntimeError("a source file changed during the campaign")
                     record["sources_sha256"] = hashlib.sha256(
                         json.dumps(sources, sort_keys=True).encode()).hexdigest()

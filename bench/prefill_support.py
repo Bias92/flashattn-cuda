@@ -18,12 +18,22 @@ def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def source_manifest(source):
+    """Hash the entry point and local headers, using the serving loader's build identity."""
+    source = Path(source).resolve()
+    paths = [source, *sorted(source.parent.glob("*.h")), *sorted(source.parent.glob("*.cuh"))]
+    hashes = {p.name: sha(p) for p in paths}
+    digest = hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest()
+    return {"build_sources_sha256": digest, "source_files": hashes}
+
+
 def extension(source):
     source = Path(source).resolve()
-    name = "prefill_layout_" + sha(source)[:12]
+    manifest = source_manifest(source)
+    name = "prefill_layout_" + manifest["build_sources_sha256"][:12]
     module = load(name=name, sources=[str(source)], extra_cuda_cflags=FLAGS, verbose=False)
     record = dict(source=str(source), sha256=sha(source), so=module.__file__,
-                  so_sha256=sha(module.__file__), flags=FLAGS)
+                  so_sha256=sha(module.__file__), flags=FLAGS, **manifest)
     print(json.dumps(record), flush=True)
     return module, record
 

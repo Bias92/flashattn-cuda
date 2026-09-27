@@ -11,7 +11,7 @@ import torch.nn.functional as F
 from torch.nn.attention import SDPBackend, sdpa_kernel
 
 from compare_pytorch import SHAPE_SETS, time_once, median_ci
-from prefill_support import CANDIDATE, extension, gpu_state, guard, sha
+from prefill_support import CANDIDATE, extension, gpu_state, guard, sha, source_manifest
 
 
 def dispatch(fn, select):
@@ -117,6 +117,8 @@ def main():
                 args.output.write_text(json.dumps({"meta": meta, "cases": cases}, indent=2))
                 torch.cuda.empty_cache()
     assert sha(CANDIDATE) == source["sha256"], "Kernel changed during measurement"
+    assert source_manifest(CANDIDATE)["build_sources_sha256"] == source["build_sources_sha256"], \
+        "Kernel headers changed during measurement"
     meta.update(gpu_after=gpu_state(), guard_after=guard(), complete=True)
     args.output.write_text(json.dumps({"meta": meta, "cases": cases}, indent=2))
     print("DONE", flush=True)

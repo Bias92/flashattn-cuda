@@ -7,7 +7,8 @@ compatibility; it is not the optimization target or a headline result.
 
 ## Authoritative Files
 
-- Prefill: `cuda/attention_forward.cu`.
+- Prefill API: `cuda/attention_forward.cu`; loop: `cuda/flash_fwd_kernel.h`.
+- Prefill source map: `cuda/README.md`. Headers are part of the measured source.
 - Serving decode: `cuda/attention_decode_paged.cu`, loaded by
   `integrations/vllm/scratch_vllm/loader.py`.
 - Prefill+decode integration: `integrations/vllm_prefill/`.

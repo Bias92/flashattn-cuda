@@ -109,7 +109,8 @@ dispatch, paired samples and GPU telemetry. Existing results are not overwritten
 
 | Path | Role |
 |---|---|
-| `cuda/attention_forward.cu` | Current prefill kernel |
+| `cuda/attention_forward.cu` | Prefill API and input validation |
+| `cuda/flash_fwd_kernel.h` | Prefill forward loop; see [source map](cuda/README.md) |
 | `cuda/attention_decode_paged.cu` | Paged decode actually loaded by vLLM |
 | `cuda/attention_decode.cu` | Dense-cache decode |
 | `integrations/vllm_prefill/` | Full prefill+decode backend |

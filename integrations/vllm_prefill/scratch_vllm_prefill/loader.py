@@ -1,10 +1,11 @@
 """Builds cuda/attention_forward.cu with the flags the tests and benchmarks use.
 
-The module name carries the source hash, so an edited kernel is never served from an
-extension cached under an unchanged name.
+The module name hashes the entry point and CUDA headers, including header-only edits.
+The extension is cached once per process; restart the engine after editing sources.
 """
 
 import hashlib
+import json
 import os
 from functools import lru_cache
 from pathlib import Path
@@ -20,10 +21,14 @@ def load_prefill_extension():
 
     if not SOURCE.is_file():
         raise RuntimeError("Use pip install -e integrations/vllm_prefill from the source checkout")
-    digest = hashlib.sha256(SOURCE.read_bytes()).hexdigest()
+    # Conservatively include every local CUDA header, including decode's shared helper.
+    paths = [SOURCE, *sorted(SOURCE.parent.glob("*.h")), *sorted(SOURCE.parent.glob("*.cuh"))]
+    hashes = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
+    digest = hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest()
     os.environ.setdefault("MAX_JOBS", "1")
     module = load(name=f"attention_forward_{digest[:12]}", sources=[str(SOURCE)],
                   extra_cuda_cflags=FLAGS,
                   verbose=os.environ.get("SCRATCH_BUILD_VERBOSE") == "1")
-    print(f"SCRATCH_PREFILL source_sha256={digest} so={module.__file__}", flush=True)
+    print(f"SCRATCH_PREFILL source_sha256={hashes[SOURCE.name]} "
+          f"build_sources_sha256={digest} so={module.__file__}", flush=True)
     return module
