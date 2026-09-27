@@ -36,93 +36,39 @@ struct KernelChoice {
     }
 };
 
-template <int D, typename KV, bool ALL_MODES, typename Launch, typename... KVFields>
-static void choose_layout(Launch& launch, bool packed_rows, bool contiguous_rows,
-                          bool want_L, bool causal, bool square, bool full_tiles, bool gqa) {
-    KernelChoice<D, AddressLayout::Strided, KV, Launch, KVFields...> general{launch};
-    if constexpr (ALL_MODES) {
-        if (packed_rows) {
-            KernelChoice<D, AddressLayout::ContiguousHeads, KV, Launch, KVFields...> flat{launch};
-            if (want_L)
-                with_flags(flat, Flags</*WRITE_L=*/true, /*CAUSAL=*/true,
-                                       /*SQUARE=*/true, /*FULL_TILES=*/false>{}, gqa);
-            else
-                with_flags(flat, Flags</*WRITE_L=*/false, /*CAUSAL=*/true,
-                                       /*SQUARE=*/true, /*FULL_TILES=*/false>{}, gqa);
-            return;
-        }
-        if constexpr (D == 64) {
-            if (contiguous_rows) {
-                KernelChoice<D, AddressLayout::ContiguousRows, KV, Launch, KVFields...> rows{launch};
-                if (square)
-                    with_flags(rows, Flags</*WRITE_L=*/false, /*CAUSAL=*/false,
-                                           /*SQUARE=*/true, /*FULL_TILES=*/true>{}, gqa);
-                else
-                    with_flags(rows, Flags</*WRITE_L=*/false, /*CAUSAL=*/false,
-                                           /*SQUARE=*/false, /*FULL_TILES=*/true>{}, gqa);
-                return;
+struct ForwardLaunch {
+    const torch::Tensor& Q;
+    const torch::Tensor& O;
+    float* L;
+    int N_kv;
+    int kv_group;
+    bool causal;
+    float scale;
+
+    template <typename Dispatch, typename... KVFields>
+    void run(KVFields... kv_fields) const {
+        const int B = Q.size(0), H = Q.size(1), N_q = Q.size(2), D = Q.size(3);
+        TORCH_CHECK(B <= 65535 && H <= 65535, "B and H must each be <= 65535 (grid limits)");
+        TORCH_CHECK(D == 64 || D == 128, "Head dimension must be 64 or 128, got ", D);
+
+        const dim3 block(kNWarps * 32);
+        const auto stream = at::cuda::getCurrentCUDAStream();
+        auto launch = [&](auto kernel, int smem_bytes, bool flatten_heads) {
+            const dim3 grid = flatten_heads ? dim3((N_q + kBlockM - 1) / kBlockM, B * H)
+                                           : dim3((N_q + kBlockM - 1) / kBlockM, H, B);
+            if (smem_bytes > 48 * 1024) {
+                C10_CUDA_CHECK(cudaFuncSetAttribute(
+                    kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, smem_bytes));
             }
-        }
-        with_flags(general, Flags<>{}, want_L, causal, square, full_tiles, gqa);
-    } else {
-        with_flags(general, Flags</*WRITE_L=*/false, /*CAUSAL=*/true, /*SQUARE=*/false>{},
-                   full_tiles, gqa);
+            kernel<<<grid, block, smem_bytes, stream>>>(
+                reinterpret_cast<const half*>(Q.data_ptr<at::Half>()),
+                reinterpret_cast<half*>(O.data_ptr<at::Half>()), L,
+                strides_of(Q), strides_of(O), N_q, N_kv, H, kv_group, scale, kv_fields...);
+        };
+        if (D == 64)
+            Dispatch::template run<64>(launch, *this, kv_fields...);
+        else
+            Dispatch::template run<128>(launch, *this, kv_fields...);
+        C10_CUDA_KERNEL_LAUNCH_CHECK();
     }
-}
-
-// ALL_MODES=false instantiates only causal, O-only kernels with separate Q/KV lengths.
-template <typename KV, bool ALL_MODES, typename... KVFields>
-static void launch_forward(const torch::Tensor& Q_h, const torch::Tensor& O_h, float* L_ptr,
-                           int N_kv, int kv_group, bool causal, float scale, KVFields... kv_fields)
-{
-    const int B = Q_h.size(0), H = Q_h.size(1), N_q = Q_h.size(2), D = Q_h.size(3);
-    const bool want_L = (L_ptr != nullptr);
-    const bool gqa = (kv_group != 1);
-    const bool square = (N_q == N_kv);
-    const bool full_tiles = (N_q % kBlockM == 0) && (N_kv % kBlockN == 0);
-    bool packed_rows = false;
-    bool contiguous_rows = false;
-    if constexpr (ALL_MODES) {
-        const KV source{kv_fields...};
-        // Fixed-row-stride specialization: D64, dense, O-only, full tiles.
-        contiguous_rows = D == 64 && !want_L && !causal && full_tiles
-                       && Q_h.stride(2) == D && O_h.stride(2) == D
-                       && source.sK.n == D && source.sV.n == D;
-        const int H_kv = H / kv_group;
-        const bool k_contiguous = source.sK.n == D
-            && (H_kv == 1 || source.sK.h == (int64_t)N_kv * D)
-            && (B == 1 || source.sK.b == (int64_t)H_kv * N_kv * D);
-        const bool v_contiguous = source.sV.n == D
-            && (H_kv == 1 || source.sV.h == (int64_t)N_kv * D)
-            && (B == 1 || source.sV.b == (int64_t)H_kv * N_kv * D);
-        // Flatten batch/head indexing for contiguous, partial-tile causal inputs.
-        packed_rows = causal && square && !full_tiles
-                   && Q_h.is_contiguous() && O_h.is_contiguous()
-                   && k_contiguous && v_contiguous && (int64_t)B * H <= 65535;
-    }
-    TORCH_CHECK(B <= 65535 && H <= 65535, "B and H must each be <= 65535 (grid limits)");
-    TORCH_CHECK(ALL_MODES || (causal && !want_L), "this K/V source is built for causal, O-only use");
-
-    dim3 block(kNWarps * 32);
-    auto stream = at::cuda::getCurrentCUDAStream();
-
-    auto launch = [&](auto kernel, int smem_bytes, bool contiguous) {
-        const dim3 grid = contiguous ? dim3((N_q + kBlockM - 1) / kBlockM, B * H)
-                                     : dim3((N_q + kBlockM - 1) / kBlockM, H, B);
-        if (smem_bytes > 48 * 1024) {
-            C10_CUDA_CHECK(cudaFuncSetAttribute(
-                kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, smem_bytes));
-        }
-        kernel<<<grid, block, smem_bytes, stream>>>(
-            reinterpret_cast<const half*>(Q_h.data_ptr<at::Half>()),
-            reinterpret_cast<half*>(O_h.data_ptr<at::Half>()), L_ptr,
-            strides_of(Q_h), strides_of(O_h), N_q, N_kv, H, kv_group, scale, kv_fields...);
-    };
-    if (D == 64)
-        choose_layout<64, KV, ALL_MODES, decltype(launch), KVFields...>(
-            launch, packed_rows, contiguous_rows, want_L, causal, square, full_tiles, gqa);
-    else
-        choose_layout<128, KV, ALL_MODES, decltype(launch), KVFields...>(
-            launch, packed_rows, contiguous_rows, want_L, causal, square, full_tiles, gqa);
-    C10_CUDA_KERNEL_LAUNCH_CHECK();
-}
+};

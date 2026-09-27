@@ -6,3 +6,5 @@ include cuda/softmax.h
 include cuda/README.md
 include cuda/flash_fwd_kernel.h
 include cuda/flash_fwd_launch_template.h
+include cuda/flash_fwd_dense_dispatch.h
+include cuda/flash_fwd_paged_dispatch.h

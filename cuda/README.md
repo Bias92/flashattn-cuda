@@ -6,7 +6,9 @@ The loop reads: stage K/V, QK, mask, online softmax, PV, store O (and optionally
 | File | Responsibility |
 |---|---|
 | [attention_forward.cu](attention_forward.cu) | Tensor validation and Python entry points: forward, forward_only, forward_paged |
-| [flash_fwd_launch_template.h](flash_fwd_launch_template.h) | Layout/flag dispatch, launch grid and shared-memory allocation |
+| [flash_fwd_launch_template.h](flash_fwd_launch_template.h) | ForwardLaunch: launch grid, stream and shared-memory allocation |
+| [flash_fwd_dense_dispatch.h](flash_fwd_dense_dispatch.h) | DenseForwardDispatch: layout selection for ordinary K/V tensors |
+| [flash_fwd_paged_dispatch.h](flash_fwd_paged_dispatch.h) | PagedForwardDispatch: causal, O-only dispatch for paged K/V |
 | [flash_fwd_kernel.h](flash_fwd_kernel.h) | QK, masks, PV, epilogue and the forward loop |
 | [kernel_traits.h](kernel_traits.h) | Compile-time tile dimensions and shared-memory sizes |
 | [flash_fwd_memory.h](flash_fwd_memory.h) | Dense/paged K/V addressing, asynchronous staging and Q fragments |
@@ -16,17 +18,17 @@ The loop reads: stage K/V, QK, mask, online softmax, PV, store O (and optionally
 ## Call Path
 
 ```text
-forward / forward_only -> DenseKV
-forward_paged          -> PagedKV
-                            |
-                     launch_forward
-                            |
-                     choose_layout
-                            |
-                     attention_fwd_kernel
+forward / forward_only -> ForwardLaunch::run<DenseForwardDispatch>
+forward_paged          -> ForwardLaunch::run<PagedForwardDispatch>
+                                           |
+                         selected attention_fwd_kernel specialization
 ```
 
-The launcher selects an address layout and compile-time flags:
+The dense dispatcher selects the address layout. The paged dispatcher uses the
+strided layout with causal masking and no L output. Both use the same launcher
+and calculation kernel; neither depends on vLLM or benchmark code.
+
+Kernel flags:
 
 | Flag | Meaning |
 |---|---|
@@ -72,17 +74,14 @@ uses `flash_fwd_kernel.h`, `flash_fwd_launch_template.h`, `kernel_traits.h`,
 This repository borrows those organizational conventions, not the upstream
 CuTe/CUTLASS implementation or its full template/build hierarchy.
 
-## Scope of This Reorganization
+## Integration Boundary
 
-Base: `2077e40a48319d9b3b91f2ec48e2951bf6bfd869`, not the older study branch.
-Existing function bodies, arithmetic order, PTX strings, barriers, launch arguments,
-dispatch conditions, public API and compatibility paths are preserved. Only files,
-comments and the tile-trait identifiers change.
+`cuda/attention_forward.cu` owns tensor validation and the three Python APIs.
+`integrations/vllm_prefill/` adapts vLLM batches to those APIs. `bench/` calls the
+APIs for measurement. Neither directory is a dependency of the CUDA extension.
 
-The PyTorch entry point remains `cuda/attention_forward.cu`; its local headers
-are included into the same translation unit. There are no extra GPU launches.
-The serving loader and current benchmark hash the entry point plus all local
-`.h`/`.cuh` files; this conservative set also includes the unchanged decode helper.
+Dispatch uses compile-time policies, not virtual calls. The existing kernel
+specializations and Python signatures are retained.
 
-Dated benchmark records retain their original source hashes. The new organization
-has a different source hash; those historical measurements are not fresh reruns.
+Build records hash the entry point and local headers. Dated benchmark records
+retain their original source hashes; reorganizing sources is not a fresh measurement.

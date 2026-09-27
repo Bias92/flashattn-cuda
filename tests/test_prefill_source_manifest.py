@@ -67,7 +67,8 @@ class PrefillSourceManifestTests(unittest.TestCase):
         manifest = (ROOT / "MANIFEST.in").read_text()
         self.assertIn("include cuda/README.md", manifest)
         for name in ("kernel_traits.h", "flash_fwd_memory.h", "softmax.h", "flash_fwd_kernel.h",
-                     "flash_fwd_launch_template.h", "attention_forward_ops.cuh"):
+                     "flash_fwd_launch_template.h", "flash_fwd_dense_dispatch.h",
+                     "flash_fwd_paged_dispatch.h", "attention_forward_ops.cuh"):
             self.assertIn(f"include cuda/{name}", manifest)
 
     def test_fresh_loader_build_identity_changes_on_header_edit(self):

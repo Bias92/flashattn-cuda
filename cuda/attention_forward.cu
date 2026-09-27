@@ -13,7 +13,8 @@
 #include <utility>
 #include <vector>
 
-#include "flash_fwd_launch_template.h"
+#include "flash_fwd_dense_dispatch.h"
+#include "flash_fwd_paged_dispatch.h"
 
 // Byte alignment required by half2 loads/stores (Q/O) and cp.async copies (K/V).
 constexpr int64_t QO_ROW_ALIGN = 4;
@@ -129,8 +130,9 @@ static std::pair<torch::Tensor, torch::Tensor> attention_forward_impl(
         L = torch::empty({Q.size(0), Q.size(1), Q.size(2)}, Q.options().dtype(torch::kFloat));
     }
 
-    launch_forward<DenseKV, /*ALL_MODES=*/true>(
-        Q_h, O_h, want_L ? L.data_ptr<float>() : nullptr, (int)K.size(2), kv_group, causal, scale,
+    const ForwardLaunch launch{
+        Q_h, O_h, want_L ? L.data_ptr<float>() : nullptr, (int)K.size(2), kv_group, causal, scale};
+    launch.run<DenseForwardDispatch>(
         reinterpret_cast<const half*>(K_h.data_ptr<at::Half>()),
         reinterpret_cast<const half*>(V_h.data_ptr<at::Half>()), strides_of(K_h), strides_of(V_h));
     return {O_h, L};
@@ -189,8 +191,8 @@ torch::Tensor attention_forward_paged(torch::Tensor Q, torch::Tensor key_cache,
 
     int page_shift = 0;
     while ((int64_t(1) << page_shift) < page_size) page_shift++;
-    launch_forward<PagedKV, /*ALL_MODES=*/false>(
-        Q_h, O_h, nullptr, (int)N_kv, kv_group, /*causal=*/true, scale,
+    const ForwardLaunch launch{Q_h, O_h, nullptr, (int)N_kv, kv_group, /*causal=*/true, scale};
+    launch.run<PagedForwardDispatch>(
         reinterpret_cast<const half*>(key_cache.data_ptr<at::Half>()),
         reinterpret_cast<const half*>(value_cache.data_ptr<at::Half>()),
         (const int32_t*)block_table.data_ptr<int32_t>(), page_shift,
