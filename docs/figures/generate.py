@@ -10,6 +10,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 
 
@@ -48,7 +49,16 @@ def kernel_data(root, sources):
                              for s in run[key(case)]["samples_ms"]) for run in maps]
             assert abs(median(values) - case["ratios"]["ours_o"][backend]) < 1e-12
             ratios[backend] = values
-        rows.append({"shape": case["shape"], "causal": case["causal"], "ratios": ratios})
+        times = {}
+        for backend in ("ours_o", "flash", "cudnn"):
+            times[backend] = median(median(s[backend] for s in run[key(case)]["samples_ms"])
+                                    for run in maps)
+            assert abs(times[backend] - case["median_ms"][backend]) < 1e-12
+        b, h, _, n, d = case["shape"]
+        flops = 4 * b * h * n * n * d // (2 if case["causal"] else 1)
+        rows.append({"shape": case["shape"], "causal": case["causal"], "ratios": ratios,
+                     "median_ms": times, "flops": flops,
+                     "effective_tflops": {k: flops / (ms * 1e9) for k, ms in times.items()}})
     assert len(rows) == 34
     for group in summary["groups"]:
         if group["D"] != 64:
@@ -147,32 +157,71 @@ def kernel_plot(rows, out):
 
 
 def serving_plot(rows, out, study, panels, filename):
-    fig, axes = plt.subplots(1, 2, figsize=(11, 3.5))
-    fig.subplots_adjust(left=.08, right=.98, bottom=.18, top=.78, wspace=.27)
-    for ax, (mode, metric, panel_title, ylabel, divisor) in zip(axes, panels):
-        for (config, label, color, marker), line in zip(SERIES, ("-", "--", ":")):
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.6))
+    fig.subplots_adjust(left=.09, right=.975, bottom=.14, top=.79, wspace=.35)
+    for ax, (mode, metric, panel_title) in zip(axes, panels):
+        panel_values = []
+        for (config, label, color, _), offset in zip(SERIES[1:], (-.19, .19)):
             data = sorted([r for r in rows if r["study"] == study and r["mode"] == mode and r["config"] == config],
                           key=lambda r: (r["concurrency"], r["input_len"]))
             assert len(data) == (4 if study == "latency" else 5)
             labels = [r["concurrency"] if study == "throughput" else r["input_len"] for r in data]
-            values = [median(r["values"][metric]) / divisor for r in data]
-            ax.plot(labels, values, color=color, marker=marker, label=label,
-                    linewidth=1.3, markersize=4, linestyle=line, markerfacecolor="white")
-            ax.set_xscale("log", base=2)
-            ax.set_xticks(labels, [f"{n:,}" for n in labels], fontsize=10)
-            ax.minorticks_off()
-        ax.set_ylim(bottom=0)
-        ax.set_xlabel("Concurrent requests (log scale)" if study == "throughput" else "Input tokens (log scale)", labelpad=10)
-        ax.set_ylabel(ylabel)
+            values = [100 * (median(r["ratios"][metric]) - 1) for r in data]
+            y = np.arange(len(data)) + offset
+            ax.barh(y, values, height=.30, color=color, label=label)
+            for yi, value in zip(y, values):
+                ax.annotate(f"{value:+.2f}%", xy=(value, yi),
+                            xytext=(4 if value >= 0 else -4, 0), textcoords="offset points",
+                            ha="left" if value >= 0 else "right", va="center", fontsize=10)
+            panel_values.extend(values)
+        low, high = min(0, min(panel_values)), max(0, max(panel_values))
+        span = max(high - low, 1)
+        ax.set_xlim(low - span * .25, high + span * .25)
+        ax.set_yticks(range(len(labels)), [f"{n:,}" for n in labels])
+        ax.set_ylim(len(labels) - .45, -.55)
+        ax.set_ylabel("Concurrent requests" if study == "throughput" else "Input tokens")
+        ax.set_xlabel("Change vs Native Flash (%)", labelpad=8)
         ax.set_title(panel_title, fontsize=11, pad=10)
         style_axes(ax)
+        ax.grid(axis="y", visible=False)
+        ax.grid(axis="x", color="#e5e5e5", linewidth=.6)
+        ax.axvline(0, color=INK, linestyle="--", lw=.8)
+        left, right = ax.get_xlim()
+        ax.set_xticks([tick for tick in ax.get_xticks() if left <= tick <= right])
     handles, labels = axes[0].get_legend_handles_labels()
+    handles.insert(0, Line2D([], [], color=INK, linestyle="--", linewidth=.8))
+    labels.insert(0, "Native Flash = 0%")
     fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(.53, 1.005), ncol=3, frameon=False)
-    if panels[0][1] == panels[1][1]:
-        ymax = max(ax.get_ylim()[1] for ax in axes)
-        for ax in axes:
-            ax.set_ylim(0, ymax)
     save(fig, out / filename)
+
+
+def throughput_table(rows, out):
+    lines = ["# Effective Attention Throughput", "",
+             "RTX 4060 Ti 8 GB, FP16 inputs and FP32 accumulation, D=64. These values",
+             "are derived from the September 22 warmed O-only API measurements, not a new GPU run.", "",
+             "## FLOP Accounting", "",
+             "For equal query/KV lengths, the QK and PV products together use the",
+             "[FlashAttention benchmark convention](https://github.com/Dao-AILab/flash-attention/blob/main/benchmarks/benchmark_flash_attention.py):", "",
+             "- Dense: `F = 4 * B * H_q * N^2 * D`.",
+             "- Causal: `F = 2 * B * H_q * N^2 * D` (half-dense approximation).",
+             "- `effective TFLOP/s = F / (time_ms * 10^9)`; one FMA counts as two FLOPs.", "",
+             "This counts useful matrix-product work, excluding softmax and padding/masked",
+             "tile work. It is not a count of all hardware instructions, GPU peak utilization,",
+             "or whole-model serving FLOP/s. GQA uses the query-head count H_q.", "",
+             "Each time is the median of three per-run median API latencies. The paired",
+             "ratio plot uses a different aggregation and can differ in sign near parity.", "",
+             "## All 34 Cases", "",
+             "| B | H_q/H_kv | N | Mask | GFLOP/call | Custom ms | Custom TFLOP/s | Flash TFLOP/s | cuDNN TFLOP/s |",
+             "|---:|---:|---:|---|---:|---:|---:|---:|---:|"]
+    for row in sorted(rows, key=lambda r: (*r["shape"], r["causal"])):
+        b, h, hk, n, _ = row["shape"]
+        rates = row["effective_tflops"]
+        lines.append(f"| {b} | {h}/{hk} | {n} | {'Causal' if row['causal'] else 'Dense'} | "
+                     f"{row['flops'] / 1e9:.3f} | {row['median_ms']['ours_o']:.5f} | "
+                     f"{rates['ours_o']:.2f} | {rates['flash']:.2f} | {rates['cudnn']:.2f} |")
+    lines += ["", "[Source measurements](../serving/backend_overview_2026-09-22/README.md)",
+              "| [Exact derived values and input hashes](data.json)"]
+    (out / "kernel-throughput.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def main():
@@ -187,23 +236,24 @@ def main():
     kernel = kernel_data(args.repo, sources)
     serving = serving_data(args.repo, sources)
     kernel_plot(kernel, args.output)
+    throughput_table(kernel, args.output)
     serving_plot(serving, args.output, "latency", [
-        ("graphs", "p50_ttft_ms", "TTFT", "p50 latency (ms)", 1),
-        ("graphs", "p50_tpot_ms", "TPOT", "p50 latency (ms)", 1),
+        ("graphs", "p50_ttft_ms", "TTFT (lower is better)"),
+        ("graphs", "p50_tpot_ms", "TPOT (lower is better)"),
     ], "low-latency.png")
     serving_plot(serving, args.output, "throughput", [
-        ("eager", "output_throughput", "Eager execution", "Output tokens/s", 1),
-        ("graphs", "output_throughput", "CUDA Graphs", "Output tokens/s", 1),
+        ("eager", "output_throughput", "Eager throughput (higher is better)"),
+        ("graphs", "output_throughput", "CUDA Graph throughput (higher is better)"),
     ], "high-throughput.png")
     serving_plot(serving, args.output, "long_context", [
-        ("graphs", "p50_ttft_ms", "TTFT", "p50 latency (s)", 1000),
-        ("graphs", "p50_tpot_ms", "TPOT", "p50 latency (ms)", 1),
+        ("graphs", "p50_ttft_ms", "TTFT (lower is better)"),
+        ("graphs", "p50_tpot_ms", "TPOT (lower is better)"),
     ], "long-context.png")
     assert len(sources) == 256
     for relative, digest in sources.items():
         assert hashlib.sha256((args.repo / relative).read_bytes()).hexdigest() == digest
     (args.output / "data.json").write_text(json.dumps({
-        "aggregation": "Kernel: median paired ratios. Serving plots: median of three per-run metrics.",
+        "aggregation": "Kernel: median paired ratios. TFLOP/s: FLOPs divided by median API time. Serving plots: median of three per-run ratios vs Native Flash.",
         "input_sha256": sources, "kernel": kernel, "serving": serving,
     }, indent=2) + "\n", encoding="utf-8")
     print(f"Verified {len(kernel)} kernel cases, 252 serving records, {len(sources)} unchanged source files.")

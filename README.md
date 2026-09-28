@@ -41,6 +41,22 @@ The 1% band is a practical comparison threshold, not a significance test.
 
 [Per-shape timings and measurement protocol](docs/serving/backend_overview_2026-09-22/README.md)
 
+### Effective TFLOP/s
+
+Across the 34 cases, the custom kernel achieves **34.48-41.74 TFLOP/s for
+dense** and **20.28-39.76 TFLOP/s for causal** attention.
+
+At B=1, H_q=H_kv=8, N=4096, D=64:
+
+| Mask | GFLOP/call | Custom TFLOP/s | SDPA-Flash TFLOP/s | SDPA-cuDNN TFLOP/s |
+|---|---:|---:|---:|---:|
+| Dense | 34.36 | 39.84 | 39.11 | 40.39 |
+| Causal | 17.18 | 35.57 | 33.44 | 33.63 |
+
+These rates divide QK/PV FLOPs by measured O-only API time, using the
+FlashAttention benchmark's half-dense convention for causal attention.
+[All 34 cases and FLOP accounting](docs/figures/kernel-throughput.md)
+
 ## Serving Performance
 
 The vLLM 0.19.0 study compared three configurations with the same models and
@@ -56,9 +72,9 @@ engine settings:
 execution modes. FP16, 128 output tokens per request, 2048-token chunked
 prefill, prefix caching off; startup and warmup excluded.
 
-Plots show medians across three runs. These are whole-engine results from the
-archived September 20-21 serving
-implementation, not the current standalone build. Kernel results above are
+Changes are relative to **Native Flash = 0%**, using the median of three
+per-run ratios. These are whole-engine results from the archived September
+20-21 serving implementation, not the current standalone build. Kernel results above are
 from September 22. [Measured revisions and raw records](docs/evaluation.md)
 
 ### Low Latency
@@ -67,7 +83,7 @@ from September 22. [Measured revisions and raw records](docs/evaluation.md)
 TPOT, inter-token and end-to-end latency, including p50/p95/p99.
 The plot uses CUDA Graphs; lower latency is better.
 
-![Low latency: TTFT and TPOT for all three configurations with CUDA Graphs](docs/figures/low-latency.png)
+![TTFT and TPOT percentage changes for both custom configurations versus Native Flash, with CUDA Graphs](docs/figures/low-latency.png)
 
 With CUDA Graphs, custom prefill + decode had **0.1-1.5% lower TTFT** at
 512-1920 tokens, and **1.2-1.8% higher TPOT**, versus native Flash.
@@ -79,7 +95,7 @@ The 128-token TTFT varied substantially between runs.
 output tokens/s, TTFT, TPOT and request-latency distributions.
 Higher output throughput is better.
 
-![High throughput: output tokens per second under eager execution and CUDA Graphs](docs/figures/high-throughput.png)
+![Output throughput percentage changes versus Native Flash under eager execution and CUDA Graphs](docs/figures/high-throughput.png)
 
 Custom prefill + decode improved throughput by **8.6-15.7% in eager mode**.
 With CUDA Graphs the difference was **-0.1% to +1.3%**, with TPOT changing by
@@ -91,14 +107,13 @@ With CUDA Graphs the difference was **-0.1% to +1.3%**, with TPOT changing by
 end-to-end latency, request failures and KV-cache capacity from engine logs.
 The plot uses CUDA Graphs; lower latency is better.
 
-![Long context: TTFT and TPOT as input length increases, with CUDA Graphs](docs/figures/long-context.png)
+![Long-context TTFT and TPOT percentage changes versus Native Flash, with CUDA Graphs](docs/figures/long-context.png)
 
 With CUDA Graphs, custom prefill + decode had **2.2-3.9% lower TTFT** across
 all five lengths; TPOT changed by -1.9% to +0.4%. KV-cache records describe
 engine capacity, not per-request peak memory.
 
 TTFT = time to first token; TPOT = average time per subsequent output token.
-Percentage changes use median per-run ratios.
 [Full serving report](docs/serving/prefill_campaign_2026-09-20/REPORT.md)
 
 ## Code And Records
