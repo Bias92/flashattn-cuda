@@ -1,13 +1,14 @@
 # flashattn-cuda
 
-FlashAttention-2 forward written in CUDA/PTX, tuned and measured on an
-**RTX 4060 Ti 8 GB**. The focus is **head dimension 64**, with FP16 operands
-and FP32 accumulation.
+Flash-Attention and Flash-Attention-2 inference kernels written with CUDA/PTX,
+especially for **RTX 4060 Ti**.
 
 Evaluation covers both attention-kernel latency against **SDPA-Flash/cuDNN**
 and model serving under **low latency, high throughput and long context**.
 
 ## Implementation
+
+The FA2 kernel uses FP16 operands and FP32 accumulation.
 
 - Tensor Core `mma.sync` for both QK and PV, without CUTLASS.
 - Register-resident online softmax; no full attention matrix in global memory.
