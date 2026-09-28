@@ -5,7 +5,8 @@ run a benchmark or modify the original records.
 
 | Figure | Source | Aggregation |
 |---|---|---|
-| Kernel performance | [September 22 raw runs](../serving/backend_overview_2026-09-22/) | All 34 D64 cases; median of three within-run paired O-only ratios; whiskers show the three-run min/max |
+| Kernel throughput (README) | [September 22 raw runs](../serving/backend_overview_2026-09-22/) | B=1, H_q=H_kv=8, D=64; all four recorded sequence lengths, dense and causal; QK/PV FLOPs divided by median of three per-run median O-only latencies |
+| [Per-case kernel comparison](kernel-comparison.md) | [September 22 raw runs](../serving/backend_overview_2026-09-22/) | All 34 D64 cases; median of three within-run paired O-only ratios; whiskers show the three-run min/max |
 | Low latency | [September 20-21 serving records](../serving/prefill_campaign_2026-09-20/serving/graphs/cases/) | TTFT/TPOT p50 percentage change vs Native Flash; median of three per-run ratios, CUDA Graphs |
 | High throughput | [Serving records](../serving/prefill_campaign_2026-09-20/serving/) | Output tokens/s percentage change vs Native Flash; median of three per-run ratios, eager and CUDA Graphs separately |
 | Long context | [Serving records](../serving/prefill_campaign_2026-09-20/serving/graphs/cases/) | TTFT/TPOT p50 percentage change vs Native Flash; median of three per-run ratios, CUDA Graphs |
@@ -35,6 +36,9 @@ Source file hashes and the numerical inputs to every performance plot are in
 The [34-case effective TFLOP/s table](kernel-throughput.md) is derived from
 the same kernel timings. Its FLOP convention and exclusions are documented
 there; it does not estimate whole-model serving FLOP/s.
+
+[Presentation references](presentation-references.md) list the original kernel
+articles used to select the README chart format.
 
 ## Regenerate
 

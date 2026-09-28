@@ -20,42 +20,35 @@ query/KV lengths**. Earlier FA1/FP32 kernels remain in [experiments](experiments
 
 ## Kernel Performance
 
-**RTX 4060 Ti 8 GB, PyTorch 2.10.0+cu128.** The comparison covers 34 D64 cases:
-batch sizes 1-8, sequence lengths 512-8192, MHA/GQA and dense/causal masks.
-Flash and cuDNN are separately forced SDPA backends. Timings use warmed
-O-only APIs, without CUDA Graphs.
+**RTX 4060 Ti 8 GB, PyTorch 2.10.0+cu128.** Batch size 1, eight Q/KV heads,
+head dimension 64. Flash and cuDNN are separately forced SDPA backends.
+FP16 inputs, FP32 accumulation; warmed O-only API time, without CUDA Graphs.
 
-![All 34 kernel cases: custom kernel latency change versus SDPA-Flash and SDPA-cuDNN](docs/figures/kernel-performance.png?v=aa05629)
+Effective throughput over sequence length; **higher is better**. Each bar uses
+the median of three per-run median latencies and the QK/PV FLOP count.
 
-Negative values mean the custom kernel is faster. Points show median paired ratios;
-whiskers show the min/max across three runs. H denotes query/KV heads.
+![Attention forward throughput: Custom, SDPA-Flash and SDPA-cuDNN over sequence length, with separate Dense and Causal panels](docs/figures/kernel-throughput.png)
 
-**Causal attention is the strongest path; cuDNN wins most dense cases.**
-Counts below are faster / within 1% / slower, from three runs of paired timings.
-The 1% band is a practical comparison threshold, not a significance test.
+**Execution time (ms), lower is better:**
 
-| Mask | Cases | vs SDPA-Flash | vs SDPA-cuDNN |
-|---|---:|---:|---:|
-| Dense | 17 | 10 / 4 / 3 | 2 / 4 / 11 |
-| Causal | 17 | 15 / 0 / 2 | 16 / 0 / 1 |
-
-[Per-shape timings and measurement protocol](docs/serving/backend_overview_2026-09-22/README.md)
-
-### Effective TFLOP/s
-
-Across the 34 cases, the custom kernel achieves **34.48-41.74 TFLOP/s for
-dense** and **20.28-39.76 TFLOP/s for causal** attention.
-
-At B=1, H_q=H_kv=8, N=4096, D=64:
-
-| Mask | GFLOP/call | Custom TFLOP/s | SDPA-Flash TFLOP/s | SDPA-cuDNN TFLOP/s |
+| Mask | Sequence length | Custom | SDPA-Flash | SDPA-cuDNN |
 |---|---:|---:|---:|---:|
-| Dense | 34.36 | 39.84 | 39.11 | 40.39 |
-| Causal | 17.18 | 35.57 | 33.44 | 33.63 |
+| Dense | 1024 | 0.06227 | 0.05998 | 0.05782 |
+| Dense | 2048 | 0.22313 | 0.22501 | 0.21361 |
+| Dense | 4096 | 0.86249 | 0.87860 | 0.85070 |
+| Dense | 8192 | 3.37455 | 3.45639 | 3.41856 |
+| Causal | 1024 | 0.05296 | 0.05270 | 0.05217 |
+| Causal | 2048 | 0.14025 | 0.15490 | 0.14524 |
+| Causal | 4096 | 0.48298 | 0.51368 | 0.51085 |
+| Causal | 8192 | 1.81162 | 1.82800 | 1.86083 |
 
-These rates divide QK/PV FLOPs by measured O-only API time, using the
-FlashAttention benchmark's half-dense convention for causal attention.
+The full benchmark covers **34 cases**, including batch sizes 1-8, MHA/GQA
+and sequence lengths 512-8192. Custom throughput spans **34.48-41.74 TFLOP/s
+for dense** and **20.28-39.76 TFLOP/s for causal** attention.
+
 [All 34 cases and FLOP accounting](docs/figures/kernel-throughput.md)
+| [Per-case comparisons](docs/figures/kernel-comparison.md)
+| [Measurement protocol](docs/serving/backend_overview_2026-09-22/README.md)
 
 ## Serving Performance
 

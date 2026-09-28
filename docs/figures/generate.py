@@ -165,6 +165,34 @@ def kernel_plot(rows, out):
     save(fig, out / "kernel-performance.png")
 
 
+def kernel_throughput_plot(rows, out):
+    fig, axes = plt.subplots(2, 1, figsize=(7.2, 7.2), sharey=True)
+    fig.subplots_adjust(left=.13, right=.98, bottom=.10, top=.88, hspace=.55)
+    lengths = [1024, 2048, 4096, 8192]
+    x = np.arange(len(lengths))
+    for causal, ax in zip((False, True), axes):
+        group = sorted([r for r in rows if r["causal"] == causal
+                        and r["shape"][:3] == [1, 8, 8]], key=lambda r: r["shape"][3])
+        assert [r["shape"][3] for r in group] == lengths
+        assert all(r["shape"][4] == 64 for r in group)
+        for i, (backend, label, color) in enumerate((
+                ("ours_o", "Custom", TEAL),
+                ("flash", "SDPA-Flash", BLUE),
+                ("cudnn", "SDPA-cuDNN", ORANGE))):
+            values = [r["effective_tflops"][backend] for r in group]
+            ax.bar(x + (i - 1) * .24, values, width=.22, color=color, label=label)
+        ax.set_xticks(x, [f"{n:,}" for n in lengths])
+        ax.set_yticks(range(0, 41, 10))
+        ax.set_ylim(0, 45)
+        ax.set_xlabel("Sequence length", labelpad=8)
+        ax.set_ylabel("TFLOP/s")
+        ax.set_title("Causal" if causal else "Dense", fontsize=13, pad=10)
+        style_axes(ax)
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(.55, .995), ncol=3, frameon=False)
+    save(fig, out / "kernel-throughput.png")
+
+
 def serving_plot(rows, out, study, panels, filename):
     fig, axes = plt.subplots(2, 1, figsize=(7.2, 8.5))
     fig.subplots_adjust(left=.16, right=.96, bottom=.09, top=.88, hspace=.62)
@@ -253,6 +281,7 @@ def main():
     kernel = kernel_data(args.repo, sources)
     serving = serving_data(args.repo, sources)
     kernel_plot(kernel, args.output)
+    kernel_throughput_plot(kernel, args.output)
     throughput_table(kernel, args.output)
     serving_plot(serving, args.output, "latency", [
         ("graphs", "p50_ttft_ms", "p50 TTFT (lower is better)"),
