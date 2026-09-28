@@ -25,7 +25,7 @@ batch sizes 1-8, sequence lengths 512-8192, MHA/GQA and dense/causal masks.
 Flash and cuDNN are separately forced SDPA backends. Timings use warmed
 O-only APIs, without CUDA Graphs.
 
-![All 34 kernel cases: custom kernel latency change versus SDPA-Flash and SDPA-cuDNN](docs/figures/kernel-performance.png)
+![All 34 kernel cases: custom kernel latency change versus SDPA-Flash and SDPA-cuDNN](docs/figures/kernel-performance.png?v=aa05629)
 
 Negative values mean the custom kernel is faster. Points show median paired ratios;
 whiskers show the min/max across three runs. H denotes query/KV heads.
@@ -83,7 +83,7 @@ from September 22. [Measured revisions and raw records](docs/evaluation.md)
 TPOT, inter-token and end-to-end latency, including p50/p95/p99.
 The plot uses CUDA Graphs; lower latency is better.
 
-![TTFT and TPOT percentage changes for both custom configurations versus Native Flash, with CUDA Graphs](docs/figures/low-latency.png)
+![TTFT and TPOT percentage changes for both custom configurations versus Native Flash, with CUDA Graphs](docs/figures/low-latency.png?v=aa05629)
 
 With CUDA Graphs, custom prefill + decode had **0.1-1.5% lower TTFT** at
 512-1920 tokens, and **1.2-1.8% higher TPOT**, versus native Flash.
@@ -95,7 +95,7 @@ The 128-token TTFT varied substantially between runs.
 output tokens/s, TTFT, TPOT and request-latency distributions.
 Higher output throughput is better.
 
-![Output throughput percentage changes versus Native Flash under eager execution and CUDA Graphs](docs/figures/high-throughput.png)
+![Output throughput percentage changes versus Native Flash under eager execution and CUDA Graphs](docs/figures/high-throughput.png?v=aa05629)
 
 Custom prefill + decode improved throughput by **8.6-15.7% in eager mode**.
 With CUDA Graphs the difference was **-0.1% to +1.3%**, with TPOT changing by
@@ -107,7 +107,7 @@ With CUDA Graphs the difference was **-0.1% to +1.3%**, with TPOT changing by
 end-to-end latency, request failures and KV-cache capacity from engine logs.
 The plot uses CUDA Graphs; lower latency is better.
 
-![Long-context TTFT and TPOT percentage changes versus Native Flash, with CUDA Graphs](docs/figures/long-context.png)
+![Long-context TTFT and TPOT percentage changes versus Native Flash, with CUDA Graphs](docs/figures/long-context.png?v=aa05629)
 
 With CUDA Graphs, custom prefill + decode had **2.2-3.9% lower TTFT** across
 all five lengths; TPOT changed by -1.9% to +0.4%. KV-cache records describe
