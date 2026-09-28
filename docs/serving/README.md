@@ -9,11 +9,11 @@ This is an out-of-tree attention backend, not a new serving engine.
 | Configuration | Prefill | Decode |
 |---|---|---|
 | Native `FLASH_ATTN` | vLLM FlashAttention | vLLM FlashAttention |
-| Scratch decode-only | vLLM FlashAttention | `cuda/attention_decode_paged.cu` for pure decode batches |
-| Scratch full | `cuda/attention_forward.cu` | `cuda/attention_decode_paged.cu` |
+| Custom decode-only | vLLM FlashAttention | `cuda/attention_decode_paged.cu` for pure decode batches |
+| Custom prefill + decode | `cuda/attention_forward.cu` | `cuda/attention_decode_paged.cu` |
 
 `integrations/vllm/scratch_vllm/loader.py` loads the paged decode source.
-`integrations/vllm_prefill/` adds scratch prefill and mixed-batch handling.
+`integrations/vllm_prefill/` adds custom prefill and mixed-batch handling.
 The full backend reads fresh K/V from the projection tensors, and cached K/V
 through page tables for chunks and prefix hits. Each prefill request gets its
 own launch. The decode-only backend retains native handling for mixed batches.

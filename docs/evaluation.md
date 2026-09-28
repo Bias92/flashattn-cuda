@@ -25,8 +25,8 @@ Only the attention backend changes; model weights and engine settings match.
 | Configuration | Prefill | Decode |
 |---|---|---|
 | Native Flash | vLLM FlashAttention | vLLM FlashAttention |
-| Scratch decode-only | vLLM FlashAttention | Custom paged decode |
-| Scratch full | Custom prefill | Custom paged decode |
+| Custom decode-only | vLLM FlashAttention | Custom paged decode |
+| Custom prefill + decode | Custom prefill | Custom paged decode |
 
 The campaign used vLLM 0.19.0, FP16, 128 output tokens per request,
 2048-token chunked prefill and disabled prefix caching. Three runs of each
@@ -35,7 +35,7 @@ produced **252 accepted measurements**. Server startup and warmup are excluded.
 
 ### Results
 
-**Scratch full versus native Flash**, from the 2026-09-20/21 campaign.
+**Custom prefill + decode versus native Flash**, from the 2026-09-20/21 campaign.
 Each value is the median of three per-run ratios; ranges cover the listed
 workload settings. Negative latency changes and positive throughput changes
 are better.
@@ -75,7 +75,7 @@ every measured case.
 
 B=1, H_q=H_kv=8, D=64, N_q=N_kv=N. Lower time is better.
 
-| Mask | N | Scratch (ms) | SDPA-Flash (ms) | SDPA-cuDNN (ms) |
+| Mask | N | Custom (ms) | SDPA-Flash (ms) | SDPA-cuDNN (ms) |
 |---|---:|---:|---:|---:|
 | Dense | 1024 | 0.06227 | 0.05998 | 0.05782 |
 | Dense | 2048 | 0.22313 | 0.22501 | 0.21361 |

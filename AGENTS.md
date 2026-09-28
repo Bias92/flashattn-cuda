@@ -23,6 +23,9 @@ Do not attribute the older serving numbers to the newer prefill source.
 Old shape sets named holdout have since been used for development.
 
 Preserve measured raw data and the FP32 baseline in `experiments/cuda/fp32.cu`.
-Do not change precision, add benchmark-shape whitelists, or replace scratch
+Use "custom" for the project's kernels and backends in prose and figure labels.
+Preserve historical identifiers, file paths and raw measurement records.
+
+Do not change precision, add benchmark-shape whitelists, or replace custom
 computation with another attention implementation. Do not create AI-generated PRs.
 Do not commit, push, use cloud resources, or start a long GPU run without a user request.

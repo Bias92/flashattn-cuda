@@ -1,95 +1,115 @@
 # flashattn-cuda
 
-Flash-Attention and Flash-Attention-2 inference kernels written with CUDA/PTX,
-especially for **RTX 4060 Ti**.
+Flash-Attention and Flash-Attention-2 inference kernels written in **CUDA C++
+with inline PTX**, especially for **RTX 4060 Ti**.
 
-Evaluation covers both attention-kernel latency against **SDPA-Flash/cuDNN**
-and model serving under **low latency, high throughput and long context**.
+The project evaluates attention-kernel latency against **PyTorch SDPA-Flash
+and cuDNN**, then model serving under **low latency, high throughput and
+long context**.
 
 ## Implementation
 
-The FA2 kernel uses FP16 operands and FP32 accumulation.
+- Tensor Core `mma.sync` for QK and PV, with FP16 operands and FP32 accumulation.
+- Online softmax and output accumulation in registers.
+- Four warps per block; double-buffered K/V tiles loaded with `cp.async`.
 
-- Tensor Core `mma.sync` for both QK and PV.
-- Register-resident online softmax; no full attention matrix in global memory.
-- Four warps per block and double-buffered K/V tiles using `cp.async`.
+The standalone FA2 forward supports **dense/causal attention, GQA and unequal
+query/KV lengths**. Earlier FA1/FP32 kernels remain in [experiments](experiments/).
 
-The standalone forward kernel supports dense/causal attention, GQA and
-unequal query/KV lengths. [Read the kernel](cuda/flash_fwd_kernel.h)
-| [Source map](cuda/README.md).
+[Read the forward loop](cuda/flash_fwd_kernel.h) | [Source map](cuda/README.md)
 
-## Three Workloads
+## Kernel Performance
 
-The serving study used **TinyLlama-1.1B** and **Qwen2.5-0.5B** in vLLM 0.19.0.
-It compared native FlashAttention, scratch decode-only, and scratch
-prefill+decode with matching model weights and engine settings.
-Three runs across 14 settings and two execution modes produced **252 measurements**.
+**RTX 4060 Ti 8 GB, PyTorch 2.10.0+cu128.** The comparison covers 34 D64 cases:
+batch sizes 1-8, sequence lengths 512-8192, MHA/GQA and dense/causal masks.
+Flash and cuDNN are separately forced SDPA backends. Timings use warmed
+O-only APIs, without CUDA Graphs.
 
-**Results below compare scratch prefill+decode against native FlashAttention,
-with CUDA Graphs enabled.** All requests generate 128 output tokens.
+![All 34 kernel cases: custom kernel latency change versus SDPA-Flash and SDPA-cuDNN](docs/figures/kernel-performance.png)
 
-### 1. Low Latency
+Negative values mean the custom kernel is faster. Points show median paired ratios;
+whiskers show the min/max across three runs. H denotes query/KV heads.
 
-**Test:** TinyLlama, one request at a time, 128-1920 input tokens.
+**Causal attention is the strongest path; cuDNN wins most dense cases.**
+Counts below are faster / within 1% / slower, from three runs of paired timings.
+The 1% band is a practical comparison threshold, not a significance test.
 
-**Metrics:** TTFT, TPOT, inter-token and end-to-end latency, including p50/p95/p99.
+| Mask | Cases | vs SDPA-Flash | vs SDPA-cuDNN |
+|---|---:|---:|---:|
+| Dense | 17 | 10 / 4 / 3 | 2 / 4 / 11 |
+| Causal | 17 | 15 / 0 / 2 | 16 / 0 / 1 |
 
-**Result:** At 512-1920 tokens, median TTFT was **0.1-1.5% lower**, while TPOT
-was **1.2-1.8% higher**. The 128-token TTFT varied substantially between runs.
+[Per-shape timings and measurement protocol](docs/serving/backend_overview_2026-09-22/README.md)
 
-### 2. High Throughput
+## Serving Performance
 
-**Test:** TinyLlama, 512 input tokens, 2/4/8/16/32 concurrent requests.
+The vLLM 0.19.0 study compared three configurations with the same models and
+engine settings:
 
-**Metrics:** Total output tokens/s, TTFT, TPOT and request-latency distributions.
+| Configuration | Prefill | Decode |
+|---|---|---|
+| Native Flash | vLLM FlashAttention | vLLM FlashAttention |
+| Custom decode-only | vLLM FlashAttention | Custom paged decode |
+| Custom prefill + decode | Custom prefill | Custom paged decode |
 
-**Result:** Throughput was **roughly unchanged (-0.1% to +1.3%)**. Median TPOT
-changed by -0.8% to +1.6%; higher-concurrency TTFT varied between runs.
+**252 measurements:** 14 settings, three configurations, three runs and two
+execution modes. FP16, 128 output tokens per request, 2048-token chunked
+prefill, prefix caching off; startup and warmup excluded.
 
-### 3. Long Context
+Plots show medians across three runs. These are whole-engine results from the
+archived September 20-21 serving
+implementation, not the current standalone build. Kernel results above are
+from September 22. [Measured revisions and raw records](docs/evaluation.md)
 
-**Test:** Qwen2.5-0.5B, one request, 2048-32640 input tokens, 2048-token chunks.
+### Low Latency
 
-**Metrics:** TTFT, TPOT, end-to-end latency, request failures and KV-cache capacity.
+**TinyLlama-1.1B, one request at a time, 128-1920 input tokens.** Measured TTFT,
+TPOT, inter-token and end-to-end latency, including p50/p95/p99.
+The plot uses CUDA Graphs; lower latency is better.
 
-**Result:** Median TTFT was **2.2-3.9% lower** across the five tested lengths.
-TPOT changed by -1.9% to +0.4%. KV-cache capacity comes from engine logs,
-not a per-request peak-memory measurement.
+![Low latency: TTFT and TPOT for all three configurations with CUDA Graphs](docs/figures/low-latency.png)
 
-TTFT is time to the first token; TPOT is average time per subsequent output
-token. p50 is the median, while p95/p99 describe the slow tail.
+With CUDA Graphs, custom prefill + decode had **0.1-1.5% lower TTFT** at
+512-1920 tokens, and **1.2-1.8% higher TPOT**, versus native Flash.
+The 128-token TTFT varied substantially between runs.
 
-**Execution mode matters:** eager throughput improved by 8.6-15.7%, but that
-advantage largely disappeared with CUDA Graphs.
-[Detailed comparison](docs/evaluation.md#serving-evaluation)
-| [Full serving report and raw runs](docs/serving/prefill_campaign_2026-09-20/REPORT.md).
+### High Throughput
 
-## Kernel Results
+**TinyLlama-1.1B, 512 input tokens, 2-32 concurrent requests.** Measured total
+output tokens/s, TTFT, TPOT and request-latency distributions.
+Higher output throughput is better.
 
-**34 D64 cases:** batch sizes 1-8, sequence lengths 512-8192, dense/causal
-attention and multiple MHA/GQA head configurations. Each case uses three runs
-of paired, warmed O-only API timings. Flash and cuDNN are forced SDPA backends.
+![High throughput: output tokens per second under eager execution and CUDA Graphs](docs/figures/high-throughput.png)
 
-Counts are **faster / within 1% / slower**, based on paired latency ratios:
+Custom prefill + decode improved throughput by **8.6-15.7% in eager mode**.
+With CUDA Graphs the difference was **-0.1% to +1.3%**, with TPOT changing by
+-0.8% to +1.6%. Higher-concurrency TTFT varied between runs.
 
-| Mask | vs SDPA-Flash | vs SDPA-cuDNN |
-|---|---:|---:|
-| Dense (17 cases) | 10 / 4 / 3 | 2 / 4 / 11 |
-| Causal (17 cases) | 15 / 0 / 2 | 16 / 0 / 1 |
+### Long Context
 
-Causal attention is the strongest path; cuDNN wins most dense cases.
-[Per-shape timings and methodology](docs/serving/backend_overview_2026-09-22/README.md).
+**Qwen2.5-0.5B, one request, 2048-32640 input tokens.** Measured TTFT, TPOT,
+end-to-end latency, request failures and KV-cache capacity from engine logs.
+The plot uses CUDA Graphs; lower latency is better.
+
+![Long context: TTFT and TPOT as input length increases, with CUDA Graphs](docs/figures/long-context.png)
+
+With CUDA Graphs, custom prefill + decode had **2.2-3.9% lower TTFT** across
+all five lengths; TPOT changed by -1.9% to +0.4%. KV-cache records describe
+engine capacity, not per-request peak memory.
+
+TTFT = time to first token; TPOT = average time per subsequent output token.
+Percentage changes use median per-run ratios.
+[Full serving report](docs/serving/prefill_campaign_2026-09-20/REPORT.md)
 
 ## Code And Records
 
 - [Kernel source map](cuda/README.md): forward loop, memory operations, softmax and PTX.
-- [Build, API and tests](docs/usage.md): instructions for the measured `sm_89` environment.
-- [Evaluation details](docs/evaluation.md): conditions, timing tables and original data.
-- [Optimization history](experiments/): earlier kernels, including the preserved FP32 baseline.
+- [Build, API and tests](docs/usage.md): the measured `sm_89` environment.
+- [Evaluation details](docs/evaluation.md): conditions, timing tables and raw results.
+- [Figure data and generation](docs/figures/README.md): plots from preserved measurements.
+- [Optimization history](experiments/): earlier kernels, including the unchanged FP32 baseline.
 - [FlashAttention-2 paper](https://arxiv.org/abs/2307.08691): algorithm reference.
 
-The active build contains standalone forward attention. Serving results are
-from September 20-21; kernel results are from September 22, before the source
-cleanup. The earlier vLLM integration and decode kernels are retained in
-[Git history](https://github.com/Bias92/flashattn-cuda/tree/d4d4f37f6d4129f4a42f521fe93282e8ae7b7beb),
-with their measurements unchanged. Other GPUs have not been evaluated.
+The active build contains standalone forward attention. The vLLM integration
+and decode kernels are preserved in [Git history](https://github.com/Bias92/flashattn-cuda/tree/d4d4f37f6d4129f4a42f521fe93282e8ae7b7beb).
+Other GPUs have not been evaluated.

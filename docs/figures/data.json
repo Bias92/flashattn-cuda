@@ -1,0 +1,4457 @@
+{
+  "aggregation": "Kernel: median paired ratios. Serving plots: median of three per-run metrics.",
+  "input_sha256": {
+    "docs/serving/backend_overview_2026-09-22/summary.json": "044885b7e669b03ab242654b9ad60052baff3802b9e88e435083b3e7ff891a53",
+    "docs/serving/backend_overview_2026-09-22/run1.json": "6e6543b7e4b79bc5433b8e3ec65c667507e82925b8e63a224766d0a5fe72a667",
+    "docs/serving/backend_overview_2026-09-22/run2.json": "4fbd659e66cd9dcba1bae75e77eb6c0dcfb6fc09b84eb0144308e44c122fb5ba",
+    "docs/serving/backend_overview_2026-09-22/run3.json": "4c969f1ec1c0df7f582f02a84d2c6fa0cb483e495d60b6fb0112bccbdd6631b6",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_FLASH_ATTN_r0_n1024_c1.json": "8d81af98615c986e44d770dd74cbd91ebdb9c11f76e88f67d8e434e99276d967",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_FLASH_ATTN_r0_n128_c1.json": "3220418716179d173c708d4425f035e3ca925eed25eaa6756e7dbc6ee2452c9a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_FLASH_ATTN_r0_n1920_c1.json": "8fc5b7c2dea78efdf48575657a4c6f1b2431ddedc1e347865534305fc5361a5a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_FLASH_ATTN_r0_n512_c1.json": "0118bc5488ce2dfd68dd6d11290467d63de047f4a3124844e624fc6d35091ba9",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_FLASH_ATTN_r1_n1024_c1.json": "e6d80c913d3c5e9fd06854a7f0539c7c1e8d784d395ffe29b82a751855bf115f",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_FLASH_ATTN_r1_n128_c1.json": "34d65c8c5d5b372a62ac2848c82a6dbc9d530ad09baca331c5f89fa42cb13423",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_FLASH_ATTN_r1_n1920_c1.json": "d4d91c5727343a9c3b04f9cd90d9fde8a0ba9c3213d8505e00d2c62974bea07c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_FLASH_ATTN_r1_n512_c1.json": "8afe343fde28d0daa1862fefcf817404340b2d3eae90eab272334f24914f60e7",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_FLASH_ATTN_r2_n1024_c1.json": "94a49e5ac057c7c00fe534e9e64b7acd2fa685c51574a4a437534b2b0eb595b1",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_FLASH_ATTN_r2_n128_c1.json": "bf66c020f307150f9f63955b304a59a4753b9d563eb8cbfc1d2b3d2fe53a3fc8",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_FLASH_ATTN_r2_n1920_c1.json": "3bb5b9dc8c34453567d98d5d12fbf990c24360d9c6f94f905d26ee3fd64c3bbe",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_FLASH_ATTN_r2_n512_c1.json": "331a5ed64d0fbdf3c82486dc519a7652adf7073d8766134110e31bb7a80e7051",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_DECODE_r0_n1024_c1.json": "e0ff8655acafa29169c4449133b572920d576c5cbab005e67432514181d84596",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_DECODE_r0_n128_c1.json": "7e7b0e4110e7b29901476b72d50b98e4963a8058af0c517b2b02e3638f71f284",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_DECODE_r0_n1920_c1.json": "7e21e7a77c35179cb6008081e84765851fcc86d20554416db6cc2fa51b2c74c2",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_DECODE_r0_n512_c1.json": "8ce2782b2dd82c033b7a24595fae01044471345a01b0daa5b6ff5115169010a5",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_DECODE_r1_n1024_c1.json": "3f5505334150e43bf6b3becc1572669c9c10a4531c6db012b0019bfd1f73d926",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_DECODE_r1_n128_c1.json": "0bc5505eca9a6ad90da8aad99a7b4778a7f999ad06030cf439b0dd8cd61961ce",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_DECODE_r1_n1920_c1.json": "dd75a922be385cee0e028f0c49aa1d1a08b802a340606c86469b4771d75cf551",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_DECODE_r1_n512_c1.json": "eb94a88c6c2d7d568dfcc5739a7945910c965bbe811d8be43330314cef93ab93",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_DECODE_r2_n1024_c1.json": "79aa96e85c7db6d6bbd5ca9d386bf195f64a9026f62f4c91043eb278e997ef20",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_DECODE_r2_n128_c1.json": "35196d44ff2d5312e37d9b1a49b0470539ae82f7dd99f5d48f1b03238f51a65e",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_DECODE_r2_n1920_c1.json": "719c11dcaa2f93cf1a03285d3eaf7ff941ba043ebaaef6ba17202c9b3f6916a8",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_DECODE_r2_n512_c1.json": "09fe7701e9c4bd00fe77fd1d9ce3744817c69d9ca84b96650024e7d124ec7dbc",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_FULL_r0_n1024_c1.json": "e68bc7bc81d8da9422713c5b9ca9393adecb084645d2b289ffeaa56153c3c0f7",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_FULL_r0_n128_c1.json": "6ed38c456e74055baa65a34742e8305f97b86e4ff3556e3ddac188ddde59e88a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_FULL_r0_n1920_c1.json": "f252409231a2ae1151ab302760ec4ce7f6f8106acc656be05167988c658dbd2d",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_FULL_r0_n512_c1.json": "9f5811a066915fdc91db48c96ac6e1f1981af1944416f68ac2a4e8512f15914a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_FULL_r1_n1024_c1.json": "64e147a6d1774338df0213e8d2563745365b98ad23995c908e761b06a878a7e2",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_FULL_r1_n128_c1.json": "a7ecf2beea4999adac28290e438d2d6af9634ccb784c0b6f50b90d42efed53d3",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_FULL_r1_n1920_c1.json": "1057d8a70ecc51302926b367bcc488c4e4e0f811b1f78ab7520a17dc0bf823b7",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_FULL_r1_n512_c1.json": "27ed02c904afdad5ba02e47bb1fd882df5ed4fa8db4a4a46a27b876dab32977b",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_FULL_r2_n1024_c1.json": "d9fd56121f4636a70140477338ebeab83c48bd7ec762f8e25d62931eee9dd382",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_FULL_r2_n128_c1.json": "2734acb9b3847d6559308b591a6f21992528932756861a24b3e52344b45cd0e4",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_FULL_r2_n1920_c1.json": "80d781be03bd9e26cfe1b95f01f0bdcd1f5d2f0d85f36fa9cd953715a4d4e9b8",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/latency_SCRATCH_FULL_r2_n512_c1.json": "91fb9acf96a9083c1c6b412f8a0bd98ccb9f58c103abf7b03a113ec416baaf3b",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r0_n16384_c1.json": "30e0dad833818c4bdea188b03d5a8de95a7703265512b58acc9ae151a1d15852",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r0_n2048_c1.json": "cf15280f3c7a5e6e8b0dd14a0436d6e9ccafa1de2dba6a4ac68c835dec987efc",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r0_n32640_c1.json": "6943247dc813be33672f64bf967430e4ea8ad7d13dcb09e474c3c5ba60f3e4c5",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r0_n4096_c1.json": "4ac4d1bab3062c54cda26f86cad08672427498d7094573e7409ea098f6c36ea8",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r0_n8192_c1.json": "9dbb8187ee5f76d8b8968406c0d96c9bae89ee0eb4c7fb0dbf22263c490cd082",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r1_n16384_c1.json": "81a2075ec9a405e64a87b137dc4dd79d4f2c5c4e9cd43169f3d7b47645325d15",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r1_n2048_c1.json": "ea0659466f1cdbd01c826df446f882dead0d6bc50e607b6971dea668ef55a3a1",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r1_n32640_c1.json": "d0742e4a7a83165cb624389732f5dcd42d0035e17c4a1ed752adfb4be61a0e9a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r1_n4096_c1.json": "59a88842ffd9b6f951985e6df354098bb853189347388235ccd8467a8c1bd3e1",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r1_n8192_c1.json": "c1d815769a661aef4e0287a4a64e4bb54e2f4201fc54a8a6f83c91c966086fe0",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r2_n16384_c1.json": "3131dd8f4c86f539c992681bf808e69323f85ff58a5244b4d5184fc07fd884e1",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r2_n2048_c1.json": "62bead3f961e9f2f0249c021eb0efc2912346959d7731549d7fd998f086601d3",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r2_n32640_c1.json": "0f80eb60ba82744e606c41eef3e035f34079eff9c029fc1819d9be8b32e4d36d",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r2_n4096_c1.json": "f5fcec60487259e5d5f20ad2061042aee255e69663193b83ae50af092f8fe82d",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_FLASH_ATTN_r2_n8192_c1.json": "989f2aea0222b81e9b4f4c55274648da4fca665e064b23334c559701456031b2",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r0_n16384_c1.json": "74521cf3689122398363e1a8ffedb6df3a8d9795035f1459460ec57d6b620a18",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r0_n2048_c1.json": "0f6c7d34544a3a07b7e65b7d02a498e90f1bdfb017a5edb8dde50f76b07af319",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r0_n32640_c1.json": "abe3f6859cde3cda90380337ed24d8df89cbbe82c81f522124bc418f20d06526",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r0_n4096_c1.json": "fd7664ebab8276d21e2feb741033b0748c68eb6d7d540f6d2a1d7d3dc8c22e23",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r0_n8192_c1.json": "ce9a6b4c17a1da4ce1be1155a04f309a93077f6ee6ed5fa12e4328b2a1d40489",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r1_n16384_c1.json": "b87f27dfb2bf10660e5e9457adfb74386b930b9a1d12166d34b1252fd4584951",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r1_n2048_c1.json": "332c0fab2e3716d1f54118c4f17b9da5238cd378a50f179460273ca0a8c783a6",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r1_n32640_c1.json": "fad632f13f237b6224d2df5974f464c5234002997d3523171c8046a614b75c9a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r1_n4096_c1.json": "4aa0ae876468f84302de383bdaa7f79e696552a37266e4b69a1225a6ce0ae260",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r1_n8192_c1.json": "98cdffec8669a99880eb22de3c16142539998f6496ba34956b27d90f3890eb66",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r2_n16384_c1.json": "2b1afbe7b99d95ed3ba8d81d3d5eb16ca3bef3e2260ce69609a23cc7db261725",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r2_n2048_c1.json": "0d2c9f9c5d1fd280d8a9ffd54edc28d4bfb8af03017b36b6aa2de6a97120c510",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r2_n32640_c1.json": "bddcb7a3d91d2cae74ac924694d40a7cba418851f8e7f4f94f422d426f08bd7e",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r2_n4096_c1.json": "5e53b88d9f593dacbdd526dff51fc74eeae3ba141eac2c5bafa1a1988436dc3e",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_DECODE_r2_n8192_c1.json": "aa102e0616e23b8be3809ababd35ea2a7bca87a49e73d759a6fa79fcb57ce3c5",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r0_n16384_c1.json": "72bd93e855b166a574e769adfb3bdee3e8233b0691f4477612d55ecc373d5e2a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r0_n2048_c1.json": "7f6bc772530dd8f059d519f21c1ef53a0adbafd0e3b49c722388999695c581bc",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r0_n32640_c1.json": "004f0bff16f2ccdfa440370ee483f879ee63ffeafd3d21775cccf0e5c0cb2c72",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r0_n4096_c1.json": "a2803567303d683b986fe1ce5d0a6a325883c49eb7f4e099f5b4df00e615632e",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r0_n8192_c1.json": "7618ddfb70a3253a8c737f902b75b8ea7e3f096eec943842c7572990ceec558b",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r1_n16384_c1.json": "89114a6277767f06a9998ecdc7e7dd33ad7fa60fae346981271441ba67595b61",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r1_n2048_c1.json": "a264148440277c9df9368c3c6be7c1b2ad58f215703900605be0d6438891e7ae",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r1_n32640_c1.json": "1cc14d21fa458605cfc0a8e84ad984c0c701af95defc00ad3889e30be1a2e944",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r1_n4096_c1.json": "b74e4821d7ab428119e353dc42629d55d902d3f4f32b790070b8e614a229d974",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r1_n8192_c1.json": "07cac722ce327f0dc68df7571f4c8bc6c19f4008fbdab7706f560cda52a356f4",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r2_n16384_c1.json": "42046085f9ff436ea7bbc2ae7ab505f1ea8e54f9e71ca96fc1f4591ff4ac524a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r2_n2048_c1.json": "5b4433df2caadb1617c2e534ff3f68cc1cdeb5721734a9fd78215bc4ebfeddc9",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r2_n32640_c1.json": "cce94e519d1c547e8627f290a949b549543a6e233b9baaf9261565288388bb02",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r2_n4096_c1.json": "4ce11dc630c60e71a63120cbc493abc75fc991d6f3d5b4d906f59bc2698a9fce",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/long_context_SCRATCH_FULL_r2_n8192_c1.json": "3f30a5a617ee3a3db4e9525d862608f1985036dbe15200710bb2f81e69dcb1f1",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r0_n512_c16.json": "4317272a5cc8332239f74bf60a2218b1b8268490e0ce8a8539dc7c4fb3876353",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r0_n512_c2.json": "8a3dace8287b9fc7a0bba695897aa6ed45ae53a05c8d6517617cc686b9d6e075",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r0_n512_c32.json": "640404af55b3fd8a7788bbd8029d8316efdb0bd7ee93159422f64a8600560121",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r0_n512_c4.json": "ca273b0f11b9e07f2808bba032ee373f782d6a4c91740dffe537e2dc4bac1281",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r0_n512_c8.json": "fa56e2402fd81f25003d2b56ce14cbd2537d068e1d55be854f904960c3c9dfa4",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r1_n512_c16.json": "b8a8c8c556541d85aa8bbb19a910f477992e82ed8577b4b3745a718e4f3ba5ea",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r1_n512_c2.json": "253fb8e558070256ac664f547855cea228d5d99564560beb42523e1c59b9d03a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r1_n512_c32.json": "da4c9ffc236d330b2e49f36511c31e23df58f66f6257d36fb8f266ebe2b02bbf",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r1_n512_c4.json": "2624edec626fd59184ce93ef5e6f1fe6c7847d36c46949f4314de13d1917adab",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r1_n512_c8.json": "55e1576aa4ae8fe45e9b0291c3bc5ea6b3c40d61be7406c7456929e3a67eb83a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r2_n512_c16.json": "a7ec67b400215c38ebd0ba9384b17548ca70aec26320336b1fadb710de22f298",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r2_n512_c2.json": "0394ce94030f16009975ae50d0f73bd3ff471829baf1ad492bb512e38337a421",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r2_n512_c32.json": "f980426520589969221eec2f9436ab6e4631a7a81df492ad089c399920c19ede",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r2_n512_c4.json": "06fa0f2803fb9dab6b0904da97cf8c267f299438a902c99920472fb4c073c0f7",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_FLASH_ATTN_r2_n512_c8.json": "8ed72936423c6981f8c8c841c16c7fe3fffc668edd31f05cf3b073b4bf052d7f",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r0_n512_c16.json": "19d07547585cc8ec220e53318406a22bb59fbe593775000b95221945488dd819",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r0_n512_c2.json": "18ea1210516cb17dfb6668a57d59ecf43667266d780952a0139bc4210e7d89cd",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r0_n512_c32.json": "e2de6b476cc08294a19fdc4739b0ca18ab8347699a6e60868775086677f57e05",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r0_n512_c4.json": "b3727bfa2f5637194199eb7497f3ec3e784489343d82a0293c5fff626e5dcd4d",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r0_n512_c8.json": "f602fb585d513f7c3390da792ae89851287564bd39f24b843486d2bc39fca16f",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r1_n512_c16.json": "de38b4fb6d33d8242182d242d5749b419aa4ed11e1b88655e67d589a73b5b981",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r1_n512_c2.json": "91eb14a74c35c1388a558d13bf083305c3ac2f3f15bff874bc08d68645fbb87b",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r1_n512_c32.json": "b43834fbae8a90c055348ada534554b29f5b63090d2a3df9f03d77e4130d0311",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r1_n512_c4.json": "2b11a8ef4efa7f804c02bcf9919bd3bb4b3a3f013af05ca12e60ca0fd4dc9a33",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r1_n512_c8.json": "6bebc315aa1e1cc93a1920c90e9135c79214a2e546af190b09dd8c27ab7ae8df",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r2_n512_c16.json": "6577d853220169e84ffe6b0ea9316dde16c17226d6bd32dacec7004da2590131",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r2_n512_c2.json": "cc3d306a082790410f65e77afa734dcd697d015225e9399bd8fe257400eb5971",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r2_n512_c32.json": "49010ec2b7dbb4da817bca78945fe25ab0759dd0d33a01b3eb68def82b0f2e76",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r2_n512_c4.json": "ff047ca2f8f682625abd7404d68e9042ade64d5d38f280ff7f02ea34c281dc97",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_DECODE_r2_n512_c8.json": "96a55e00002a76c95506a60d9b9e36bc71a504b3c4d4ac83b1de34c92237a54c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r0_n512_c16.json": "7594c4a34328ea25c0765259d2b0c5ee3a4b66a7cbe9838224da78b43a8897d4",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r0_n512_c2.json": "ccad65933bf0eacc06342d36c13ae90e5006557b6c9c784a6015f4ab145862cc",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r0_n512_c32.json": "fdfbad6b03010821698e694e9d8e35ee516d25951d3f8889d1a132b6781a3a54",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r0_n512_c4.json": "ec78b7abfb9a32fd73bae7f144c59b6ac55c71d8692496425c6f0c46e7b3e62e",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r0_n512_c8.json": "837bb5e0c203a368827a51f5212ddae9b0291a78977f02ea9d4f4426ec33aa23",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r1_n512_c16.json": "8cf1be3b818ca776141397376cec0cf70de63fd3da50f08633ea43a199bb849b",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r1_n512_c2.json": "b394f9e193fe829ddaf398bfda24955a162df66a473d8b8f0965582576f45a50",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r1_n512_c32.json": "3eedf7810c28bb144c59fea1e77a28ecbef114577b84f6aae19d1a01f6dabb83",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r1_n512_c4.json": "249a7db87d1eb2a4a69a0dd92b1e513f3ce92e4153bcff968598b7954e5ef54c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r1_n512_c8.json": "e2251a80a3ecc5200d8cf69e13f9798feb47fe8b99ca3747649e33d143d8488d",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r2_n512_c16.json": "597ccb58185aa40fb5993f1787fa2746a2af3ceaf7fdf4830e4a01c445f4132e",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r2_n512_c2.json": "1c022572b3cb3151bc20f4ddd674b9e59cf9a9996d863287d086b9cc053c11b6",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r2_n512_c32.json": "8c2fdb295c1a0a5fe8178ca6351380914f63a343c827ce45ab3e065938311971",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r2_n512_c4.json": "4d8b5b3462aaab5c3c803644ccbeabaa945dcbd7a5815d0e6485a90436ae2cbc",
+    "docs/serving/prefill_campaign_2026-09-20/serving/eager/cases/throughput_SCRATCH_FULL_r2_n512_c8.json": "b13200c05f5d9204b2a20ca2041f9e3cbae942d8529574aa11ac1cc42c0fbdce",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_FLASH_ATTN_r0_n1024_c1.json": "aa0750a750e9b01a1a5d3e93f3e0c1baffd0c8dcb30f238f0c1a1a3ea0afce48",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_FLASH_ATTN_r0_n128_c1.json": "701c75c113821e3021430c97df7f7a0be43394b1838e74caec24c06fd3d9002d",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_FLASH_ATTN_r0_n1920_c1.json": "1e98f9f630364d663f52d5ad3191c36960edea778e472957c1323ac5e019d8df",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_FLASH_ATTN_r0_n512_c1.json": "aa73d8cba35390dc04c630196991a466c7e7ebe0ffdcb586fb6fcedd10425bfb",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_FLASH_ATTN_r1_n1024_c1.json": "b8fa600e95344b2a3da833ce318a872bc1bf8bd4da7033cd5e5865cd89cd2dff",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_FLASH_ATTN_r1_n128_c1.json": "04041d618d20726b5f4de587ce4553c4b1e16f7d1854e619bd0dd78b8f3e0ed1",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_FLASH_ATTN_r1_n1920_c1.json": "0f644fbf32ea1d4927577a438abae3c9a81a9885ffd5501876711eca547d147b",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_FLASH_ATTN_r1_n512_c1.json": "69915086f2e42b6a8c5ab917a968586023a7981ada030adc92b8b095b5a37c24",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_FLASH_ATTN_r2_n1024_c1.json": "46561eab4d2ea958e9147dc6dd3b8ba6dac81d18b4717ba1def200159be387cb",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_FLASH_ATTN_r2_n128_c1.json": "ac0f64cceb0f0c93a923fdd9f8f66d61ce2157eca86ed6dee93492722dd17c7f",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_FLASH_ATTN_r2_n1920_c1.json": "857b2934c7ab18b0310a9f804b992e298f3a8b193cad2b1cf8c58c9664ec9b77",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_FLASH_ATTN_r2_n512_c1.json": "03b3ae0246f9440092a3ad2ea4571f32efe5060a3d9d2f9b7461405350cf67d8",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_DECODE_r0_n1024_c1.json": "3ed70359002190b1899bcea3006c448b4d869de9a4ab178db495d3b7d46bba7f",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_DECODE_r0_n128_c1.json": "27ccc460031eec37f167192ad964a3817771e1ce066e1b4d97b65b8d50ea8cd4",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_DECODE_r0_n1920_c1.json": "9bf5c86034129884e6c3de4c9c2593e5b22a2aca7c73ce192aa174a1d994993c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_DECODE_r0_n512_c1.json": "345db872009e5999b3f98363a20ef51307fd2002b7e80130c90de23fcebd18f4",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_DECODE_r1_n1024_c1.json": "7544c68886801552fc9e25811f55f0cef7cbd0d0807952042bf6c4573214d711",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_DECODE_r1_n128_c1.json": "cea6dcd60540f837098b1e1f6d9e55b573f85c8e9c6dc6cb2b1b61ee295e8dc8",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_DECODE_r1_n1920_c1.json": "486aab0b1138cf99d4cb58d230e90fa0bbc5194a2b2effde6ee6210252f3c8e2",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_DECODE_r1_n512_c1.json": "c6e92a0f459217bcc8a573ffcff712b08ac8b6979946b06ebe06a238edd93b82",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_DECODE_r2_n1024_c1.json": "643b7fef44ecc3adb37b097c91d16bf1fee75b9a34818133033e9c9a910c631d",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_DECODE_r2_n128_c1.json": "c1502193fdf09f252acea24fe0988808b7f105db73c7017f4ccdd7426ba1d6f3",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_DECODE_r2_n1920_c1.json": "186e5d480540e6652e1fb6b219d0b839a419c44a401c457545fffa263b711575",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_DECODE_r2_n512_c1.json": "f89aaca3f66627809895ba55e9c0bfd831bc8a2fb1dfc00250764d90817bfe77",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_FULL_r0_n1024_c1.json": "2e4274f375d6798e871aa08ed9a391d3b242526087039790cc0285bb63b9658c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_FULL_r0_n128_c1.json": "ace7dcf25c42b14fd655f359d9d41745e206223fd93344f8ba7880e58f593339",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_FULL_r0_n1920_c1.json": "a2e9d7faece1296a084ebb151b742dba4667abe956a256d78ec00a17cdd79e7c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_FULL_r0_n512_c1.json": "0a03207de1af9c257a65d1844da061defe5a79a1cd6010cc6025a9f9416ba8bd",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_FULL_r1_n1024_c1.json": "47562a0ce07422d801721c9707e7652ce8ff80c15c52bcbc647d722ce4929bf0",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_FULL_r1_n128_c1.json": "754b6f13e2d8eba050d972550d9fb8dd2d5046902a65b2c9a0a2ad15f110194c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_FULL_r1_n1920_c1.json": "6bc41af54c420ccf5fe161f7b600c148a575d76a8865e047df1c69ba473b12fa",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_FULL_r1_n512_c1.json": "ca6b7a840c6839b04b77483b0021b91c580680791743bf9f2ccf8cff1c76071c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_FULL_r2_n1024_c1.json": "9b9b07945ba5f554a61368d1032f4df72f220037f63b4bfa26c95e9091b8fd3b",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_FULL_r2_n128_c1.json": "3a5b925e1b46597cbb59433a15a563ec6a24a812e7c6f5bbcfda73b94dfccacd",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_FULL_r2_n1920_c1.json": "d8a9034221fa2bba910c3fdae0a2a53031101c1482494bdbc7b3bae502f9e94b",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/latency_SCRATCH_FULL_r2_n512_c1.json": "e8ccaa27f0ad91aa3af125ae26105ae9154202b713b3931f5327adf3ef36e846",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r0_n16384_c1.json": "240a3d7ea0c799b5d015e28617ab54bb7564d35fde454f36dcff4378a4f41a60",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r0_n2048_c1.json": "0bfafb8e4f993478fede6b93f8b75ce9dfa94f01524fc32376138c8621c2b864",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r0_n32640_c1.json": "533e1eb932878aac32e0447118a0c59db2aaf03f0dc854d3708a95e4af5d372c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r0_n4096_c1.json": "e085e002aef4a37e2059c94e9931eafa061208e847da01c4653287f8a9fd98bd",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r0_n8192_c1.json": "ccdf751ec6d867747b8f09c04c89ff0cb3714cdea406c50b045e671b9ad1585f",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r1_n16384_c1.json": "eb36644566f6186c5d42eb661dd3a432089522fb759a67f7a023df1e58b84609",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r1_n2048_c1.json": "952b69692708aaae83f749417af5b9277bcd3dac64d3de2e73425eb921bf6fca",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r1_n32640_c1.json": "be0f5ee38c1bef559cc910f037b95baf8e9adce8cdbf0ee13db31900bc14a38a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r1_n4096_c1.json": "61848a982b60edaa7766d92fb6dc79285bd591b6824f15da4965c0ac4dcc80e5",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r1_n8192_c1.json": "f1e1fbed2113fa7fc5cefd3b575eefb0ea316895286b4866a91711c4d5b01a87",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r2_n16384_c1.json": "e70005d52f5fa19c0ff453b691a253030ee25319c5a01a83322d8934a31b241e",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r2_n2048_c1.json": "dbdc03d796c89417596c8ac82e9a9efc35dd3bc02831795551509ff0ba4d293c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r2_n32640_c1.json": "c2da792998aad10cb6284582921f8ab57914817e78d889d759ae024d01076265",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r2_n4096_c1.json": "df7edc96b036c948d4ee5d918a38e85aaddcb95dcbdf9858dc8f97efa8196ff2",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_FLASH_ATTN_r2_n8192_c1.json": "31d41424b1fd7b301c560dd954497c5617500cc865e07c5eaf669c8df0002c45",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r0_n16384_c1.json": "1325d5622f1af89444088efefc3eddcfba34822848ee1b9aa698ceba67e87e09",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r0_n2048_c1.json": "7789b6af5ff9d5704279a116dd4c68451fe73a5749426913a07895523168c6a0",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r0_n32640_c1.json": "2af013600f21c31c66ff26400b72689cd861228356f543f5d9000ff4d60583f3",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r0_n4096_c1.json": "ae10e1458f76cdb4da6f3fecd71a8d596a4a622f0a901ef48e0b5d5753f9a62a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r0_n8192_c1.json": "57fee9f22a239da4240793cba5e5d229b64dc28a47b67f004a478275701516e5",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r1_n16384_c1.json": "c3712bd6a15cdcdd5b45ea9af43373d981126508432ee4bf626b5d4977daca04",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r1_n2048_c1.json": "fd4d3b76345a4b46f6c2ed398fcbd392f032999509bea7eecd49b45e7bfa9361",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r1_n32640_c1.json": "c187a4317b96fb2aa605cb7271272100f7f8b8917a763e6f0e7966337e6f7586",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r1_n4096_c1.json": "05e938c47daf8961c6e530079df4bbfcd6b0dea0b5f184c3ce801b5b584717d9",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r1_n8192_c1.json": "920981feb92f45f2240c8821dec8b0bc0970f6f84dce63766a3107636f29d1db",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r2_n16384_c1.json": "d13c2b0b600c4695b74a63f0eeffc53bedfe81dcdd59aed6559ea7a84d50138a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r2_n2048_c1.json": "17fbded8d6fb68adedce045f66fc1e6f1b0191fc6f545469551652135fac4ef4",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r2_n32640_c1.json": "01a343ab573d9ee65806429792dbc1431fb1a7fad530ca7bace74de98c1d1621",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r2_n4096_c1.json": "33298bcaec782694ab632168829d71e9a183ee3cf935af9b169bb6b33df3b569",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_DECODE_r2_n8192_c1.json": "a9d0d6ba5aae6a5ebce897f26d9000e161bb47fd2870548f240c2b9bcce64b62",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r0_n16384_c1.json": "bf8509a378b65a52542e87d1151783d5b48cd145f609bfe44d5175a2e68973ad",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r0_n2048_c1.json": "07eafef7386d52d52f4ca53c5c9b5be9261fff0a70111833d377d675127bacb5",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r0_n32640_c1.json": "212a67b76590a4a6647b7c194d3971418a4ff59ebd06901be151075149b22312",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r0_n4096_c1.json": "a6e1c0b8057026c2e25f3bd802213755e5dae322109f05b0c744361e52e63766",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r0_n8192_c1.json": "8ee9a4cd965410f4536cf3c2b50bc708badd447801ef2f87494414970f64501c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r1_n16384_c1.json": "2f78554f7d512aa7845ac4b66e44623f5a1f96a97409199bf9c05d44e4c417f2",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r1_n2048_c1.json": "ea649b5738183f36436ce33056a95bd42e536726dad017a99b7e9c8a4c451410",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r1_n32640_c1.json": "74a553e1cf188ee06865bfc7e6ee9809718ffc3d85f5f3b0dd44b3f0a91d538e",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r1_n4096_c1.json": "a0a58429c3aaf9d08aed72008934678dbb018775bde0391465d106305d15dcfa",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r1_n8192_c1.json": "dc7871ab457b71256ca9f9e693d7b37662089521d286d3282ed8cb263f0ef5b8",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r2_n16384_c1.json": "c44a7940a28d2259c4d736e82ad3f14ac66b13e00fb9cae52eeb7fa699eb5bd6",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r2_n2048_c1.json": "c8edad4b00fec3b2d0858277f2f16bb96e795574eacbfcb79eb69ca4a77264e3",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r2_n32640_c1.json": "382d9f74bc34dbcb7131a8e52048708267383ec8880dce50db6c381d6fbcc3a9",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r2_n4096_c1.json": "c2ca983fd092c02d95be6497fe2932148006d712eaf15e35d1b2b0a0abb5f760",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/long_context_SCRATCH_FULL_r2_n8192_c1.json": "f4d9717a96b070e38aae8134dd7bf497d35bcf8277e0c2b5198bbf704948800c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r0_n512_c16.json": "96d8650f6a9f3fba8ffffce413cdf5dc5ea26046ce08740168ae8255b5aa78ba",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r0_n512_c2.json": "b6d7517a1f62b56ef42a20f1530cf068c80d3204def6e0b32f2b3237eed92b49",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r0_n512_c32.json": "22f7a10f1107f472017f95375e99702809c751d04a67a7e922ccc8e155775289",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r0_n512_c4.json": "3a07de6a12096803705273d9a5b980443e08cc00ad06eb704f81a39bd786fa76",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r0_n512_c8.json": "7e5438033367ef2c92f56d79803fc768de653dce5ba611b24020a6fe47cbfcf5",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r1_n512_c16.json": "e919030e7dbf30aba672775ae1599e82aef92c05a674aafce321374448d6787a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r1_n512_c2.json": "e727f126010bf70d77df28c60ba497fce3202d6c45933c7d24e1e908a1789847",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r1_n512_c32.json": "81061d220b922aed3b288408266f08c1f113c7d076a8b241f5ad2015b1af05dd",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r1_n512_c4.json": "e1b16f01c8012e33dac1f1b85fbcd9d315d73f24d7fca5037ee41770cc2b51a1",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r1_n512_c8.json": "6e7ab2d351df23f80cfadb9be364b7beffaf617d4972818f7fb2cb98d2069feb",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r2_n512_c16.json": "2d29538d028054ba271754743634d279c7faf65c3629d022af15bbb7db725d72",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r2_n512_c2.json": "a999c50c9f584062f5a98d15c72abe52fa30f1bac0bb0ec68fc6f9ec46c34adb",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r2_n512_c32.json": "d1f22fb805c8d1c83c00c71cedb727cebfc07d3150cacdedd53cefc0910883ee",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r2_n512_c4.json": "f95d33b6cfb1096f58e3c2cfd3ef43a971275fe4b5efbc6ac9ba11773a78ddab",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_FLASH_ATTN_r2_n512_c8.json": "24df1118e357c92195f1c99dc36f4567dd2a4e9559d4bc8a1174da7aaf53933e",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r0_n512_c16.json": "9358eb6711722d9f3362262f841ec8346b8f97cefe033c2011dd2786e8da7f18",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r0_n512_c2.json": "71f8319aaf0a754d7ca6911516a9af2036d97d13d7e5cffb0b78f6d247972fdb",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r0_n512_c32.json": "640d143f297264c039416f5ae0d15c8114156283f08f0ebf57a177bdaf8d591c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r0_n512_c4.json": "e2a6ad53863d97836b2c0a3e0d10fae5828789e911a3719261d91cf6b7487f30",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r0_n512_c8.json": "53bda241210d22f9a17a3e0c663382e95c0a8e32232a4658f3c2bb81fd707de0",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r1_n512_c16.json": "29983c25c5828ace686f30e1b3eaf1a44b37303b181fbda2d3915a7cf3637e39",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r1_n512_c2.json": "2dceee5062b7d0c25bc6d7230168ea6cdd70a9038c5108413c979c5d9143bcb6",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r1_n512_c32.json": "3130a8083c64151eafc9c4c07fdebcc5761a0ffb7590eeb5b3753d917874f72c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r1_n512_c4.json": "b894afd7c7fb700fdbde6f88c1f0828cabe8a72abb1991383ac15daa6d6eafcf",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r1_n512_c8.json": "6de43d5b074d2ff0ac26b314a8a6b180c619e2d2279fcec26f35470d2fb9ea9a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r2_n512_c16.json": "44a376823dfdbbb023dc7e1a24b3ef0132cf5e38bf73695f3a129341261f845c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r2_n512_c2.json": "bc439092ff1f1fc61f0b5be506015c79a3700b34aca63d83bd93a41108a5a616",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r2_n512_c32.json": "7d4fd67075551e4866ad90e4596dc460d719039d76552b035564f6f833769a5f",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r2_n512_c4.json": "698b50bbb479aee5a87bde19c54ffead86c41a22587379c6ccc54ebd84b7e4b9",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_DECODE_r2_n512_c8.json": "9780d0c86c0dedfc13ed8bd29116b20ae0338676490b8c52375f3d03038efdc9",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r0_n512_c16.json": "387640a78c4a4234aa3e0099094ef789270c64044393e5c56bd899c474a64497",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r0_n512_c2.json": "1de0186be0a77398dcf0ffe93da1eee01a4adb5a94394dd8c595fffadd58d304",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r0_n512_c32.json": "de7d85859af0d4ba8fb750ce6189e30fad06a0c114764161be49af5a8b68a1cd",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r0_n512_c4.json": "4aac1d4546e4710cc8b5ddaaa218275d4c80e6c60cb21a62eee9a801adafcd42",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r0_n512_c8.json": "ec261a23621ec926faa6bfa1e05b34d98e2fa951ab3dbb777520e8e6a53c9150",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r1_n512_c16.json": "19915a65307b98da8876fa722a6f3f6ba9f00657e04a277346b3acd64167f11c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r1_n512_c2.json": "ed54b9f874c4d5c617f866dd9e411e8590ac2bb0fd35cf02284ed4aaeebf6e74",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r1_n512_c32.json": "efb42897ca75a4bded0d42eeaeaa875f1ecff68064a4f5658b1e729f8d13d01c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r1_n512_c4.json": "09a98903aeab83ff4ec9748ab993b0e3edd5e9db719573569f204e9403e5809c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r1_n512_c8.json": "6516535d1e8c68ec6e0439c5811c3a1184cab5bde96dfece4f7f10b99bccb5f7",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r2_n512_c16.json": "bc6911196f7a506d165595638ce7344ba6b6bb41df94a89c7bd89e7b63cc4a2a",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r2_n512_c2.json": "09924eec9511ca7179d6f9400b6435bc67a688867ff8844b014afb3cf398c45f",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r2_n512_c32.json": "c01bf64c547a3d4ed271592ef4ddb60f3e5d7c04e2ba189648073f23c024d1f6",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r2_n512_c4.json": "d4fa49c6f8686c4653ff03c271d2778686d267b5454717567f40b2f395dfc28c",
+    "docs/serving/prefill_campaign_2026-09-20/serving/graphs/cases/throughput_SCRATCH_FULL_r2_n512_c8.json": "34ed9539253dd6d696be26f5efd46e20ac2ef8292f55b162ff164124f7922697"
+  },
+  "kernel": [
+    {
+      "shape": [
+        1,
+        8,
+        8,
+        1024,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          1.0379286694299177,
+          1.02705179264974,
+          1.0266104426810576
+        ],
+        "cudnn": [
+          1.079036026668567,
+          1.0838592299506322,
+          1.0462891802388525
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        8,
+        8,
+        1024,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          1.0185282201891255,
+          1.0105095914167506,
+          0.987485246161134
+        ],
+        "cudnn": [
+          1.031081414058253,
+          1.0237631308550732,
+          0.967757205941969
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        8,
+        8,
+        2048,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          0.9936036377332543,
+          0.9922806108830479,
+          0.9984162444843374
+        ],
+        "cudnn": [
+          1.0304154772065264,
+          1.0434105916808278,
+          1.0423356239115635
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        8,
+        8,
+        2048,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.9048927236427178,
+          0.9071728409886003,
+          0.8990480667533061
+        ],
+        "cudnn": [
+          0.9661691669793488,
+          0.9654816266485133,
+          0.9559603071660044
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        8,
+        8,
+        4096,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          0.9905302750884537,
+          0.9705735385449474,
+          0.9851877915505527
+        ],
+        "cudnn": [
+          1.0040275717696119,
+          1.026426279965825,
+          1.0439374944288682
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        8,
+        8,
+        4096,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.943731070161764,
+          0.9426983304785003,
+          0.9338976992092227
+        ],
+        "cudnn": [
+          0.960879054783583,
+          0.9367935745721612,
+          0.9476504730764129
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        32,
+        8,
+        2048,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          0.9474958296053528,
+          0.9289242604862054,
+          0.9433154404673081
+        ],
+        "cudnn": [
+          0.9845925118799639,
+          0.9814812423057523,
+          0.9910643436554434
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        32,
+        8,
+        2048,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.9234628432946056,
+          0.9394499095834972,
+          0.9578593636251789
+        ],
+        "cudnn": [
+          0.9501570221533806,
+          0.9519505932312504,
+          0.9827952363816322
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        32,
+        8,
+        4096,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          0.9711081848445027,
+          0.9764816148476057,
+          0.9603960807860598
+        ],
+        "cudnn": [
+          1.0010502126956133,
+          0.9894690392597378,
+          0.995638199153511
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        32,
+        8,
+        4096,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.9584047428143712,
+          0.9640079464846742,
+          0.9595915728856484
+        ],
+        "cudnn": [
+          0.9296094826371764,
+          0.9374561275258542,
+          0.9592587550026889
+        ]
+      }
+    },
+    {
+      "shape": [
+        4,
+        12,
+        12,
+        1536,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          0.9848991613335576,
+          1.0214009452141675,
+          0.9993656567848321
+        ],
+        "cudnn": [
+          1.0152008913037474,
+          1.0372931225313446,
+          0.9960620983884464
+        ]
+      }
+    },
+    {
+      "shape": [
+        4,
+        12,
+        12,
+        1536,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.9123994096777708,
+          0.9472481930418022,
+          0.9454316632945118
+        ],
+        "cudnn": [
+          0.9489565734937437,
+          0.9466707413092438,
+          0.9603973053819466
+        ]
+      }
+    },
+    {
+      "shape": [
+        2,
+        16,
+        4,
+        3072,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          0.998764355893365,
+          1.0053868274569062,
+          0.9706599523551407
+        ],
+        "cudnn": [
+          1.06907096924877,
+          1.0199947901414215,
+          1.0103810696232278
+        ]
+      }
+    },
+    {
+      "shape": [
+        2,
+        16,
+        4,
+        3072,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.9661840531695207,
+          0.955939919174081,
+          0.9612655726853873
+        ],
+        "cudnn": [
+          0.9360715130603836,
+          0.9372877170499965,
+          0.9694443569610697
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        8,
+        8,
+        8192,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          0.9862557249125637,
+          0.9636105270770777,
+          0.9584768136782804
+        ],
+        "cudnn": [
+          1.0032752890652445,
+          0.9919746138561238,
+          0.9736304520653161
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        8,
+        8,
+        8192,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.9576022874851418,
+          0.9799499693069927,
+          0.9576276251329874
+        ],
+        "cudnn": [
+          0.9897139995951538,
+          0.9663176903834645,
+          0.941207346811276
+        ]
+      }
+    },
+    {
+      "shape": [
+        8,
+        8,
+        8,
+        512,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          1.0029983285308097,
+          1.0360184923630595,
+          1.028791641789035
+        ],
+        "cudnn": [
+          1.0452385975991592,
+          1.0475428999052592,
+          1.0480735479057603
+        ]
+      }
+    },
+    {
+      "shape": [
+        8,
+        8,
+        8,
+        512,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.9168078555315602,
+          0.9023624747022614,
+          0.9018060926883993
+        ],
+        "cudnn": [
+          0.9074374286417544,
+          0.9078017309373227,
+          0.9116163103906654
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        32,
+        8,
+        1000,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          0.9649194185084801,
+          0.9781981488040695,
+          0.9770862344164001
+        ],
+        "cudnn": [
+          1.0272016267992365,
+          1.0399047205234502,
+          1.0502415853002756
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        32,
+        8,
+        1000,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.9101695835703847,
+          0.9311632262896938,
+          0.9035280542802892
+        ],
+        "cudnn": [
+          0.9427474822651823,
+          0.9404377640263573,
+          0.9288209960983123
+        ]
+      }
+    },
+    {
+      "shape": [
+        3,
+        14,
+        2,
+        2500,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          0.966849591510224,
+          1.0123708891428995,
+          0.9431387347926199
+        ],
+        "cudnn": [
+          1.0299360237660646,
+          1.0297832449377493,
+          1.0187668173409725
+        ]
+      }
+    },
+    {
+      "shape": [
+        3,
+        14,
+        2,
+        2500,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.9676640985922356,
+          0.954159950541295,
+          0.9297011246246858
+        ],
+        "cudnn": [
+          0.9621556042635467,
+          0.9401459849695135,
+          0.9658364304163113
+        ]
+      }
+    },
+    {
+      "shape": [
+        2,
+        24,
+        8,
+        2304,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          0.9433435801255332,
+          0.9937943354674365,
+          0.9938888343092382
+        ],
+        "cudnn": [
+          1.004810615240042,
+          1.014786795948319,
+          1.013135625183328
+        ]
+      }
+    },
+    {
+      "shape": [
+        2,
+        24,
+        8,
+        2304,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.9171055536293865,
+          0.9314567646513532,
+          0.917597770290487
+        ],
+        "cudnn": [
+          0.9548396954294465,
+          0.9612306997153919,
+          0.960100661773466
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        16,
+        16,
+        5000,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          0.9854850194560454,
+          0.9802747097840818,
+          0.97773893456613
+        ],
+        "cudnn": [
+          1.0675113136067633,
+          0.9895462881990487,
+          0.9978207458866197
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        16,
+        16,
+        5000,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.9246641022011276,
+          0.9318058629659686,
+          0.9516574836496889
+        ],
+        "cudnn": [
+          0.9386083849117782,
+          0.9421279615098996,
+          0.9550039945653651
+        ]
+      }
+    },
+    {
+      "shape": [
+        6,
+        10,
+        2,
+        768,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          0.9703374522067352,
+          0.9869403399024852,
+          1.0221310537716815
+        ],
+        "cudnn": [
+          1.0271356178162767,
+          1.021902345411919,
+          1.04314418718323
+        ]
+      }
+    },
+    {
+      "shape": [
+        6,
+        10,
+        2,
+        768,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.9203998302522166,
+          0.9415469871727589,
+          0.9048070816599847
+        ],
+        "cudnn": [
+          0.9263249184132274,
+          0.9203459079311089,
+          0.9244780795158319
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        40,
+        8,
+        1700,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          0.8965779203926683,
+          0.8914529029470293,
+          0.8962334850826643
+        ],
+        "cudnn": [
+          0.9471325241172492,
+          0.9645357308195266,
+          0.9372285823850084
+        ]
+      }
+    },
+    {
+      "shape": [
+        1,
+        40,
+        8,
+        1700,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.8662241957603196,
+          0.8802125706898168,
+          0.8607825639412079
+        ],
+        "cudnn": [
+          0.899740456639876,
+          0.8740348793852206,
+          0.8847424477935737
+        ]
+      }
+    },
+    {
+      "shape": [
+        2,
+        20,
+        4,
+        6144,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          1.0448349608937335,
+          1.0332140078667345,
+          1.0399285572198964
+        ],
+        "cudnn": [
+          1.070962216788313,
+          1.0693247181435557,
+          1.0678763150219264
+        ]
+      }
+    },
+    {
+      "shape": [
+        2,
+        20,
+        4,
+        6144,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          1.0173964247462095,
+          1.0281050707526813,
+          0.992409971030632
+        ],
+        "cudnn": [
+          0.9848980264568223,
+          1.006539105507997,
+          0.9882608480016781
+        ]
+      }
+    },
+    {
+      "shape": [
+        5,
+        9,
+        3,
+        1111,
+        64
+      ],
+      "causal": false,
+      "ratios": {
+        "flash": [
+          0.930234994708057,
+          0.9255997379392117,
+          0.9555066941263386
+        ],
+        "cudnn": [
+          1.0127230883193863,
+          1.0085370768103834,
+          1.0018278857229261
+        ]
+      }
+    },
+    {
+      "shape": [
+        5,
+        9,
+        3,
+        1111,
+        64
+      ],
+      "causal": true,
+      "ratios": {
+        "flash": [
+          0.9390358841198791,
+          0.9071451196233213,
+          0.9273444949576779
+        ],
+        "cudnn": [
+          0.9362483550241693,
+          0.9093862672475361,
+          0.9287929682004517
+        ]
+      }
+    }
+  ],
+  "serving": [
+    {
+      "mode": "eager",
+      "study": "latency",
+      "input_len": 128,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          29.049979000035364,
+          21.692703499866184,
+          28.98829049900087
+        ],
+        "p50_tpot_ms": [
+          11.445124468504286,
+          10.848119326772032,
+          10.537262200789803
+        ],
+        "output_throughput": [
+          85.6326211290844,
+          89.32668355734081,
+          90.86899677333516
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "latency",
+      "input_len": 128,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          30.041692999816405,
+          32.42796399990766,
+          20.35992599940073
+        ],
+        "p50_tpot_ms": [
+          10.448805637795843,
+          10.774516070864413,
+          10.520264633862642
+        ],
+        "output_throughput": [
+          94.48981159701484,
+          92.24148215237771,
+          91.80852015928433
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0341382002300186,
+          1.494878865610628,
+          0.7023500057756931
+        ],
+        "p50_tpot_ms": [
+          0.9129481873744404,
+          0.9932151137270426,
+          0.9983869086102947
+        ],
+        "output_throughput": [
+          1.1034324344057964,
+          1.0326307714443,
+          1.0103393172513253
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "latency",
+      "input_len": 128,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          22.475904999851082,
+          31.41650550014674,
+          19.568048999644816
+        ],
+        "p50_tpot_ms": [
+          10.673298307086215,
+          10.274041381891703,
+          10.907402881894372
+        ],
+        "output_throughput": [
+          90.19490586741543,
+          93.47491218585485,
+          89.46649436384129
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.7736978054209168,
+          1.448252196889177,
+          0.6750328723357889
+        ],
+        "p50_tpot_ms": [
+          0.9325628861842393,
+          0.9470804175739878,
+          1.0351268359894115
+        ],
+        "output_throughput": [
+          1.0532774155243216,
+          1.0464388519008565,
+          0.9845656664066372
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "latency",
+      "input_len": 512,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          34.6700924999368,
+          34.637977500096895,
+          34.468796500732424
+        ],
+        "p50_tpot_ms": [
+          11.892624055118233,
+          11.041475677162868,
+          11.268040177164375
+        ],
+        "output_throughput": [
+          82.54557188313852,
+          85.46439922666795,
+          85.20250597174484
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "latency",
+      "input_len": 512,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          34.42325549997349,
+          33.88026699985858,
+          34.44932799993694
+        ],
+        "p50_tpot_ms": [
+          10.71474139763719,
+          10.668767775593631,
+          10.955262783467132
+        ],
+        "output_throughput": [
+          90.53638626060693,
+          90.92646021001381,
+          88.92870644798313
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9928804054975118,
+          0.9781248630860102,
+          0.9994351847824141
+        ],
+        "p50_tpot_ms": [
+          0.9009568744440285,
+          0.96624473825178,
+          0.9722420768137557
+        ],
+        "output_throughput": [
+          1.0968048823840142,
+          1.0639103654009132,
+          1.0437334610495375
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "latency",
+      "input_len": 512,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          33.774492500015185,
+          32.979285499550315,
+          32.95090000028722
+        ],
+        "p50_tpot_ms": [
+          11.076156803150168,
+          10.94020651181546,
+          10.635033181105836
+        ],
+        "output_throughput": [
+          87.82652970910614,
+          88.79169643720869,
+          91.11136768194882
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9741679373966698,
+          0.9521134858251484,
+          0.9559631709098706
+        ],
+        "p50_tpot_ms": [
+          0.9313467534007617,
+          0.9908282943051838,
+          0.9438227956143269
+        ],
+        "output_throughput": [
+          1.06397627038606,
+          1.0389319674700586,
+          1.0693507971721337
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "latency",
+      "input_len": 1024,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          61.686501499991664,
+          62.07477400039352,
+          62.05686399971455
+        ],
+        "p50_tpot_ms": [
+          11.278919905511588,
+          11.026889791337023,
+          11.490089208664573
+        ],
+        "output_throughput": [
+          83.665357033721,
+          85.70222089387049,
+          82.55402163661262
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "latency",
+      "input_len": 1024,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          62.17662750009367,
+          61.79314299970429,
+          61.797767500138434
+        ],
+        "p50_tpot_ms": [
+          10.75944089370124,
+          10.309486452756321,
+          10.365906185035682
+        ],
+        "output_throughput": [
+          86.60400163328886,
+          92.34978649023796,
+          90.91481289644871
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0079454335743465,
+          0.9954630362297019,
+          0.9958248534831327
+        ],
+        "p50_tpot_ms": [
+          0.9539424859683153,
+          0.9349405542128197,
+          0.9021606357258606
+        ],
+        "output_throughput": [
+          1.0351237920180447,
+          1.0775658498348544,
+          1.101276607657453
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "latency",
+      "input_len": 1024,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          60.28541900013806,
+          60.40859950007871,
+          60.389033000319614
+        ],
+        "p50_tpot_ms": [
+          10.642061799212641,
+          10.687743342521026,
+          10.980829755910207
+        ],
+        "output_throughput": [
+          90.70469478150127,
+          90.10147802841549,
+          86.57703872566707
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9772870487742964,
+          0.9731585893441312,
+          0.973124149499359
+        ],
+        "p50_tpot_ms": [
+          0.9435355413785909,
+          0.969243689269259,
+          0.9556783725951982
+        ],
+        "output_throughput": [
+          1.0841368279220167,
+          1.0513318918536876,
+          1.0487319334576215
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "latency",
+      "input_len": 1920,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          116.25286399998913,
+          115.67200050012616,
+          115.17794300016249
+        ],
+        "p50_tpot_ms": [
+          11.88739280708631,
+          10.559662311023448,
+          11.881527574809384
+        ],
+        "output_throughput": [
+          77.95278036432956,
+          85.35966323990287,
+          78.80337938321975
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "latency",
+      "input_len": 1920,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          115.84976000006009,
+          115.83622750003997,
+          115.66602249968128
+        ],
+        "p50_tpot_ms": [
+          10.87628843307056,
+          10.463848783464218,
+          9.87158962992206
+        ],
+        "output_throughput": [
+          83.117639969786,
+          87.21754649337562,
+          91.30397351512228
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9965325241369616,
+          1.001419764499652,
+          1.0042376125741201
+        ],
+        "p50_tpot_ms": [
+          0.9149431342579164,
+          0.9909264591293598,
+          0.8308350561632585
+        ],
+        "output_throughput": [
+          1.0662562589982978,
+          1.0217653535985864,
+          1.158630178423089
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "latency",
+      "input_len": 1920,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          112.16266750011528,
+          112.39544249974642,
+          112.59413399966434
+        ],
+        "p50_tpot_ms": [
+          10.650168102362777,
+          10.632621425193209,
+          11.095459200787014
+        ],
+        "output_throughput": [
+          84.87544392349734,
+          86.89583166400587,
+          83.0609004525848
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.964816380782892,
+          0.9716737154522008,
+          0.9775668072098275
+        ],
+        "p50_tpot_ms": [
+          0.8959212735036399,
+          1.0069092279677918,
+          0.9338411354034178
+        ],
+        "output_throughput": [
+          1.088805858197914,
+          1.0179964208596466,
+          1.054027138210162
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 2048,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          62.53201350000381,
+          63.11579700013681,
+          63.620936998631805
+        ],
+        "p50_tpot_ms": [
+          14.406406397634196,
+          14.34049937008211,
+          14.77763081890062
+        ],
+        "output_throughput": [
+          67.6740460151426,
+          67.75431917187693,
+          65.49459449027002
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 2048,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          62.37587799978428,
+          63.35464849962591,
+          62.580587500633555
+        ],
+        "p50_tpot_ms": [
+          13.124254082674634,
+          12.666958125990949,
+          13.362164248021832
+        ],
+        "output_throughput": [
+          73.42374522633507,
+          74.41004388444463,
+          73.21873312043408
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9975031109430128,
+          1.003784337849502,
+          0.9836476866409462
+        ],
+        "p50_tpot_ms": [
+          0.9110012393395958,
+          0.8832996535962625,
+          0.9042155952990514
+        ],
+        "output_throughput": [
+          1.0849616588596749,
+          1.0982332166261413,
+          1.1179355134615205
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 2048,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          63.45450949993392,
+          60.16764849937317,
+          60.78174449976359
+        ],
+        "p50_tpot_ms": [
+          14.857064905509393,
+          13.162109700794295,
+          12.711173236218782
+        ],
+        "output_throughput": [
+          67.55438888706675,
+          75.63281301855719,
+          75.31035661575258
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0147523795940148,
+          0.9532898475359941,
+          0.9553732995329938
+        ],
+        "p50_tpot_ms": [
+          1.0312818127877612,
+          0.9178278497228463,
+          0.8601631338604808
+        ],
+        "output_throughput": [
+          0.9982318608813626,
+          1.1162803189962598,
+          1.1498713321591878
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 4096,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          128.87016599961498,
+          128.9800180002203,
+          130.25682600164146
+        ],
+        "p50_tpot_ms": [
+          14.526159208659426,
+          14.828352192920661,
+          14.969764098433496
+        ],
+        "output_throughput": [
+          64.64277397410463,
+          63.44356846677139,
+          63.444708757582404
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 4096,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          129.47454100003597,
+          128.14993699976185,
+          126.76132599972334
+        ],
+        "p50_tpot_ms": [
+          12.63080507086362,
+          12.969507956689437,
+          13.21462703543248
+        ],
+        "output_throughput": [
+          71.98065947098577,
+          70.20223713565194,
+          70.0240191783296
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0046897976403848,
+          0.9935642666722451,
+          0.9731645541411084
+        ],
+        "p50_tpot_ms": [
+          0.8695213159535016,
+          0.8746425622990887,
+          0.8827545276291507
+        ],
+        "output_throughput": [
+          1.1135143968267922,
+          1.1065303990966462,
+          1.103701483537205
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 4096,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          122.32265450006707,
+          122.110100500322,
+          122.62176099920907
+        ],
+        "p50_tpot_ms": [
+          13.1843276102356,
+          12.740230066932652,
+          13.11268001181028
+        ],
+        "output_throughput": [
+          68.95563218470187,
+          73.80171697171478,
+          71.14338176946087
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9491929613905559,
+          0.9467365751190502,
+          0.9413845305708879
+        ],
+        "p50_tpot_ms": [
+          0.9076265391870465,
+          0.8591804336165606,
+          0.8759443318938106
+        ],
+        "output_throughput": [
+          1.066718334400763,
+          1.1632655406255794,
+          1.1213446032401935
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 8192,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          283.55601999965074,
+          286.2685270001748,
+          285.97604550122924
+        ],
+        "p50_tpot_ms": [
+          13.756141177162236,
+          14.292978397632425,
+          14.297507964565595
+        ],
+        "output_throughput": [
+          63.12888129175116,
+          61.98601162134215,
+          60.00982709442307
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 8192,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          290.8874240001751,
+          285.752780000621,
+          285.5019069993432
+        ],
+        "p50_tpot_ms": [
+          12.38737011417327,
+          12.84847203936176,
+          13.009170854325129
+        ],
+        "output_throughput": [
+          67.64230186587662,
+          65.15737689694367,
+          65.97930302538839
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0258552225430917,
+          0.9981983803635057,
+          0.998342034204106
+        ],
+        "p50_tpot_ms": [
+          0.9004974545287903,
+          0.898935944763623,
+          0.909890792616907
+        ],
+        "output_throughput": [
+          1.0714953359186996,
+          1.051162596086592,
+          1.0994749730168791
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 8192,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          274.2216295000617,
+          274.3181784999251,
+          274.91184449991124
+        ],
+        "p50_tpot_ms": [
+          13.05440531889578,
+          12.844400137796548,
+          13.06146116929615
+        ],
+        "output_throughput": [
+          65.17847971131357,
+          67.38470778854612,
+          64.69561019092338
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9670809651665989,
+          0.9582547595242896,
+          0.9613107420171301
+        ],
+        "p50_tpot_ms": [
+          0.9489874486435579,
+          0.8986510565162662,
+          0.9135480953511048
+        ],
+        "output_throughput": [
+          1.0324668896014513,
+          1.0870953950091728,
+          1.0780835960271542
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 16384,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          722.4821030004023,
+          724.9495120004212,
+          722.7636169991456
+        ],
+        "p50_tpot_ms": [
+          15.00519971260137,
+          14.445719031497479,
+          14.703080641721305
+        ],
+        "output_throughput": [
+          49.0600029882367,
+          49.752325623266124,
+          49.62689613898267
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 16384,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          737.8848799999105,
+          724.0006109996102,
+          723.333318499499
+        ],
+        "p50_tpot_ms": [
+          12.89255127558923,
+          12.940927610235502,
+          13.090555271654328
+        ],
+        "output_throughput": [
+          53.35504465529282,
+          53.87816585683825,
+          52.879937883313524
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0213192505884117,
+          0.9986910798819733,
+          1.0007882265888242
+        ],
+        "p50_tpot_ms": [
+          0.8592055769015899,
+          0.895831324285006,
+          0.8903273804068453
+        ],
+        "output_throughput": [
+          1.0875467061851987,
+          1.0829275854321616,
+          1.065549973853302
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 16384,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          689.7362834999967,
+          689.7289540002021,
+          688.895755500198
+        ],
+        "p50_tpot_ms": [
+          13.201616779527708,
+          13.547119862212597,
+          13.22422085039167
+        ],
+        "output_throughput": [
+          54.5245241533432,
+          53.20838489748541,
+          52.91310905042621
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9546759437162317,
+          0.9514165367143543,
+          0.9531411644106214
+        ],
+        "p50_tpot_ms": [
+          0.8798028038534528,
+          0.9377947773090717,
+          0.8994183717435897
+        ],
+        "output_throughput": [
+          1.1113844441961562,
+          1.0694652808873542,
+          1.0662183849306297
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 32640,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          2063.0869789997632,
+          2065.832250499625,
+          2062.953111999377
+        ],
+        "p50_tpot_ms": [
+          14.56866859842652,
+          14.292666177167606,
+          14.370739704709981
+        ],
+        "output_throughput": [
+          32.56406366691419,
+          32.78347276056263,
+          32.88710382431481
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 32640,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          2069.415164500242,
+          2062.15589599924,
+          2062.667273000443
+        ],
+        "p50_tpot_ms": [
+          12.302022972440811,
+          12.649856374017995,
+          13.483783850396444
+        ],
+        "output_throughput": [
+          34.99801313978827,
+          34.7682592214012,
+          33.864640269172135
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.003067338199937,
+          0.9982204002771784,
+          0.9998614418343919
+        ],
+        "p50_tpot_ms": [
+          0.8444164193404389,
+          0.8850592476738887,
+          0.9382804314503839
+        ],
+        "output_throughput": [
+          1.0747434195489254,
+          1.060542288345553,
+          1.02972400519302
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "long_context",
+      "input_len": 32640,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          1957.972780000091,
+          1961.9902859994909,
+          1952.8588485009095
+        ],
+        "p50_tpot_ms": [
+          13.095029649603951,
+          12.70418013385591,
+          14.186675862212839
+        ],
+        "output_throughput": [
+          35.31217294973878,
+          35.65024831137372,
+          34.44650231505175
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9490500400275735,
+          0.9497335930954608,
+          0.9466326874527137
+        ],
+        "p50_tpot_ms": [
+          0.8988487562287107,
+          0.888860061263497,
+          0.9871917628264594
+        ],
+        "output_throughput": [
+          1.0843908583073043,
+          1.087445755724199,
+          1.0474167168707635
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 2,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          63.03107600001567,
+          63.9489750010398,
+          63.331061000099
+        ],
+        "p50_tpot_ms": [
+          11.68573157874168,
+          12.088286165356214,
+          12.399474578740223
+        ],
+        "output_throughput": [
+          160.57958854951448,
+          155.4889562241612,
+          156.72808648630124
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 2,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          60.36583900004189,
+          51.79266750019451,
+          60.74320999960037
+        ],
+        "p50_tpot_ms": [
+          11.630663866143312,
+          11.27967245274632,
+          11.13413418897835
+        ],
+        "output_throughput": [
+          169.13237400260823,
+          166.50425992508949,
+          171.76524827364707
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9577155084585083,
+          0.8099061400022811,
+          0.9591377286337491
+        ],
+        "p50_tpot_ms": [
+          0.9952876110299722,
+          0.9331076629433792,
+          0.8979520961370905
+        ],
+        "output_throughput": [
+          1.0532619714021532,
+          1.0708429972675875,
+          1.0959442696230466
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 2,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          58.14893299998403,
+          57.760491499720956,
+          58.56330999995407
+        ],
+        "p50_tpot_ms": [
+          10.44868724803084,
+          11.178743704723868,
+          11.292649413380287
+        ],
+        "output_throughput": [
+          182.17026008763077,
+          170.16445856301203,
+          170.68531825859094
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9225438734374385,
+          0.9032277921386822,
+          0.9247170199763829
+        ],
+        "p50_tpot_ms": [
+          0.8941406173524273,
+          0.9247583612605894,
+          0.9107361236694927
+        ],
+        "output_throughput": [
+          1.1344546447848123,
+          1.0943829240045437,
+          1.0890538006632884
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 4,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          118.23186250012441,
+          116.3266535004368,
+          116.7924095007038
+        ],
+        "p50_tpot_ms": [
+          12.847119023622934,
+          13.14227533070453,
+          13.08718466535488
+        ],
+        "output_throughput": [
+          287.79798671128356,
+          295.11341551638793,
+          285.2828747264949
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 4,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          112.77927399987675,
+          116.0286205004013,
+          111.87956649973785
+        ],
+        "p50_tpot_ms": [
+          10.805910889763167,
+          11.344500244097537,
+          10.291173696857625
+        ],
+        "output_throughput": [
+          332.9203705934778,
+          328.13701662316004,
+          359.57856745075617
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9538822413438516,
+          0.9974379646360721,
+          0.957935254337429
+        ],
+        "p50_tpot_ms": [
+          0.841115496002921,
+          0.8632067095408646,
+          0.7863550457953719
+        ],
+        "output_throughput": [
+          1.1567849184694285,
+          1.1119013889930676,
+          1.2604281550215366
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 4,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          116.63421000025664,
+          112.5236705001953,
+          114.80325250067835
+        ],
+        "p50_tpot_ms": [
+          11.013302688976239,
+          10.259626267718092,
+          11.39132449212254
+        ],
+        "output_throughput": [
+          327.4180345069725,
+          354.0623575411594,
+          323.62107629357536
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9864871239775481,
+          0.9673077245342812,
+          0.9829684394000497
+        ],
+        "p50_tpot_ms": [
+          0.8572585549122163,
+          0.7806582961892714,
+          0.8704182590376588
+        ],
+        "output_throughput": [
+          1.1376661742788194,
+          1.1997501263086359,
+          1.1343866210119897
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 8,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          139.5043859999987,
+          125.86907750028331,
+          123.80997950003803
+        ],
+        "p50_tpot_ms": [
+          12.347323921260358,
+          13.912964763787429,
+          13.458662787400492
+        ],
+        "output_throughput": [
+          586.150948894183,
+          506.83749258585067,
+          528.4605407112149
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 8,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          174.83763449990875,
+          174.90849399928265,
+          188.68524199933745
+        ],
+        "p50_tpot_ms": [
+          11.406665003937096,
+          12.505277173229441,
+          11.869124185039713
+        ],
+        "output_throughput": [
+          605.3054566041161,
+          577.6582358090917,
+          598.3622766055323
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.2532769722373487,
+          1.3896065457291444,
+          1.52399057621425
+        ],
+        "p50_tpot_ms": [
+          0.9238167781681358,
+          0.8988218820030431,
+          0.881894759719454
+        ],
+        "output_throughput": [
+          1.0326784555174218,
+          1.1397306715845317,
+          1.132274276902949
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 8,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          187.1929930002807,
+          184.66022049960884,
+          178.6323549995359
+        ],
+        "p50_tpot_ms": [
+          11.155226484253415,
+          11.749260078743209,
+          12.44685021259739
+        ],
+        "output_throughput": [
+          633.9773975857876,
+          612.1121913718683,
+          573.7165552921293
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.3418430657820495,
+          1.4670817024077514,
+          1.4427944800643557
+        ],
+        "p50_tpot_ms": [
+          0.9034529712989615,
+          0.8444828459081636,
+          0.9248207202464183
+        ],
+        "output_throughput": [
+          1.0815940821759868,
+          1.2077089803457777,
+          1.0856374527415193
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 16,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          201.97301949974644,
+          283.79279549972125,
+          181.56912800077407
+        ],
+        "p50_tpot_ms": [
+          14.042850271652435,
+          14.874552602359328,
+          14.663726937007281
+        ],
+        "output_throughput": [
+          985.8259493182393,
+          933.2858956142818,
+          952.7919434325714
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 16,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          181.53171100016152,
+          279.30991249922954,
+          282.78892999969685
+        ],
+        "p50_tpot_ms": [
+          13.720183149606473,
+          13.204848220478262,
+          12.025284909450276
+        ],
+        "output_throughput": [
+          1026.216816506159,
+          1025.2110318127727,
+          1116.10603865596
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.8987918854200693,
+          0.9842036758100291,
+          1.5574725346397613
+        ],
+        "p50_tpot_ms": [
+          0.9770226758952695,
+          0.8877475896911194,
+          0.8200701609562647
+        ],
+        "output_throughput": [
+          1.0409716007332253,
+          1.0984962235371472,
+          1.1714058314085085
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 16,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          242.65202549986498,
+          244.90958049955225,
+          235.75963750045048
+        ],
+        "p50_tpot_ms": [
+          12.701885417323494,
+          11.842973968500665,
+          12.507172960630575
+        ],
+        "output_throughput": [
+          1089.8673633374437,
+          1138.9616900146052,
+          1102.0247387458244
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.2014081192669877,
+          0.8629873075822773,
+          1.2984566269407065
+        ],
+        "p50_tpot_ms": [
+          0.9045090684306535,
+          0.7961902643459805,
+          0.8529327512957059
+        ],
+        "output_throughput": [
+          1.105537305130947,
+          1.2203781235383924,
+          1.15662684423592
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 32,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          327.70645200002946,
+          327.9235925001558,
+          307.58829549995426
+        ],
+        "p50_tpot_ms": [
+          17.391674062993815,
+          17.84004172440484,
+          17.429128862197217
+        ],
+        "output_throughput": [
+          1599.3071062092458,
+          1531.1310114459538,
+          1601.5839613765108
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 32,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          330.45216299979074,
+          289.2567689996213,
+          330.31305699933
+        ],
+        "p50_tpot_ms": [
+          15.92314747637908,
+          15.893318669297988,
+          15.28140185826659
+        ],
+        "output_throughput": [
+          1706.2654968990835,
+          1717.309537430377,
+          1733.0276872733887
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0083785686336169,
+          0.8820858749267448,
+          1.0738804493923897
+        ],
+        "p50_tpot_ms": [
+          0.9155615163154719,
+          0.8908790077299106,
+          0.8767737033266806
+        ],
+        "output_throughput": [
+          1.0668779562565414,
+          1.1215954249457738,
+          1.082071080297224
+        ]
+      }
+    },
+    {
+      "mode": "eager",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 32,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          299.94380100015405,
+          307.9743669986783,
+          307.46561549949547
+        ],
+        "p50_tpot_ms": [
+          15.536950854331419,
+          15.18820125590186,
+          15.98580549212125
+        ],
+        "output_throughput": [
+          1784.3327662100717,
+          1779.2336179241483,
+          1730.0690669230537
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9152819517881421,
+          0.9391650190540407,
+          0.9996011551731532
+        ],
+        "p50_tpot_ms": [
+          0.8933556826131595,
+          0.8513545814819865,
+          0.9171890126300889
+        ],
+        "output_throughput": [
+          1.1156911385452306,
+          1.1620387835028525,
+          1.0802237713695098
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "latency",
+      "input_len": 128,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          16.952719000983052,
+          16.871735499080387,
+          16.873565000423696
+        ],
+        "p50_tpot_ms": [
+          8.254635232268933,
+          8.262666283464897,
+          8.24447472440961
+        ],
+        "output_throughput": [
+          119.6108508653718,
+          119.58621379096368,
+          119.71467937738612
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "latency",
+      "input_len": 128,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          20.61885699731647,
+          20.713608999358257,
+          17.207385499204975
+        ],
+        "p50_tpot_ms": [
+          8.314150960617068,
+          8.313411311000104,
+          8.095973031503684
+        ],
+        "output_throughput": [
+          118.56965330086075,
+          118.68828492675524,
+          121.65172796159712
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.2162566368333496,
+          1.2277106288494908,
+          1.0197836378247807
+        ],
+        "p50_tpot_ms": [
+          1.0072099767795282,
+          1.0061414833655762,
+          0.981987731435909
+        ],
+        "output_throughput": [
+          0.9912951245060285,
+          0.9924913680620576,
+          1.0161805435581102
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "latency",
+      "input_len": 128,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          20.566495000821305,
+          20.04837050117203,
+          17.00423049987876
+        ],
+        "p50_tpot_ms": [
+          8.314796145674249,
+          8.302285807119228,
+          8.300900240151458
+        ],
+        "output_throughput": [
+          118.98339857748007,
+          118.563948938891,
+          119.03934795386463
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.2131679289693116,
+          1.188281460568463,
+          1.0077437992179947
+        ],
+        "p50_tpot_ms": [
+          1.0072881371147855,
+          1.0047950046988605,
+          1.0068440401151073
+        ],
+        "output_throughput": [
+          0.9947542193425415,
+          0.9914516496537,
+          0.9943588252749475
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "latency",
+      "input_len": 512,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          34.59725750144571,
+          33.827285000370466,
+          33.71123500073736
+        ],
+        "p50_tpot_ms": [
+          8.261106992123796,
+          8.273648763789662,
+          8.255710129911519
+        ],
+        "output_throughput": [
+          117.47648796189975,
+          117.48305551835759,
+          117.8975211185976
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "latency",
+      "input_len": 512,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          34.38523600198096,
+          34.32347800116986,
+          33.962090499699116
+        ],
+        "p50_tpot_ms": [
+          8.36574385828599,
+          8.361022125964656,
+          8.108022834626246
+        ],
+        "output_throughput": [
+          116.28875626931287,
+          116.36324041126446,
+          119.79033111038808
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9938717252529079,
+          1.0146684252311102,
+          1.0074413025496178
+        ],
+        "p50_tpot_ms": [
+          1.0126662039678163,
+          1.0105604388909268,
+          0.9821108913756331
+        ],
+        "output_throughput": [
+          0.9898896220580574,
+          0.990468284109974,
+          1.016054705593737
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "latency",
+      "input_len": 512,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          34.194347503216704,
+          34.56301899859682,
+          33.68594600033248
+        ],
+        "p50_tpot_ms": [
+          8.360772456692606,
+          8.354636350397744,
+          8.35273603936332
+        ],
+        "output_throughput": [
+          116.47242783190966,
+          116.54851273823819,
+          116.41765765593837
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9883542792889821,
+          1.021749720623996,
+          0.9992498346499519
+        ],
+        "p50_tpot_ms": [
+          1.0120644200182654,
+          1.0097886179266553,
+          1.011752581900891
+        ],
+        "output_throughput": [
+          0.9914530971481227,
+          0.9920452972899282,
+          0.98744788313937
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "latency",
+      "input_len": 1024,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          62.22991600043315,
+          61.58450649854785,
+          61.34058750103577
+        ],
+        "p50_tpot_ms": [
+          8.282135385823093,
+          8.297495003931745,
+          8.280139618106237
+        ],
+        "output_throughput": [
+          114.3323056205897,
+          114.22054253634727,
+          114.63404845077457
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "latency",
+      "input_len": 1024,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          62.797495502309175,
+          62.645456000609556,
+          61.781227497704094
+        ],
+        "p50_tpot_ms": [
+          8.432084484218104,
+          8.443102177169942,
+          8.130420566914378
+        ],
+        "output_throughput": [
+          112.76683139449726,
+          112.60000951546446,
+          116.34211420122612
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0091206856501633,
+          1.0172275392364591,
+          1.0071834981473056
+        ],
+        "p50_tpot_ms": [
+          1.018105125237591,
+          1.017548329124537,
+          0.9819182938818487
+        ],
+        "output_throughput": [
+          0.9863076825259919,
+          0.9858122454604248,
+          1.014900160759698
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "latency",
+      "input_len": 1024,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          61.219938495924,
+          61.159652497735806,
+          61.339487503573764
+        ],
+        "p50_tpot_ms": [
+          8.434739307101449,
+          8.43292944487111,
+          8.43173624803523
+        ],
+        "output_throughput": [
+          112.90595228122059,
+          112.71674956673989,
+          113.21259332046466
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9837702254892627,
+          0.9931012843169886,
+          0.9999820673797428
+        ],
+        "p50_tpot_ms": [
+          1.0184256733522583,
+          1.016322328711881,
+          1.0183084630116015
+        ],
+        "output_throughput": [
+          0.9875244942221104,
+          0.986834303740688,
+          0.9876000616787053
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "latency",
+      "input_len": 1920,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          115.54709849951905,
+          115.90814150076767,
+          115.75328299841203
+        ],
+        "p50_tpot_ms": [
+          8.381730858272071,
+          8.392320566921928,
+          8.378559086620982
+        ],
+        "output_throughput": [
+          108.05483913580076,
+          107.95428971563956,
+          108.05659225038828
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "latency",
+      "input_len": 1920,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          117.5616619984794,
+          117.77297449953039,
+          115.6697094993433
+        ],
+        "p50_tpot_ms": [
+          8.494561185044425,
+          8.499278185042822,
+          8.21746651576621
+        ],
+        "output_throughput": [
+          106.73118181929982,
+          106.83691871957909,
+          109.95878076326247
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0174349985860418,
+          1.016088887067095,
+          0.9992780032073053
+        ],
+        "p50_tpot_ms": [
+          1.0134614590566338,
+          1.0127447012144013,
+          0.9807732368788797
+        ],
+        "output_throughput": [
+          0.9877501338478937,
+          0.9896495915168937,
+          1.017603632256572
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "latency",
+      "input_len": 1920,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          114.25032649640343,
+          114.04390600000625,
+          114.05117649701424
+        ],
+        "p50_tpot_ms": [
+          8.525857633864552,
+          8.516963149619603,
+          8.484481496030124
+        ],
+        "output_throughput": [
+          106.75873992314907,
+          107.28367605547439,
+          106.90405719246239
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9887771132295371,
+          0.9839162678598459,
+          0.9852953932941916
+        ],
+        "p50_tpot_ms": [
+          1.0171953475993851,
+          1.0148519806534737,
+          1.0126420794213031
+        ],
+        "output_throughput": [
+          0.9880051719754745,
+          0.9937879850635707,
+          0.9893339681187129
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 2048,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          61.75002900090476,
+          61.4290350004012,
+          62.14027200076089
+        ],
+        "p50_tpot_ms": [
+          4.616327177152597,
+          4.61529497243739,
+          4.631656346467162
+        ],
+        "output_throughput": [
+          196.08510306830604,
+          196.0323021882968,
+          193.84077293054798
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 2048,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          61.71445800282527,
+          62.33815049927216,
+          60.46489600339555
+        ],
+        "p50_tpot_ms": [
+          4.606192578734852,
+          4.606122901586643,
+          4.4558426062702505
+        ],
+        "output_throughput": [
+          197.2219234255609,
+          197.5007124268573,
+          203.37325006465818
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9994239517186466,
+          1.014799442948518,
+          0.9730388048937922
+        ],
+        "p50_tpot_ms": [
+          0.9978046186873618,
+          0.998012679383328,
+          0.9620408495265381
+        ],
+        "output_throughput": [
+          1.0057975865553583,
+          1.0074906544593352,
+          1.0491768423639418
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 2048,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          60.41507150439429,
+          60.411351500079036,
+          59.5959340025729
+        ],
+        "p50_tpot_ms": [
+          4.6015440826794665,
+          4.603491354319835,
+          4.4570656338448575
+        ],
+        "output_throughput": [
+          197.98865016773945,
+          197.71199618452633,
+          203.4534461640758
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9783812652704842,
+          0.9834331843188564,
+          0.9590549265996642
+        ],
+        "p50_tpot_ms": [
+          0.9967976501868638,
+          0.9974424997344599,
+          0.9623049078856044
+        ],
+        "output_throughput": [
+          1.0097077598942859,
+          1.0085684551855956,
+          1.0495905638849883
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 4096,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          125.21384100000432,
+          126.06925550062442,
+          124.58721649818472
+        ],
+        "p50_tpot_ms": [
+          4.7004573307061746,
+          4.700480393687146,
+          4.700169421249577
+        ],
+        "output_throughput": [
+          176.09722191798966,
+          175.75145427675014,
+          176.70194070077122
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 4096,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          126.62060000366182,
+          127.7727109954867,
+          123.93978350155521
+        ],
+        "p50_tpot_ms": [
+          4.6553891141831105,
+          4.656713771646179,
+          4.50755946064784
+        ],
+        "output_throughput": [
+          178.8203371513398,
+          178.64222192260695,
+          182.4780633275456
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0112348522529346,
+          1.0135120611928563,
+          0.9948033753796969
+        ],
+        "p50_tpot_ms": [
+          0.9904119507204859,
+          0.9906889044575643,
+          0.9590206345050154
+        ],
+        "output_throughput": [
+          1.0154637035365517,
+          1.0164480439593109,
+          1.0326885070071512
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 4096,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          121.81338599839364,
+          122.58527700032573,
+          119.41714299973683
+        ],
+        "p50_tpot_ms": [
+          4.6555761260018995,
+          4.655888039372608,
+          4.5079772834591365
+        ],
+        "output_throughput": [
+          179.97286042350407,
+          179.02059793711723,
+          183.76672020228781
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9728428185378439,
+          0.9723645667100697,
+          0.9585023757351283
+        ],
+        "p50_tpot_ms": [
+          0.9904517365978233,
+          0.9905132346952397,
+          0.9591095297710897
+        ],
+        "output_throughput": [
+          1.0220085158828873,
+          1.0186009479911289,
+          1.0399813350860712
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 8192,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          283.0065130001458,
+          283.773328499592,
+          282.68596250018163
+        ],
+        "p50_tpot_ms": [
+          4.8661472677148,
+          4.8705647952703846,
+          4.867613492124507
+        ],
+        "output_throughput": [
+          141.6713234990814,
+          141.4445295182369,
+          141.364874689942
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 8192,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          286.8853694999416,
+          287.63098899798933,
+          280.52549199856
+        ],
+        "p50_tpot_ms": [
+          4.831134110230148,
+          4.825948472447577,
+          4.6799643818604375
+        ],
+        "output_throughput": [
+          142.53734447628287,
+          141.95139493761008,
+          145.93688723114627
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.01370589128383,
+          1.0135941616458253,
+          0.992357347770248
+        ],
+        "p50_tpot_ms": [
+          0.9928047476661974,
+          0.9908395997798587,
+          0.961449463773639
+        ],
+        "output_throughput": [
+          1.0061128883094472,
+          1.0035834925613565,
+          1.032341927591505
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 8192,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          275.77027900042594,
+          275.70859550178284,
+          269.13449600033346
+        ],
+        "p50_tpot_ms": [
+          4.832160633869055,
+          4.832212385836316,
+          4.682177326757246
+        ],
+        "output_throughput": [
+          143.78174163692677,
+          144.28925986319263,
+          147.6789753604323
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9744308570039301,
+          0.9715803700071102,
+          0.9520617635909691
+        ],
+        "p50_tpot_ms": [
+          0.9930156996950679,
+          0.9921256751431967,
+          0.9619040900294806
+        ],
+        "output_throughput": [
+          1.0148965795315594,
+          1.020111985628889,
+          1.0446652726452672
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 16384,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          718.7772055021924,
+          721.3294470002438,
+          718.4019009982876
+        ],
+        "p50_tpot_ms": [
+          5.295601082668048,
+          5.300544133850655,
+          5.30039712599161
+        ],
+        "output_throughput": [
+          91.72954782578998,
+          91.70990182885149,
+          91.46472305124756
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 16384,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          725.984584496473,
+          729.1718484993908,
+          713.239380500454
+        ],
+        "p50_tpot_ms": [
+          5.199186893695173,
+          5.197734503931637,
+          5.039107807103901
+        ],
+        "output_throughput": [
+          91.99974495645034,
+          92.06120414488747,
+          94.26222326642007
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0100272781873278,
+          1.010872149378846,
+          0.9928138824651497
+        ],
+        "p50_tpot_ms": [
+          0.9817935325059834,
+          0.980603947948957,
+          0.9507038222463704
+        ],
+        "output_throughput": [
+          1.0029455844606747,
+          1.0038305821839346,
+          1.030585564815028
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 16384,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          693.8205384976754,
+          692.902693997894,
+          679.5295394986169
+        ],
+        "p50_tpot_ms": [
+          5.1945275905510915,
+          5.210214842510306,
+          5.041621696865314
+        ],
+        "output_throughput": [
+          94.33102654269658,
+          94.63926271984373,
+          96.613947847081
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9652789949187658,
+          0.960591165215053,
+          0.945890508577923
+        ],
+        "p50_tpot_ms": [
+          0.980913688448369,
+          0.9829584870799427,
+          0.9511781055315013
+        ],
+        "output_throughput": [
+          1.0283603133185313,
+          1.031941598808589,
+          1.0562973857467248
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 32640,
+      "concurrency": 1,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          2054.6692655007064,
+          2059.132149001016,
+          2052.109880498392
+        ],
+        "p50_tpot_ms": [
+          5.886323582657725,
+          5.89622036614304,
+          5.9016229291254
+        ],
+        "output_throughput": [
+          45.46772911075997,
+          45.526595276005494,
+          45.60502262333183
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 32640,
+      "concurrency": 1,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          2088.3841539980494,
+          2089.9221244981163,
+          2045.9003789983399
+        ],
+        "p50_tpot_ms": [
+          5.938003877969367,
+          5.906371818929883,
+          5.744863614152592
+        ],
+        "output_throughput": [
+          44.97976522991267,
+          45.013084121494394,
+          46.02053354773254
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0164089126476163,
+          1.014952889503492,
+          0.9969740891757004
+        ],
+        "p50_tpot_ms": [
+          1.008779723809935,
+          1.0017216881589321,
+          0.9734379310817747
+        ],
+        "output_throughput": [
+          0.989267907362195,
+          0.9887206334803221,
+          1.009111078133489
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "long_context",
+      "input_len": 32640,
+      "concurrency": 1,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          1982.8672190014913,
+          1984.613579003053,
+          1938.9990475028753
+        ],
+        "p50_tpot_ms": [
+          5.9184135236251665,
+          5.917816503946467,
+          5.755058228349685
+        ],
+        "output_throughput": [
+          46.69607558624906,
+          46.79155321748623,
+          47.87781137805729
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9650542071637415,
+          0.9638106908125759,
+          0.9448807132257236
+        ],
+        "p50_tpot_ms": [
+          1.0054516100783153,
+          1.003662708729042,
+          0.9751653566254807
+        ],
+        "output_throughput": [
+          1.027015786790161,
+          1.0277850327662748,
+          1.0498363694169661
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 2,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          59.179355499509256,
+          58.81524849974085,
+          59.199819499553996
+        ],
+        "p50_tpot_ms": [
+          8.538472551176314,
+          8.543309598416824,
+          8.536119322837575
+        ],
+        "output_throughput": [
+          224.54791906769609,
+          224.51264591036727,
+          224.63074732835503
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 2,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          59.766585000033956,
+          50.4188044978946,
+          59.065483499580296
+        ],
+        "p50_tpot_ms": [
+          8.544069476399065,
+          8.570428291345099,
+          8.341822255880382
+        ],
+        "output_throughput": [
+          223.96821249954385,
+          225.10169289441708,
+          229.14070861857007
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0099228775908107,
+          0.8572403549075671,
+          0.9977308038924897
+        ],
+        "p50_tpot_ms": [
+          1.0006554949013662,
+          1.003174260819636,
+          0.977238243795706
+        ],
+        "output_throughput": [
+          0.9974183391653811,
+          1.0026236695116273,
+          1.0200772215907852
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 2,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          58.24461299562245,
+          58.70507999861729,
+          58.05715149836033
+        ],
+        "p50_tpot_ms": [
+          8.53285733857889,
+          8.568324275611802,
+          8.342413484269212
+        ],
+        "output_throughput": [
+          224.25559789138717,
+          223.4995592410134,
+          228.68275907189545
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9842049225444072,
+          0.9981268717903311,
+          0.9806981168041858
+        ],
+        "p50_tpot_ms": [
+          0.9993423633367948,
+          1.0029279843960721,
+          0.9773075057596581
+        ],
+        "output_throughput": [
+          0.9986981790901354,
+          0.9954876186806941,
+          1.0180385445524844
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 4,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          113.53955450067588,
+          113.15301649847243,
+          110.9779795006034
+        ],
+        "p50_tpot_ms": [
+          8.618097452758024,
+          8.615900271653068,
+          8.628642259840648
+        ],
+        "output_throughput": [
+          419.24481895863215,
+          418.9724866740166,
+          417.8909031356267
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 4,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          111.2889654978062,
+          114.86605949903606,
+          114.22679250244983
+        ],
+        "p50_tpot_ms": [
+          8.661989118131823,
+          8.63008875193924,
+          8.392526208643991
+        ],
+        "output_throughput": [
+          419.20510875945376,
+          415.18385846875185,
+          426.0513577482533
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9801779299490181,
+          1.015139172189782,
+          1.0292743931405668
+        ],
+        "p50_tpot_ms": [
+          1.0050929646148006,
+          1.0016467786114998,
+          0.9726357816112523
+        ],
+        "output_throughput": [
+          0.9999052815982866,
+          0.9909573341310774,
+          1.019527715371153
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 4,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          113.41847700168728,
+          114.53058600091026,
+          111.43347000324866
+        ],
+        "p50_tpot_ms": [
+          8.64197233071121,
+          8.646773858230532,
+          8.390680897633057
+        ],
+        "output_throughput": [
+          423.3976241296044,
+          418.58044095618595,
+          429.6112478692373
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9989336095291101,
+          1.0121743948598705,
+          1.0041043322710952
+        ],
+        "p50_tpot_ms": [
+          1.0027703188649306,
+          1.0035833268264536,
+          0.9724219228191777
+        ],
+        "output_throughput": [
+          1.009905441840134,
+          0.9990642685849306,
+          1.0280464222735348
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 8,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          154.64615100063384,
+          124.48753349963226,
+          146.04164450065582
+        ],
+        "p50_tpot_ms": [
+          9.427030866140203,
+          9.60702113385253,
+          9.456032460641257
+        ],
+        "output_throughput": [
+          743.7482593816543,
+          746.4820370093886,
+          744.5197653224183
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 8,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          172.79109050286934,
+          173.71934299444547,
+          146.7158904997632
+        ],
+        "p50_tpot_ms": [
+          9.52724451575003,
+          9.521727712613423,
+          9.320476496070585
+        ],
+        "output_throughput": [
+          735.7727284582472,
+          730.4056705681197,
+          752.2322152381237
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.1173319826250387,
+          1.3954758208375833,
+          1.0046168064007548
+        ],
+        "p50_tpot_ms": [
+          1.0106304573553242,
+          0.9911217618811562,
+          0.9856646045648748
+        ],
+        "output_throughput": [
+          0.9892765719814419,
+          0.9784638267979291,
+          1.0103589592579392
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 8,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          123.94687199775944,
+          144.37823749540257,
+          165.08706549575436
+        ],
+        "p50_tpot_ms": [
+          9.587747751946898,
+          9.532975358252576,
+          9.297375740161657
+        ],
+        "output_throughput": [
+          734.7297420076354,
+          756.0117851817147,
+          757.6435559624483
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.8014869506661788,
+          1.1597806899743022,
+          1.1304108910867066
+        ],
+        "p50_tpot_ms": [
+          1.0170485159207396,
+          0.9922925353688422,
+          0.983221639610484
+        ],
+        "output_throughput": [
+          0.9878742339760005,
+          1.0127662123130314,
+          1.0176271890301618
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 16,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          180.63308849923487,
+          226.93732800144062,
+          226.528484501614
+        ],
+        "p50_tpot_ms": [
+          11.152742791343522,
+          10.848118515764147,
+          10.888003905502117
+        ],
+        "output_throughput": [
+          1253.1212353890273,
+          1250.6664282434676,
+          1239.867683557894
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 16,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          183.11343299865257,
+          236.1932079984399,
+          179.82644499716116
+        ],
+        "p50_tpot_ms": [
+          11.504627653510138,
+          11.217659976384713,
+          11.236184342496426
+        ],
+        "output_throughput": [
+          1208.6862278550295,
+          1215.8195434374102,
+          1249.3879555607818
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0137313961690257,
+          1.0407860622953158,
+          0.7938359071831423
+        ],
+        "p50_tpot_ms": [
+          1.0315514191217374,
+          1.0340650279662376,
+          1.0319783534260454
+        ],
+        "output_throughput": [
+          0.9645405358403306,
+          0.9721373469223131,
+          1.007678458055757
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 16,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          222.05675250006607,
+          206.14753900372307,
+          170.92174400022486
+        ],
+        "p50_tpot_ms": [
+          10.98740699998466,
+          11.017039893678568,
+          11.100234204740998
+        ],
+        "output_throughput": [
+          1239.681379549435,
+          1261.4718188692175,
+          1268.4601066842886
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.2293248947077968,
+          0.908389733937532,
+          0.7545264975231274
+        ],
+        "p50_tpot_ms": [
+          0.9851753246307096,
+          1.0155714908229432,
+          1.0194921218876154
+        ],
+        "output_throughput": [
+          0.9892748957881796,
+          1.0086397063051622,
+          1.0230608664985497
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 32,
+      "config": "FLASH_ATTN",
+      "values": {
+        "p50_ttft_ms": [
+          321.35953750184854,
+          328.5429359984846,
+          314.75144649812137
+        ],
+        "p50_tpot_ms": [
+          14.445599374013238,
+          14.292113716541868,
+          14.717097409465074
+        ],
+        "output_throughput": [
+          1867.702501860998,
+          1855.6172170539107,
+          1854.745367389141
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "p50_tpot_ms": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "output_throughput": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 32,
+      "config": "SCRATCH_DECODE",
+      "values": {
+        "p50_ttft_ms": [
+          310.36676700023236,
+          310.79588050124585,
+          308.40133050151053
+        ],
+        "p50_tpot_ms": [
+          15.258433129900826,
+          15.1331036181295,
+          14.674803232261956
+        ],
+        "output_throughput": [
+          1803.5938241563929,
+          1799.7277240216072,
+          1855.0979803976747
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9657929228207427,
+          0.9459825381930579,
+          0.9798249823241122
+        ],
+        "p50_tpot_ms": [
+          1.0562686071268061,
+          1.0588429338212066,
+          0.9971261875880554
+        ],
+        "output_throughput": [
+          0.9656751127972862,
+          0.969880914814405,
+          1.0001901139718332
+        ]
+      }
+    },
+    {
+      "mode": "graphs",
+      "study": "throughput",
+      "input_len": 512,
+      "concurrency": 32,
+      "config": "SCRATCH_FULL",
+      "values": {
+        "p50_ttft_ms": [
+          291.2555920011073,
+          313.37520299712196,
+          291.9553955034644
+        ],
+        "p50_tpot_ms": [
+          14.597869688997001,
+          14.485577401587296,
+          14.26654544884227
+        ],
+        "output_throughput": [
+          1875.2787871927337,
+          1855.9960854462652,
+          1905.7242913194702
+        ]
+      },
+      "ratios": {
+        "p50_ttft_ms": [
+          0.9063231614821201,
+          0.9538333309305039,
+          0.927574436120048
+        ],
+        "p50_tpot_ms": [
+          1.0105409482182988,
+          1.0135363941879016,
+          0.9693858137860093
+        ],
+        "output_throughput": [
+          1.0040564733003177,
+          1.0002041737858824,
+          1.0274856726031836
+        ]
+      }
+    }
+  ]
+}
