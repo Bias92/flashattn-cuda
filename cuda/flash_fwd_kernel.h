@@ -29,13 +29,13 @@ __device__ __forceinline__ void compute_qk(
 }
 
 template <int NT>
-__device__ __forceinline__ void apply_mask(float (&acc_s)[NT][4], int kv, int N, int lane)
+__device__ __forceinline__ void apply_mask(float (&acc_s)[NT][4], int kv, int N_kv, int lane)
 {
     #pragma unroll
     for (int t = 0; t < NT; t++) {
         int col0 = kv + t * 8 + 2 * (lane % 4);
-        if (col0 >= N)     { acc_s[t][0] = -INFINITY; acc_s[t][2] = -INFINITY; }
-        if (col0 + 1 >= N) { acc_s[t][1] = -INFINITY; acc_s[t][3] = -INFINITY; }
+        if (col0 >= N_kv)     { acc_s[t][0] = -INFINITY; acc_s[t][2] = -INFINITY; }
+        if (col0 + 1 >= N_kv) { acc_s[t][1] = -INFINITY; acc_s[t][3] = -INFINITY; }
     }
 }
 
@@ -91,8 +91,8 @@ template <int D, bool WRITE_L, bool FULL_TILES>
 __device__ __forceinline__ void epilogue(
     const float (&acc_o)[Flash_fwd_kernel_traits<D>::NTILES_O][4],
     const Softmax& softmax,
-    half* __restrict__ O_bh, int64_t o_row, float* __restrict__ L_bh,
-    int N, int q_block, int warp, int lane)
+    half* __restrict__ O_bh, int64_t stride_o_row, float* __restrict__ L_bh,
+    int N_q, int q_block, int warp, int lane)
 {
     using Kernel_traits = Flash_fwd_kernel_traits<D>;
     const float inv_sum_lo = 1.0f / softmax.row_sum[0];
@@ -104,19 +104,19 @@ __device__ __forceinline__ void epilogue(
     #pragma unroll
     for (int t = 0; t < Kernel_traits::NTILES_O; t++) {
         int col = t * 8 + cbase;
-        if (FULL_TILES || r_lo < N) {
+        if (FULL_TILES || r_lo < N_q) {
             half2 v = __floats2half2_rn(acc_o[t][0] * inv_sum_lo, acc_o[t][1] * inv_sum_lo);
-            *reinterpret_cast<half2*>(&O_bh[r_lo * o_row + col]) = v;
+            *reinterpret_cast<half2*>(&O_bh[r_lo * stride_o_row + col]) = v;
         }
-        if (FULL_TILES || r_hi < N) {
+        if (FULL_TILES || r_hi < N_q) {
             half2 v = __floats2half2_rn(acc_o[t][2] * inv_sum_hi, acc_o[t][3] * inv_sum_hi);
-            *reinterpret_cast<half2*>(&O_bh[r_hi * o_row + col]) = v;
+            *reinterpret_cast<half2*>(&O_bh[r_hi * stride_o_row + col]) = v;
         }
     }
     if constexpr (WRITE_L) {
         if (lane % 4 == 0) {
-            if (FULL_TILES || r_lo < N) L_bh[r_lo] = softmax.row_max[0] * LN2f + logf(softmax.row_sum[0]);
-            if (FULL_TILES || r_hi < N) L_bh[r_hi] = softmax.row_max[1] * LN2f + logf(softmax.row_sum[1]);
+            if (FULL_TILES || r_lo < N_q) L_bh[r_lo] = softmax.row_max[0] * LN2f + logf(softmax.row_sum[0]);
+            if (FULL_TILES || r_hi < N_q) L_bh[r_hi] = softmax.row_max[1] * LN2f + logf(softmax.row_sum[1]);
         }
     }
 }
@@ -130,21 +130,21 @@ attention_fwd_kernel(
     const half* __restrict__ Q,
     half* __restrict__ O,
     float* __restrict__ L,    // contiguous [B, H_q, N_q]; may be nullptr when WRITE_L == false
-    Strides sQ, Strides sO,
+    Strides stride_q, Strides stride_o,
     int N_q,
     int N_kv_launch,          // K/V length; ignored when SQUARE
     int H_q,                  // query heads; also used by contiguous GQA addressing
     int kv_group,             // query heads per key/value head; only read when GQA
     float softmax_scale,
-    KVFields... kv_fields)    // the members of KV (DenseKV or PagedKV)
+    KVFields... kv_fields)    // DenseKV pointers and strides, in declaration order
 {
     using Kernel_traits = Flash_fwd_kernel_traits<D>;
     const int N_kv = SQUARE ? N_q : N_kv_launch;
     KV kv_source{kv_fields...};
     constexpr bool FLAT_HEADS = LAYOUT == AddressLayout::ContiguousHeads;
     if constexpr (LAYOUT != AddressLayout::Strided) {
-        sQ.n = sO.n = D;
-        kv_source.sK.n = kv_source.sV.n = D;
+        stride_q.n = stride_o.n = D;
+        kv_source.stride_k.n = kv_source.stride_v.n = D;
     }
 
     const int tid  = threadIdx.x;
@@ -171,10 +171,10 @@ attention_fwd_kernel(
         O_bh = O + (int64_t)bh * N_q * D;
         kv_head.K = kv_source.K + (int64_t)bh_kv * N_kv * D;
         kv_head.V = kv_source.V + (int64_t)bh_kv * N_kv * D;
-        kv_head.k_row = kv_head.v_row = D;
+        kv_head.stride_k_row = kv_head.stride_v_row = D;
     } else {
-        Q_bh = Q + b * sQ.b + h * sQ.h;
-        O_bh = O + b * sO.b + h * sO.h;
+        Q_bh = Q + b * stride_q.b + h * stride_q.h;
+        O_bh = O + b * stride_o.b + h * stride_o.h;
     }
     float* L_bh = nullptr;
     if constexpr (WRITE_L) {
@@ -195,13 +195,13 @@ attention_fwd_kernel(
     if constexpr (kStages == 2) {
         // Q borrows the second stage, so block 0 of K/V can already be in flight.
         kv_stager.issue(cur_base, 0);
-        stage_q_to_smem<D, FULL_TILES>(smem + Kernel_traits::STAGE, Q_bh, sQ.n, q_block, N_q, tid);
+        stage_q_to_smem<D, FULL_TILES>(smem + Kernel_traits::STAGE, Q_bh, stride_q.n, q_block, N_q, tid);
         __syncthreads();
         load_q_fragments<D>(tSrQ, smem + Kernel_traits::STAGE, warp, lane);
         __syncthreads();
     } else {
         // Q shares the single K/V buffer, so it has to be consumed first.
-        stage_q_to_smem<D, FULL_TILES>(smem, Q_bh, sQ.n, q_block, N_q, tid);
+        stage_q_to_smem<D, FULL_TILES>(smem, Q_bh, stride_q.n, q_block, N_q, tid);
         __syncthreads();
         load_q_fragments<D>(tSrQ, smem, warp, lane);
         __syncthreads();
@@ -261,5 +261,5 @@ attention_fwd_kernel(
         }
     }
 
-    epilogue<D, WRITE_L, FULL_TILES>(acc_o, softmax, O_bh, sO.n, L_bh, N_q, q_block, warp, lane);
+    epilogue<D, WRITE_L, FULL_TILES>(acc_o, softmax, O_bh, stride_o.n, L_bh, N_q, q_block, warp, lane);
 }

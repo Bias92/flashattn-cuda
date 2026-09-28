@@ -4,23 +4,23 @@
 
 struct DenseForwardDispatch {
     static AddressLayout select_layout(const ForwardLaunch& args, const DenseKV& source) {
-        const int B = args.Q.size(0), H = args.Q.size(1);
+        const int B = args.Q.size(0), H_q = args.Q.size(1);
         const int N_q = args.Q.size(2), D = args.Q.size(3), N_kv = args.N_kv;
         const bool full_tiles = (N_q % kBlockM == 0) && (N_kv % kBlockN == 0);
         const bool contiguous_rows = D == 64 && args.L == nullptr && !args.causal && full_tiles
             && args.Q.stride(2) == D && args.O.stride(2) == D
-            && source.sK.n == D && source.sV.n == D;
+            && source.stride_k.n == D && source.stride_v.n == D;
 
-        const int H_kv = H / args.kv_group;
-        const bool k_contiguous = source.sK.n == D
-            && (H_kv == 1 || source.sK.h == (int64_t)N_kv * D)
-            && (B == 1 || source.sK.b == (int64_t)H_kv * N_kv * D);
-        const bool v_contiguous = source.sV.n == D
-            && (H_kv == 1 || source.sV.h == (int64_t)N_kv * D)
-            && (B == 1 || source.sV.b == (int64_t)H_kv * N_kv * D);
+        const int H_kv = H_q / args.kv_group;
+        const bool k_contiguous = source.stride_k.n == D
+            && (H_kv == 1 || source.stride_k.h == (int64_t)N_kv * D)
+            && (B == 1 || source.stride_k.b == (int64_t)H_kv * N_kv * D);
+        const bool v_contiguous = source.stride_v.n == D
+            && (H_kv == 1 || source.stride_v.h == (int64_t)N_kv * D)
+            && (B == 1 || source.stride_v.b == (int64_t)H_kv * N_kv * D);
         const bool packed_rows = args.causal && N_q == N_kv && !full_tiles
             && args.Q.is_contiguous() && args.O.is_contiguous()
-            && k_contiguous && v_contiguous && (int64_t)B * H <= 65535;
+            && k_contiguous && v_contiguous && (int64_t)B * H_q <= 65535;
 
         if (packed_rows) return AddressLayout::ContiguousHeads;
         if (contiguous_rows) return AddressLayout::ContiguousRows;

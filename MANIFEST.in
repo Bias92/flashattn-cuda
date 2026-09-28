@@ -1,4 +1,3 @@
-include cuda/attention_decode_mma.cuh
 include cuda/attention_forward_ops.cuh
 include cuda/kernel_traits.h
 include cuda/flash_fwd_memory.h
@@ -7,4 +6,3 @@ include cuda/README.md
 include cuda/flash_fwd_kernel.h
 include cuda/flash_fwd_launch_template.h
 include cuda/flash_fwd_dense_dispatch.h
-include cuda/flash_fwd_paged_dispatch.h

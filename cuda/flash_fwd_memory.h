@@ -15,48 +15,20 @@ struct Strides {
 struct DenseKV {
     const half* K;
     const half* V;
-    Strides sK, sV;
+    Strides stride_k, stride_v;
 
     struct Head {
-        static constexpr bool LINEAR = true;   // the address is linear in the row index
         const half* K;
         const half* V;
-        int64_t k_row, v_row;
+        int64_t stride_k_row, stride_v_row;
         __device__ __forceinline__ void rows(int row, const half*& k, const half*& v) const {
-            k = K + row * k_row;
-            v = V + row * v_row;
+            k = K + row * stride_k_row;
+            v = V + row * stride_v_row;
         }
     };
     __device__ __forceinline__ Head head(int b, int h_kv) const {
-        return {K + b * sK.b + h_kv * sK.h, V + b * sV.b + h_kv * sV.h, sK.n, sV.n};
-    }
-};
-
-// A vLLM-style paged cache, K and V each [pages, page_size, H_kv, D] with the same strides:
-// row r is slot r & (page_size - 1) of page table[r >> page_shift]. One sequence per launch.
-struct PagedKV {
-    const half* K;
-    const half* V;
-    const int32_t* table;       // page ids of this sequence, in order
-    int page_shift;             // log2(page_size)
-    int64_t page, slot, hd;     // element strides of the cache: page, slot in page, head
-
-    struct Head {
-        static constexpr bool LINEAR = false;
-        const half* K;
-        const half* V;
-        const int32_t* table;
-        int page_shift;
-        int64_t page, slot;
-        __device__ __forceinline__ void rows(int row, const half*& k, const half*& v) const {
-            const int64_t at = table[row >> page_shift] * page
-                             + (row & ((1 << page_shift) - 1)) * slot;
-            k = K + at;
-            v = V + at;
-        }
-    };
-    __device__ __forceinline__ Head head(int /*b*/, int h_kv) const {
-        return {K + h_kv * hd, V + h_kv * hd, table, page_shift, page, slot};
+        return {K + b * stride_k.b + h_kv * stride_k.h,
+                V + b * stride_v.b + h_kv * stride_v.h, stride_k.n, stride_v.n};
     }
 };
 
@@ -88,15 +60,15 @@ struct KVStager {
         constexpr uint32_t ROWSTEP_OFF = (uint32_t)(ROWSTEP * Kernel_traits::LDS) * sizeof(half);
         constexpr uint32_t VBLOCK_OFF  = (uint32_t)(kBlockN * Kernel_traits::LDS) * sizeof(half);
         const int row0 = kv + r0;
-        if constexpr (FULL_TILES && KVHead::LINEAR) {
+        if constexpr (FULL_TILES) {
             // Full linear tiles use fixed offsets from the first row pointer.
-            const half* k = src.K + row0 * src.k_row + cc;
-            const half* v = src.V + row0 * src.v_row + cc;
+            const half* k = src.K + row0 * src.stride_k_row + cc;
+            const half* v = src.V + row0 * src.stride_v_row + cc;
             #pragma unroll
             for (int i = 0; i < kBlockN / ROWSTEP; i++) {
                 const uint32_t saddr = sbase + k0_off + (uint32_t)i * ROWSTEP_OFF;
-                cp_async_16(saddr, k + (i * ROWSTEP) * src.k_row, 16);
-                cp_async_16(saddr + VBLOCK_OFF, v + (i * ROWSTEP) * src.v_row, 16);
+                cp_async_16(saddr, k + (i * ROWSTEP) * src.stride_k_row, 16);
+                cp_async_16(saddr + VBLOCK_OFF, v + (i * ROWSTEP) * src.stride_v_row, 16);
             }
         } else {
             // Past N_kv use a valid row-0 pointer and zero-fill the destination (src_size=0).
@@ -119,7 +91,7 @@ struct KVStager {
 // Stage Q in shared memory before loading the per-warp register fragments.
 template <int D, bool FULL_TILES>
 __device__ __forceinline__ void stage_q_to_smem(
-    half* sQ_raw, const half* __restrict__ Q_bh, int64_t q_row, int q_block, int N, int tid)
+    half* sQ_raw, const half* __restrict__ Q_bh, int64_t stride_q_row, int q_block, int N_q, int tid)
 {
     using Kernel_traits = Flash_fwd_kernel_traits<D>;
     half (*sQ)[Kernel_traits::LDS] = reinterpret_cast<half(*)[Kernel_traits::LDS]>(sQ_raw);
@@ -128,13 +100,13 @@ __device__ __forceinline__ void stage_q_to_smem(
         int flat = i * 2;
         int r = flat / D, c = flat % D;
         if constexpr (FULL_TILES) {
-            // N % kBlockM == 0 guarantees every Q row in this block is valid.
+            // N_q % kBlockM == 0 guarantees every Q row in this block is valid.
             *reinterpret_cast<half2*>(&sQ[r][c]) =
-                *reinterpret_cast<const half2*>(&Q_bh[(q_block + r) * q_row + c]);
+                *reinterpret_cast<const half2*>(&Q_bh[(q_block + r) * stride_q_row + c]);
         } else {
             int gr = q_block + r;
-            half2 val = (gr < N)
-                ? *reinterpret_cast<const half2*>(&Q_bh[gr * q_row + c])
+            half2 val = (gr < N_q)
+                ? *reinterpret_cast<const half2*>(&Q_bh[gr * stride_q_row + c])
                 : __float2half2_rn(0.0f);
             *reinterpret_cast<half2*>(&sQ[r][c]) = val;
         }

@@ -1,87 +1,41 @@
-# Forward Source Map
+# FA2 Forward
 
-Start with `flash_fwd_kernel.h` and its `attention_fwd_kernel` function.
-The loop reads: stage K/V, QK, mask, online softmax, PV, store O (and optionally L).
+Read `attention_fwd_kernel` in [flash_fwd_kernel.h](flash_fwd_kernel.h).
+Each block keeps its Q tile in registers and streams K/V tiles through shared memory:
+
+```text
+load Q -> [load K/V -> QK -> mask -> online softmax -> PV] -> normalize/store O
+```
+
+`forward` also returns the row log-sum-exp L. `forward_only` returns O.
 
 | File | Responsibility |
 |---|---|
-| [attention_forward.cu](attention_forward.cu) | Tensor validation and Python entry points: forward, forward_only, forward_paged |
-| [flash_fwd_launch_template.h](flash_fwd_launch_template.h) | ForwardLaunch: launch grid, stream and shared-memory allocation |
-| [flash_fwd_dense_dispatch.h](flash_fwd_dense_dispatch.h) | DenseForwardDispatch: layout selection for ordinary K/V tensors |
-| [flash_fwd_paged_dispatch.h](flash_fwd_paged_dispatch.h) | PagedForwardDispatch: causal, O-only dispatch for paged K/V |
-| [flash_fwd_kernel.h](flash_fwd_kernel.h) | QK, masks, PV, epilogue and the forward loop |
-| [kernel_traits.h](kernel_traits.h) | Compile-time tile dimensions and shared-memory sizes |
-| [flash_fwd_memory.h](flash_fwd_memory.h) | Dense/paged K/V addressing, asynchronous staging and Q fragments |
-| [softmax.h](softmax.h) | Quad reductions and running row statistics |
-| [attention_forward_ops.cuh](attention_forward_ops.cuh) | Inline PTX: mma, ldmatrix and cp.async |
+| [attention_forward.cu](attention_forward.cu) | Python APIs and tensor validation |
+| [flash_fwd_dense_dispatch.h](flash_fwd_dense_dispatch.h) | Select the kernel for input layout, mask, lengths and heads |
+| [flash_fwd_launch_template.h](flash_fwd_launch_template.h) | CUDA stream, grid, shared memory and launch |
+| [flash_fwd_kernel.h](flash_fwd_kernel.h) | QK, masks, PV, output and the forward loop |
+| [flash_fwd_memory.h](flash_fwd_memory.h) | Tensor addressing, asynchronous K/V copies and Q loading |
+| [softmax.h](softmax.h) | Running row maximum/sum and output rescaling |
+| [kernel_traits.h](kernel_traits.h) | Tile dimensions and fragment counts |
+| [attention_forward_ops.cuh](attention_forward_ops.cuh) | PTX wrappers for mma, ldmatrix and cp.async |
 
-## Call Path
+## Notation
 
-```text
-forward / forward_only -> ForwardLaunch::run<DenseForwardDispatch>
-forward_paged          -> ForwardLaunch::run<PagedForwardDispatch>
-                                           |
-                         selected attention_fwd_kernel specialization
-```
+- `N_q`, `N_kv`: query and key/value lengths; `H_q`, `H_kv`: head counts.
+- `stride_q/k/v/o`: tensor strides in elements. `sQ`: Q in shared memory.
+- `tSrQ`, `tSrK*`: register operands for QK; `tOrP`, `tOrVt*`: operands for PV.
+- `acc_s`: FP32 scores, then unnormalized probabilities; `acc_o`: FP32 output sum.
+- `kBlockM`, `kBlockN`: query/KV tile rows; `kNWarps`: warps per block.
 
-The dense dispatcher selects the address layout. The paged dispatcher uses the
-strided layout with causal masking and no L output. Both use the same launcher
-and calculation kernel; neither depends on vLLM or benchmark code.
+## Specializations
 
-Kernel flags:
+`WRITE_L`, `CAUSAL`, `SQUARE`, `FULL_TILES` and `GQA` select output, masking,
+equal-length, boundary-check and head-sharing paths at compile time.
+`ContiguousRows` fixes row strides to D; `ContiguousHeads` also flattens the
+batch/head grid. `Strided` uses explicit strides. All paths compute the same
+attention operation; the selection depends on input properties.
 
-| Flag | Meaning |
-|---|---|
-| `WRITE_L` | Also store L, the natural-log softmax normalizer |
-| `CAUSAL` | Apply the bottom-right causal mask |
-| `SQUARE` | Query and K/V lengths are equal |
-| `FULL_TILES` | No partial query or K/V tile; causal masking still applies |
-| `GQA` | Multiple query heads share one K/V head |
-
-`ContiguousRows` uses fixed D-element row strides; `ContiguousHeads` also
-flattens the batch/head grid. `Strided` retains explicit tensor strides.
-The existing `ATTN_BR`, `ATTN_BC`, and `ATTN_DOUBLE_BUFFER` compile-time
-options remain unchanged; the default is a 64-by-32 tile with two K/V stages.
-
-## Names
-
-These names correspond to the roles in upstream FA2, not to CuTe tensor types:
-
-| Name | Meaning here |
-|---|---|
-| `kBlockM`, `kBlockN` | Query rows per block, K/V rows per streamed tile |
-| `kNWarps` | Warps per block |
-| `Flash_fwd_kernel_traits<D>` | Shared-memory geometry and fragment counts |
-| `tSrQ`, `tSrK*` | Register operands for QK |
-| `acc_s` | FP32 score accumulator, then unnormalized probabilities |
-| `row_max`, `row_sum` | Running softmax statistics |
-| `scores_scale` | Rescale factor for earlier tiles |
-| `tOrP`, `tOrVt*` | Register operands for PV |
-| `acc_o` | FP32 output accumulator, normalized once in the epilogue |
-
-Dense and paged decode remain in `attention_decode.cu` and
-`attention_decode_paged.cu`; their implementation has not been reorganized.
-
-## FA1 and FA2 Organization
-
-The tagged upstream [FA1 v1.0.9 source](https://github.com/Dao-AILab/flash-attention/tree/v1.0.9/csrc/flash_attn/src)
-already separates kernel bodies, launch templates, per-head-dimension translation units
-and `fmha/` helpers. It is not a single-file implementation.
-
-The tagged [FA2 v2.0.0 source](https://github.com/Dao-AILab/flash-attention/tree/v2.0.0/csrc/flash_attn/src)
-uses `flash_fwd_kernel.h`, `flash_fwd_launch_template.h`, `kernel_traits.h`,
-`softmax.h` and head-dimension/dtype-specific translation units.
-This repository borrows those organizational conventions, not the upstream
-CuTe/CUTLASS implementation or its full template/build hierarchy.
-
-## Integration Boundary
-
-`cuda/attention_forward.cu` owns tensor validation and the three Python APIs.
-`integrations/vllm_prefill/` adapts vLLM batches to those APIs. `bench/` calls the
-APIs for measurement. Neither directory is a dependency of the CUDA extension.
-
-Dispatch uses compile-time policies, not virtual calls. The existing kernel
-specializations and Python signatures are retained.
-
-Build records hash the entry point and local headers. Dated benchmark records
-retain their original source hashes; reorganizing sources is not a fresh measurement.
+The default tile is 64 by 32 with four warps and two K/V stages.
+The extension has no serving-engine dependency. Dated measurements retain
+their original source hashes and are not rerun by reorganizing this code.

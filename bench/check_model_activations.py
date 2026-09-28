@@ -1,16 +1,4 @@
-"""Attention error against FP32 on the Q, K, V of a real model: this kernel and FlashAttention.
-
-The unit tests use random tensors of unit scale. A trained model is different: a few heads of
-Qwen2.5 carry very large keys, and FP16 kernels lose more there. This script runs a model in
-FP16 through Hugging Face on one random prompt, records what every attention layer hands to
-scaled_dot_product_attention, and per layer compares three results on exactly those tensors:
-
-    reference   plain attention in FP32
-    flash       PyTorch SDPA restricted to FlashAttention, FP16
-    scratch     cuda/attention_forward.cu, FP16
-
-so a gap between the two FP16 kernels inside a served model can be held against how far each
-of them is from FP32.
+"""Compare scratch and SDPA-Flash outputs with FP32 attention on model Q/K/V tensors.
 
     python3 bench/check_model_activations.py --model Qwen/Qwen2.5-0.5B-Instruct --tokens 3000
 """

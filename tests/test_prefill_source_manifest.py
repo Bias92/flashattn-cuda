@@ -1,5 +1,6 @@
 """CPU checks for header-aware prefill build identity; no CUDA compilation."""
 import importlib.util
+import ast
 from pathlib import Path
 import tempfile
 import types
@@ -34,9 +35,6 @@ class PrefillSourceManifestTests(unittest.TestCase):
         self.mock_modules.start()
         self.addCleanup(self.mock_modules.stop)
         self.bench = load_file("prefill_build_test", ROOT / "bench/prefill_support.py")
-        self.serving = load_file(
-            "prefill_loader_test", ROOT / "integrations/vllm_prefill/scratch_vllm_prefill/loader.py")
-        self.serving.SOURCE = self.source
 
     def test_header_only_edit_changes_identity(self):
         before = self.bench.source_manifest(self.source)
@@ -52,15 +50,12 @@ class PrefillSourceManifestTests(unittest.TestCase):
         (self.root / "attention_forward_ops.cuh").write_text("// PTX wrappers\n")
         self.assertNotEqual(before, self.bench.source_manifest(self.source))
 
-    def test_serving_and_benchmark_use_the_same_build_identity(self):
+    def test_benchmark_uses_header_aware_build_identity(self):
         with patch("builtins.print"):
             _, record = self.bench.extension(self.source)
             bench_name = self.load.call_args.kwargs["name"]
-            self.serving.load_prefill_extension()
-            serving_name = self.load.call_args.kwargs["name"]
         digest = record["build_sources_sha256"][:12]
         self.assertTrue(bench_name.endswith(digest))
-        self.assertTrue(serving_name.endswith(digest))
         self.assertEqual(set(record["source_files"]), {self.source.name, self.header.name})
 
     def test_source_distribution_includes_forward_headers(self):
@@ -68,32 +63,26 @@ class PrefillSourceManifestTests(unittest.TestCase):
         self.assertIn("include cuda/README.md", manifest)
         for name in ("kernel_traits.h", "flash_fwd_memory.h", "softmax.h", "flash_fwd_kernel.h",
                      "flash_fwd_launch_template.h", "flash_fwd_dense_dispatch.h",
-                     "flash_fwd_paged_dispatch.h", "attention_forward_ops.cuh"):
+                     "attention_forward_ops.cuh"):
             self.assertIn(f"include cuda/{name}", manifest)
 
-    def test_fresh_loader_build_identity_changes_on_header_edit(self):
+    def test_extension_identity_changes_on_header_edit(self):
         with patch("builtins.print"):
-            self.serving.load_prefill_extension()
+            self.bench.extension(self.source)
             before = self.load.call_args.kwargs["name"]
-            # An engine restart normally supplies a fresh per-process cache.
-            self.serving.load_prefill_extension.cache_clear()
-            self.header.write_text("// changed after engine shutdown\n")
-            self.serving.load_prefill_extension()
+            self.header.write_text("// changed header\n")
+            self.bench.extension(self.source)
             after = self.load.call_args.kwargs["name"]
         self.assertNotEqual(before, after)
 
-    def test_serving_campaign_tracks_all_local_headers(self):
-        campaign = load_file("prefill_campaign_test", ROOT / "bench/bench_serving_prefill.py")
-        headers = {p.relative_to(ROOT).as_posix()
-                   for pattern in ("*.h", "*.cuh") for p in (ROOT / "cuda").glob(pattern)}
-        self.assertTrue(headers)
-        self.assertTrue(headers.issubset(campaign.SOURCES))
-        self.assertEqual(len(campaign.SOURCES), len(set(campaign.SOURCES)))
-        with patch.object(campaign, "ROOT", self.root), \
-                patch.object(campaign, "SOURCES", [self.source.name, self.header.name]):
-            before = campaign.source_hashes()
-            self.header.write_text("// edited during a campaign\n")
-            self.assertNotEqual(before, campaign.source_hashes())
+    def test_setup_builds_only_forward(self):
+        tree = ast.parse((ROOT / "setup.py").read_text())
+        extensions = [node for node in ast.walk(tree) if isinstance(node, ast.Call)
+                      and isinstance(node.func, ast.Name) and node.func.id == "CUDAExtension"]
+        self.assertEqual(len(extensions), 1)
+        fields = {item.arg: ast.literal_eval(item.value) for item in extensions[0].keywords}
+        self.assertEqual(fields["name"], "attention_forward_cuda")
+        self.assertEqual(fields["sources"], ["cuda/attention_forward.cu"])
 
 
 if __name__ == "__main__":

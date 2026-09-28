@@ -47,15 +47,15 @@ struct ForwardLaunch {
 
     template <typename Dispatch, typename... KVFields>
     void run(KVFields... kv_fields) const {
-        const int B = Q.size(0), H = Q.size(1), N_q = Q.size(2), D = Q.size(3);
-        TORCH_CHECK(B <= 65535 && H <= 65535, "B and H must each be <= 65535 (grid limits)");
+        const int B = Q.size(0), H_q = Q.size(1), N_q = Q.size(2), D = Q.size(3);
+        TORCH_CHECK(B <= 65535 && H_q <= 65535, "B and H_q must each be <= 65535 (grid limits)");
         TORCH_CHECK(D == 64 || D == 128, "Head dimension must be 64 or 128, got ", D);
 
         const dim3 block(kNWarps * 32);
         const auto stream = at::cuda::getCurrentCUDAStream();
         auto launch = [&](auto kernel, int smem_bytes, bool flatten_heads) {
-            const dim3 grid = flatten_heads ? dim3((N_q + kBlockM - 1) / kBlockM, B * H)
-                                           : dim3((N_q + kBlockM - 1) / kBlockM, H, B);
+            const dim3 grid = flatten_heads ? dim3((N_q + kBlockM - 1) / kBlockM, B * H_q)
+                                           : dim3((N_q + kBlockM - 1) / kBlockM, H_q, B);
             if (smem_bytes > 48 * 1024) {
                 C10_CUDA_CHECK(cudaFuncSetAttribute(
                     kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, smem_bytes));
@@ -63,7 +63,7 @@ struct ForwardLaunch {
             kernel<<<grid, block, smem_bytes, stream>>>(
                 reinterpret_cast<const half*>(Q.data_ptr<at::Half>()),
                 reinterpret_cast<half*>(O.data_ptr<at::Half>()), L,
-                strides_of(Q), strides_of(O), N_q, N_kv, H, kv_group, scale, kv_fields...);
+                strides_of(Q), strides_of(O), N_q, N_kv, H_q, kv_group, scale, kv_fields...);
         };
         if (D == 64)
             Dispatch::template run<64>(launch, *this, kv_fields...);

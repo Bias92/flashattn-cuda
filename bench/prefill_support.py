@@ -19,7 +19,7 @@ def sha(path):
 
 
 def source_manifest(source):
-    """Hash the entry point and local headers, using the serving loader's build identity."""
+    """Hash the CUDA entry point and local headers for the extension cache key."""
     source = Path(source).resolve()
     paths = [source, *sorted(source.parent.glob("*.h")), *sorted(source.parent.glob("*.cuh"))]
     hashes = {p.name: sha(p) for p in paths}

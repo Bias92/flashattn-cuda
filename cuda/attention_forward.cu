@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "flash_fwd_dense_dispatch.h"
-#include "flash_fwd_paged_dispatch.h"
 
 // Byte alignment required by half2 loads/stores (Q/O) and cp.async copies (K/V).
 constexpr int64_t QO_ROW_ALIGN = 4;
@@ -92,16 +91,16 @@ static torch::Tensor output_for(const torch::Tensor& Q_h, const std::optional<to
 
 // Return the number of query heads per K/V head.
 static int check_query(const torch::Tensor& Q, int64_t H_kv, int64_t N_kv, bool causal) {
-    TORCH_CHECK(Q.is_cuda() && Q.dim() == 4, "Q must be a 4D CUDA tensor [B, H, N_q, D]");
-    const int64_t H = Q.size(1), N_q = Q.size(2), D = Q.size(3);
-    TORCH_CHECK(Q.size(0) > 0 && H > 0, "batch and query head counts must be > 0");
+    TORCH_CHECK(Q.is_cuda() && Q.dim() == 4, "Q must be a 4D CUDA tensor [B, H_q, N_q, D]");
+    const int64_t H_q = Q.size(1), N_q = Q.size(2), D = Q.size(3);
+    TORCH_CHECK(Q.size(0) > 0 && H_q > 0, "batch and query head counts must be > 0");
     TORCH_CHECK(D == 64 || D == 128, "Head dimension must be 64 or 128, got ", D);
     TORCH_CHECK(N_q > 0 && N_kv > 0, "N_q and N_kv must be > 0");
     TORCH_CHECK(!causal || N_kv >= N_q,
                 "a causal mask is aligned to the bottom right, which needs N_kv >= N_q");
-    TORCH_CHECK(H_kv > 0 && H % H_kv == 0,
-                "Query heads (", H, ") must be a multiple of key/value heads (", H_kv, ")");
-    return (int)(H / H_kv);
+    TORCH_CHECK(H_kv > 0 && H_q % H_kv == 0,
+                "Query heads (", H_q, ") must be a multiple of key/value heads (", H_kv, ")");
+    return (int)(H_q / H_kv);
 }
 
 static std::pair<torch::Tensor, torch::Tensor> attention_forward_impl(
@@ -152,54 +151,6 @@ torch::Tensor attention_forward_only(torch::Tensor Q, torch::Tensor K, torch::Te
     return O;
 }
 
-// Q contains the last N_q tokens of one sequence; block_table lists its cache pages.
-// The caller must supply valid page IDs; values are not checked on the host.
-torch::Tensor attention_forward_paged(torch::Tensor Q, torch::Tensor key_cache,
-                                      torch::Tensor value_cache, torch::Tensor block_table,
-                                      int64_t N_kv, std::optional<double> softmax_scale,
-                                      std::optional<torch::Tensor> out) {
-    TORCH_CHECK(key_cache.is_cuda() && key_cache.dim() == 4
-                    && key_cache.scalar_type() == torch::kHalf,
-                "key_cache must be an fp16 CUDA tensor [pages, page_size, H_kv, D]");
-    TORCH_CHECK(value_cache.scalar_type() == torch::kHalf && value_cache.device() == key_cache.device()
-                    && value_cache.sizes() == key_cache.sizes()
-                    && value_cache.strides() == key_cache.strides(),
-                "value_cache must match key_cache in dtype, device, shape and strides");
-    const int64_t page_size = key_cache.size(1);
-    TORCH_CHECK(page_size > 0 && (page_size & (page_size - 1)) == 0,
-                "page_size must be a power of two, got ", page_size);
-    TORCH_CHECK(key_cache.stride(3) == 1 && rows_aligned(key_cache, KV_ROW_ALIGN)
-                    && rows_aligned(value_cache, KV_ROW_ALIGN),
-                "cache rows must be contiguous and start on a ", KV_ROW_ALIGN, "-byte boundary");
-    const int kv_group = check_query(Q, key_cache.size(2), N_kv, /*causal=*/true);
-    TORCH_CHECK(Q.size(0) == 1, "one sequence per call: Q must be [1, H, N_q, D]");
-    TORCH_CHECK(Q.size(3) == key_cache.size(3) && Q.device() == key_cache.device(),
-                "Q must match the cache in head dimension and device");
-    TORCH_CHECK(block_table.is_cuda() && block_table.device() == Q.device()
-                    && block_table.scalar_type() == torch::kInt && block_table.dim() == 1
-                    && block_table.is_contiguous(),
-                "block_table must be a contiguous 1D int32 CUDA tensor on the device of Q");
-    TORCH_CHECK(block_table.numel() * page_size >= N_kv,
-                "block_table lists ", block_table.numel(), " pages, fewer than N_kv needs");
-    const int D = Q.size(3);
-    const float scale = softmax_scale.has_value() ? (float)*softmax_scale
-                                                  : 1.0f / std::sqrt((float)D);
-
-    const at::cuda::CUDAGuard guard(Q.device());
-    auto Q_h = as_half_rows(Q, QO_ROW_ALIGN);
-    auto O_h = output_for(Q_h, out, {Q_h, key_cache, value_cache});
-
-    int page_shift = 0;
-    while ((int64_t(1) << page_shift) < page_size) page_shift++;
-    const ForwardLaunch launch{Q_h, O_h, nullptr, (int)N_kv, kv_group, /*causal=*/true, scale};
-    launch.run<PagedForwardDispatch>(
-        reinterpret_cast<const half*>(key_cache.data_ptr<at::Half>()),
-        reinterpret_cast<const half*>(value_cache.data_ptr<at::Half>()),
-        (const int32_t*)block_table.data_ptr<int32_t>(), page_shift,
-        key_cache.stride(0), key_cache.stride(1), key_cache.stride(2));
-    return O_h;
-}
-
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
     m.def("forward", &attention_forward, "Custom CUDA forward: returns O half, L float",
           pybind11::arg("Q"), pybind11::arg("K"), pybind11::arg("V"),
@@ -208,11 +159,5 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
     m.def("forward_only", &attention_forward_only, "Custom CUDA forward, true O-only",
           pybind11::arg("Q"), pybind11::arg("K"), pybind11::arg("V"),
           pybind11::arg("causal") = false, pybind11::arg("softmax_scale") = pybind11::none(),
-          pybind11::arg("out") = pybind11::none());
-    m.def("forward_paged", &attention_forward_paged,
-          "Causal O-only forward of one sequence with K/V in a paged cache",
-          pybind11::arg("Q"), pybind11::arg("key_cache"), pybind11::arg("value_cache"),
-          pybind11::arg("block_table"), pybind11::arg("N_kv"),
-          pybind11::arg("softmax_scale") = pybind11::none(),
           pybind11::arg("out") = pybind11::none());
 }

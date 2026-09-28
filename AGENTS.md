@@ -9,12 +9,13 @@ compatibility; it is not the optimization target or a headline result.
 
 - Prefill API: `cuda/attention_forward.cu`; loop: `cuda/flash_fwd_kernel.h`.
 - Prefill source map: `cuda/README.md`. Headers are part of the measured source.
-- Serving decode: `cuda/attention_decode_paged.cu`, loaded by
-  `integrations/vllm/scratch_vllm/loader.py`.
-- Prefill+decode integration: `integrations/vllm_prefill/`.
+- The active build is standalone FA2 forward. Do not restore vLLM adapters,
+  paged KV APIs, decode kernels, or serving runners without a user request.
 - Current performance and reproduction entry points: root `README.md`.
 - Latest kernel evidence: `docs/serving/backend_overview_2026-09-22/`.
 - Historical serving evidence: `docs/serving/prefill_campaign_2026-09-20/`.
+  Its implementation is retained in Git at `d4d4f37f6d4129f4a42f521fe93282e8ae7b7beb`;
+  it is not part of the current build.
 
 Historical reports describe their recorded source hashes, not the current
 working tree. A "final" or "current" label inside a dated report is historical.

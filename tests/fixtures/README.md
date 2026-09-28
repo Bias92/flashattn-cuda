@@ -1,7 +1,7 @@
 # Recorded Metric Fixtures
 
 These are byte-for-byte copies of historical vLLM client outputs, retained for
-CPU-only accounting tests. They are not current performance results.
+the retired CPU-only accounting tests. They are not current performance results.
 
 - `workload_flash.json`: formerly
   `docs/serving/sdpa_eager_comparison_v2/run0_flash_attn.json`.
