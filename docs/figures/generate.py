@@ -10,7 +10,6 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
 import numpy as np
 
 
@@ -118,18 +117,26 @@ def save(fig, path):
         if ax.axison:
             labels += [ax.xaxis.label, ax.yaxis.label,
                        *ax.get_xticklabels(), *ax.get_yticklabels()]
+    for legend in fig.legends:
+        labels += legend.get_texts()
+    boxes = []
     for label in labels:
         if label.get_visible() and label.get_text():
             bbox = label.get_window_extent(renderer)
             assert bbox.x0 >= -1 and bbox.y0 >= -1, label.get_text()
             assert bbox.x1 <= fig.bbox.width + 1 and bbox.y1 <= fig.bbox.height + 1, label.get_text()
+            assert label.get_fontsize() * 550 / (72 * fig.get_figwidth()) >= 12, label.get_text()
+            boxes.append((label.get_text(), bbox))
+    for i, (text, bbox) in enumerate(boxes):
+        for other, other_bbox in boxes[i + 1:]:
+            assert not bbox.overlaps(other_bbox), (text, other)
     fig.savefig(path, dpi=180, facecolor="white")
     plt.close(fig)
 
 
 def kernel_plot(rows, out):
-    fig, axes = plt.subplots(1, 2, figsize=(11, 6.5), sharex=True, sharey=True)
-    fig.subplots_adjust(left=.205, right=.98, bottom=.11, top=.85, wspace=.12)
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 8.5), sharex=True, sharey=True)
+    fig.subplots_adjust(left=.32, right=.97, bottom=.10, top=.89, wspace=.20)
     handles = []
     shapes = sorted({tuple(r["shape"]) for r in rows})
     assert len(shapes) == 17
@@ -147,18 +154,22 @@ def kernel_plot(rows, out):
                             fmt=marker, markersize=5, color=color, capsize=2, lw=1, label=label)
             if not causal:
                 handles.append(h)
-        ax.set_title("Causal" if causal else "Dense", fontsize=11, pad=10)
+        ax.set_title("Causal" if causal else "Dense", fontsize=13, pad=10)
         ax.set_yticks(range(17), [f"B{b}  H{h}/{hk}  N{n}" for b, h, hk, n, _ in shapes])
         ax.set_ylim(16.6, -.6)
         ax.set_xlabel("Latency change (%)", labelpad=8)
         style_axes(ax)
-    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(.60, .99), ncol=2, frameon=False)
+    left, right = axes[0].get_xlim()
+    axes[0].set_xticks([tick for tick in axes[0].get_xticks() if left <= tick <= right])
+    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(.55, .995), ncol=2, frameon=False)
     save(fig, out / "kernel-performance.png")
 
 
 def serving_plot(rows, out, study, panels, filename):
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.6))
-    fig.subplots_adjust(left=.09, right=.975, bottom=.14, top=.79, wspace=.35)
+    fig, axes = plt.subplots(2, 1, figsize=(7.2, 8.5))
+    fig.subplots_adjust(left=.16, right=.96, bottom=.09, top=.88, hspace=.62)
+    limits = []
+    all_values = []
     for ax, (mode, metric, panel_title) in zip(axes, panels):
         panel_values = []
         for (config, label, color, _), offset in zip(SERIES[1:], (-.19, .19)):
@@ -172,26 +183,32 @@ def serving_plot(rows, out, study, panels, filename):
             for yi, value in zip(y, values):
                 ax.annotate(f"{value:+.2f}%", xy=(value, yi),
                             xytext=(4 if value >= 0 else -4, 0), textcoords="offset points",
-                            ha="left" if value >= 0 else "right", va="center", fontsize=10)
+                            ha="left" if value >= 0 else "right", va="center", fontsize=12)
             panel_values.extend(values)
         low, high = min(0, min(panel_values)), max(0, max(panel_values))
+        all_values.extend(panel_values)
         span = max(high - low, 1)
-        ax.set_xlim(low - span * .25, high + span * .25)
+        limits.append((low - span * .25, high + span * .25))
         ax.set_yticks(range(len(labels)), [f"{n:,}" for n in labels])
         ax.set_ylim(len(labels) - .45, -.55)
         ax.set_ylabel("Concurrent requests" if study == "throughput" else "Input tokens")
         ax.set_xlabel("Change vs Native Flash (%)", labelpad=8)
-        ax.set_title(panel_title, fontsize=11, pad=10)
+        ax.set_title(panel_title, fontsize=13, pad=10)
         style_axes(ax)
         ax.grid(axis="y", visible=False)
         ax.grid(axis="x", color="#e5e5e5", linewidth=.6)
         ax.axvline(0, color=INK, linestyle="--", lw=.8)
+    if study == "throughput":
+        low, high = min(0, min(all_values)), max(0, max(all_values))
+        span = max(high - low, 1)
+        shared_limits = (low - span * .25, high + span * .25)
+        limits = [shared_limits] * len(axes)
+    for ax, bounds in zip(axes, limits):
+        ax.set_xlim(*bounds)
         left, right = ax.get_xlim()
         ax.set_xticks([tick for tick in ax.get_xticks() if left <= tick <= right])
     handles, labels = axes[0].get_legend_handles_labels()
-    handles.insert(0, Line2D([], [], color=INK, linestyle="--", linewidth=.8))
-    labels.insert(0, "Native Flash = 0%")
-    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(.53, 1.005), ncol=3, frameon=False)
+    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(.52, .995), ncol=2, frameon=False)
     save(fig, out / filename)
 
 
@@ -230,7 +247,7 @@ def main():
     parser.add_argument("--output", type=Path, default=Path(__file__).resolve().parent)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
-    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10, "text.color": INK,
+    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 12, "text.color": INK,
                          "axes.labelcolor": INK, "axes.titlecolor": INK})
     sources = {}
     kernel = kernel_data(args.repo, sources)
@@ -238,16 +255,16 @@ def main():
     kernel_plot(kernel, args.output)
     throughput_table(kernel, args.output)
     serving_plot(serving, args.output, "latency", [
-        ("graphs", "p50_ttft_ms", "TTFT (lower is better)"),
-        ("graphs", "p50_tpot_ms", "TPOT (lower is better)"),
+        ("graphs", "p50_ttft_ms", "p50 TTFT (lower is better)"),
+        ("graphs", "p50_tpot_ms", "p50 TPOT (lower is better)"),
     ], "low-latency.png")
     serving_plot(serving, args.output, "throughput", [
         ("eager", "output_throughput", "Eager throughput (higher is better)"),
         ("graphs", "output_throughput", "CUDA Graph throughput (higher is better)"),
     ], "high-throughput.png")
     serving_plot(serving, args.output, "long_context", [
-        ("graphs", "p50_ttft_ms", "TTFT (lower is better)"),
-        ("graphs", "p50_tpot_ms", "TPOT (lower is better)"),
+        ("graphs", "p50_ttft_ms", "p50 TTFT (lower is better)"),
+        ("graphs", "p50_tpot_ms", "p50 TPOT (lower is better)"),
     ], "long-context.png")
     assert len(sources) == 256
     for relative, digest in sources.items():

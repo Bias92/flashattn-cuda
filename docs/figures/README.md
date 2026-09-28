@@ -14,8 +14,12 @@ The kernel points are recomputed from raw paired samples and checked against
 the published summary and case counts. Serving bars show custom decode-only
 and custom prefill + decode relative to the native Flash zero baseline, with
 all measured settings. Bars are separated by configuration and labeled with
-the percentage change. Each panel has its own percentage scale.
+the percentage change. Eager and CUDA Graph throughput share the same percentage
+scale. TTFT and TPOT use separate scales. Latency panels show changes in p50.
 The script reads only accepted `cases/` records, not superseded or rejected runs.
+
+Figures are sized for a 550-pixel README column. Generation checks label bounds,
+text overlap and a minimum displayed font size of 12 pixels at that width.
 
 Serving bar values match the README's per-run ratio aggregation. Absolute
 timings and throughput remain in the original serving report and `data.json`.
