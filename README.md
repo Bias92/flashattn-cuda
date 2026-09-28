@@ -10,7 +10,7 @@ and model serving under **low latency, high throughput and long context**.
 
 The FA2 kernel uses FP16 operands and FP32 accumulation.
 
-- Tensor Core `mma.sync` for both QK and PV, without CUTLASS.
+- Tensor Core `mma.sync` for both QK and PV.
 - Register-resident online softmax; no full attention matrix in global memory.
 - Four warps per block and double-buffered K/V tiles using `cp.async`.
 
