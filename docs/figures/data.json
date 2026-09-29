@@ -1,5 +1,5 @@
 {
-  "aggregation": "Kernel: median paired ratios. TFLOP/s: FLOPs divided by median API time. Serving plots: median of three per-run ratios vs Native Flash.",
+  "aggregation": "Kernel: median paired ratios. TFLOP/s: FLOPs divided by median API time. Serving plots: median of three per-run absolute measurements; long-context TTFT converted from ms to s. Paired serving ratios are retained separately.",
   "input_sha256": {
     "docs/serving/backend_overview_2026-09-22/summary.json": "044885b7e669b03ab242654b9ad60052baff3802b9e88e435083b3e7ff891a53",
     "docs/serving/backend_overview_2026-09-22/run1.json": "6e6543b7e4b79bc5433b8e3ec65c667507e82925b8e63a224766d0a5fe72a667",

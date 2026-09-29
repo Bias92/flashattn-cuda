@@ -194,50 +194,81 @@ def kernel_throughput_plot(rows, out):
 
 
 def serving_plot(rows, out, study, panels, filename):
-    fig, axes = plt.subplots(2, 1, figsize=(7.2, 8.5))
-    fig.subplots_adjust(left=.16, right=.96, bottom=.09, top=.88, hspace=.62)
-    limits = []
-    all_values = []
-    for ax, (mode, metric, panel_title) in zip(axes, panels):
-        panel_values = []
-        for (config, label, color, _), offset in zip(SERIES[1:], (-.19, .19)):
+    fig, axes = plt.subplots(2, 1, figsize=(7.2, 7.6), sharey=study == "throughput")
+    fig.subplots_adjust(left=.15, right=.98, bottom=.10, top=.88, hspace=.58)
+    maxima = []
+    for ax, (mode, metric, panel_title, unit, scale) in zip(axes, panels):
+        maximum = 0
+        settings = None
+        for i, (config, label, color, _) in enumerate(SERIES):
             data = sorted([r for r in rows if r["study"] == study and r["mode"] == mode and r["config"] == config],
                           key=lambda r: (r["concurrency"], r["input_len"]))
             assert len(data) == (4 if study == "latency" else 5)
             labels = [r["concurrency"] if study == "throughput" else r["input_len"] for r in data]
-            values = [100 * (median(r["ratios"][metric]) - 1) for r in data]
-            y = np.arange(len(data)) + offset
-            ax.barh(y, values, height=.30, color=color, label=label)
-            for yi, value in zip(y, values):
-                ax.annotate(f"{value:+.2f}%", xy=(value, yi),
-                            xytext=(4 if value >= 0 else -4, 0), textcoords="offset points",
-                            ha="left" if value >= 0 else "right", va="center", fontsize=12)
-            panel_values.extend(values)
-        low, high = min(0, min(panel_values)), max(0, max(panel_values))
-        all_values.extend(panel_values)
-        span = max(high - low, 1)
-        limits.append((low - span * .25, high + span * .25))
-        ax.set_yticks(range(len(labels)), [f"{n:,}" for n in labels])
-        ax.set_ylim(len(labels) - .45, -.55)
-        ax.set_ylabel("Concurrent requests" if study == "throughput" else "Input tokens")
-        ax.set_xlabel("Change vs Native Flash (%)", labelpad=8)
+            if settings is None:
+                settings = labels
+            assert labels == settings
+            values = [median(r["values"][metric]) * scale for r in data]
+            assert all(np.isfinite(value) and value > 0 for value in values)
+            x = np.arange(len(data)) + (i - 1) * .24
+            ax.bar(x, values, width=.22, color=color, label=label)
+            maximum = max(maximum, max(values))
+        maxima.append(maximum)
+        ax.set_xticks(range(len(settings)), [f"{n:,}" for n in settings])
+        ax.set_xlim(-.55, len(settings) - .45)
+        ax.set_xlabel("Concurrent requests" if study == "throughput" else "Input tokens", labelpad=8)
+        ax.set_ylabel("Output tokens/s" if study == "throughput" else f"p50 latency ({unit})")
         ax.set_title(panel_title, fontsize=13, pad=10)
         style_axes(ax)
-        ax.grid(axis="y", visible=False)
-        ax.grid(axis="x", color="#e5e5e5", linewidth=.6)
-        ax.axvline(0, color=INK, linestyle="--", lw=.8)
-    if study == "throughput":
-        low, high = min(0, min(all_values)), max(0, max(all_values))
-        span = max(high - low, 1)
-        shared_limits = (low - span * .25, high + span * .25)
-        limits = [shared_limits] * len(axes)
-    for ax, bounds in zip(axes, limits):
-        ax.set_xlim(*bounds)
-        left, right = ax.get_xlim()
-        ax.set_xticks([tick for tick in ax.get_xticks() if left <= tick <= right])
+    for ax, maximum in zip(axes, maxima):
+        ax.set_ylim(0, (max(maxima) if study == "throughput" else maximum) * 1.12)
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(.52, .995), ncol=2, frameon=False)
+    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(.55, .995),
+               ncol=3, frameon=False, handlelength=1.1, columnspacing=1.0, handletextpad=.4)
     save(fig, out / filename)
+
+
+def serving_tables(rows, out):
+    lines = ["# Serving Measurements", "",
+             "Median of three accepted runs per configuration and setting. TTFT and TPOT",
+             "are per-run request p50s, not pooled request percentiles. These are the",
+             "September 20-21 archived serving results, not measurements of the current build.", "",
+             "Times below are in milliseconds; throughput is total output tokens/s.",
+             "The long-context TTFT figure converts milliseconds to seconds.", "",
+             "| Label | Attention configuration |", "|---|---|",
+             "| Native Flash | Native prefill and decode |",
+             "| Custom decode-only | Native prefill, custom decode |",
+             "| Custom prefill + decode | Custom prefill and decode |", ""]
+    for study, title in (("latency", "Low Latency"), ("throughput", "High Throughput"),
+                         ("long_context", "Long Context")):
+        lines += [f"## {title}", ""]
+        for mode, mode_label in (("eager", "Eager"), ("graphs", "CUDA Graphs")):
+            lines += [f"### {mode_label}", ""]
+            settings = sorted({(r["input_len"], r["concurrency"]) for r in rows
+                               if r["study"] == study and r["mode"] == mode})
+            for metric, metric_title in (("p50_ttft_ms", "p50 TTFT (ms)"),
+                                         ("p50_tpot_ms", "p50 TPOT (ms)"),
+                                         ("output_throughput", "Output tokens/s")):
+                setting_label = "Concurrent requests" if study == "throughput" else "Input tokens"
+                lines += [f"**{metric_title}**", "",
+                          f"| {setting_label} | Native Flash | Custom decode-only | Custom prefill + decode |",
+                          "|---:|---:|---:|---:|"]
+                for n, concurrency in settings:
+                    values = []
+                    for config, _, _, _ in SERIES:
+                        matches = [r for r in rows if (r["study"], r["mode"], r["input_len"],
+                                   r["concurrency"], r["config"]) == (study, mode, n, concurrency, config)]
+                        assert len(matches) == 1
+                        values.append(median(matches[0]["values"][metric]))
+                    setting = concurrency if study == "throughput" else n
+                    lines.append(f"| {setting:,} | " + " | ".join(f"{v:.3f}" for v in values) + " |")
+                lines.append("")
+    lines += ["Serving percentage comparisons in the root README use these same medians",
+              "before rounding. Historical per-run ratios remain in the campaign report",
+              "and data.json.", "",
+              "[Raw runs and campaign report](../serving/prefill_campaign_2026-09-20/REPORT.md)",
+              "| [Unrounded values and source hashes](data.json)"]
+    (out / "serving-measurements.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def throughput_table(rows, out):
@@ -284,22 +315,23 @@ def main():
     kernel_throughput_plot(kernel, args.output)
     throughput_table(kernel, args.output)
     serving_plot(serving, args.output, "latency", [
-        ("graphs", "p50_ttft_ms", "p50 TTFT (lower is better)"),
-        ("graphs", "p50_tpot_ms", "p50 TPOT (lower is better)"),
+        ("graphs", "p50_ttft_ms", "(a) TTFT", "ms", 1),
+        ("graphs", "p50_tpot_ms", "(b) TPOT", "ms", 1),
     ], "low-latency.png")
     serving_plot(serving, args.output, "throughput", [
-        ("eager", "output_throughput", "Eager throughput (higher is better)"),
-        ("graphs", "output_throughput", "CUDA Graph throughput (higher is better)"),
+        ("eager", "output_throughput", "(a) Eager", "tokens/s", 1),
+        ("graphs", "output_throughput", "(b) CUDA Graphs", "tokens/s", 1),
     ], "high-throughput.png")
     serving_plot(serving, args.output, "long_context", [
-        ("graphs", "p50_ttft_ms", "p50 TTFT (lower is better)"),
-        ("graphs", "p50_tpot_ms", "p50 TPOT (lower is better)"),
+        ("graphs", "p50_ttft_ms", "(a) TTFT", "s", .001),
+        ("graphs", "p50_tpot_ms", "(b) TPOT", "ms", 1),
     ], "long-context.png")
+    serving_tables(serving, args.output)
     assert len(sources) == 256
     for relative, digest in sources.items():
         assert hashlib.sha256((args.repo / relative).read_bytes()).hexdigest() == digest
     (args.output / "data.json").write_text(json.dumps({
-        "aggregation": "Kernel: median paired ratios. TFLOP/s: FLOPs divided by median API time. Serving plots: median of three per-run ratios vs Native Flash.",
+        "aggregation": "Kernel: median paired ratios. TFLOP/s: FLOPs divided by median API time. Serving plots: median of three per-run absolute measurements; long-context TTFT converted from ms to s. Paired serving ratios are retained separately.",
         "input_sha256": sources, "kernel": kernel, "serving": serving,
     }, indent=2) + "\n", encoding="utf-8")
     print(f"Verified {len(kernel)} kernel cases, 252 serving records, {len(sources)} unchanged source files.")
